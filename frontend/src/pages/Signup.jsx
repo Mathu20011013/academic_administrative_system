@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate instead of useHistory
+import { useNavigate } from 'react-router-dom';
 import '../styles/AuthPage.css';
 
 const Signup = () => {
@@ -27,14 +27,10 @@ const Signup = () => {
   return (
     <div className="auth-container">
       <div className="auth-image">
-        {/* Background Image */}
-        <img src="/assets/Signuppageimg.jpg" alt="Background" className="background-image" />
+        <img src="/assets/Signuppageimg.jpg" alt="Signup" /> {/* Ensure the path is correct */}
       </div>
       <div className="auth-form">
-        <div className="logo-container">
-          {/* Company Logo */}
-          <img src="/assets/LOGO.png" alt="Company Logo" className="company-logo" />
-        </div>
+        <img src="/assets/LOGO.png" alt="Company Logo" className="auth-logo" />
         <h2>ERROR TO CLEVER</h2>
         <p>Join us and get more benefits. We promise to keep your data safely.</p>
         <form onSubmit={handleSubmit}>

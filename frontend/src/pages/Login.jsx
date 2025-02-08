@@ -1,38 +1,42 @@
-// frontend/src/pages/Login.jsx
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // For redirecting after login
-import '../styles/AuthPage.css'; // Ensure your styles are imported
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate instead of useHistory
+import '../styles/AuthPage.css';
 
-const Login = () => {
+const Signup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [role, setRole] = useState('');
   const [message, setMessage] = useState('');
-  const navigate = useNavigate(); // For navigating after successful login
+  const navigate = useNavigate(); // Initialize useNavigate hook
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Simulating login logic here (replace with actual API call)
-      if (email === 'test@example.com' && password === 'password') {
-        setMessage('Login successful!');
-        setTimeout(() => {
-          navigate('/dashboard'); // Redirect after successful login
-        }, 2000);
-      } else {
-        setMessage('Invalid credentials.');
-      }
+      const response = await axios.post('http://localhost:5000/api/auth/signup', { email, password, confirmPassword, role });
+      setMessage(response.data.message);
+      setTimeout(() => {
+        navigate('/login'); // Redirect to login after successful signup
+      }, 2000);
     } catch (error) {
-      setMessage('An error occurred. Please try again.');
+      setMessage(error.response.data.error); // Show error message if signup fails
     }
   };
 
   return (
     <div className="auth-container">
       <div className="auth-image">
-        <img src="/assets/background.jpg" alt="Background" />
+        {/* Background Image */}
+        <img src="/assets/background.jpg" alt="Background" className="background-image" />
       </div>
       <div className="auth-form">
-        <h2>Login</h2>
+        <div className="logo-container">
+          {/* Company Logo */}
+          <img src="/assets/logo.png" alt="Company Logo" className="company-logo" />
+        </div>
+        <h2>ERROR TO CLEVER</h2>
+        <p>Join us and get more benefits. We promise to keep your data safely.</p>
         <form onSubmit={handleSubmit}>
           <input
             type="email"
@@ -48,11 +52,25 @@ const Login = () => {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <button type="submit">Login</button>
+          <input
+            type="password"
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
+          <input
+            type="text"
+            placeholder="Role"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            required
+          />
+          <button type="submit">Create Account</button>
         </form>
         <p>or you can</p>
         <p>
-          Need an Account? <a href="/signup">Sign Up</a>
+          Already have an account? <a href="/login">Login</a>
         </p>
         {message && <p className="error-message">{message}</p>}
       </div>
@@ -60,4 +78,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Signup;

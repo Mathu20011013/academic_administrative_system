@@ -11,13 +11,15 @@ const Home = () => {
 
 const App = () => {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />  {/* Home route */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-      </Routes>
-    </Router>
+    <div style={{ width: '100vw', height: '100vh' }}>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home />} />  {/* Home route */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+        </Routes>
+      </Router>
+    </div>
   );
 };
 

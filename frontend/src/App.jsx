@@ -1,22 +1,29 @@
 // frontend/src/App.jsx
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Login from './pages/Login';   // Correct import for default export
-import Signup from './pages/Signup'; // Correct import for default export
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Login from './pages/login';
+import Signup from './pages/Signup';
 
-// Home page component
-const Home = () => {
-  return <h1>Welcome to the Home Page</h1>;
-};
+import Home from "./pages/Home";
+import MyCourses from "./pages/MyCourses";
+import Forum from "./pages/Forum";
+import Chatbot from "./pages/Chatbotpage";
 
 const App = () => {
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
       <Router>
         <Routes>
-          <Route path="/" element={<Home />} />  {/* Home route */}
+          {/* Redirect root URL "/" to "/login" */}
+          <Route path="/" element={<Navigate to="/login" />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+
+          {/* Protected Routes (Main Pages inside Layout) */}
+          <Route path="/home" element={<Home />} />
+          <Route path="/mycourses" element={<MyCourses />} />
+          <Route path="/forum" element={<Forum />} />
+          <Route path="/chatbot" element={<Chatbot />} />
         </Routes>
       </Router>
     </div>

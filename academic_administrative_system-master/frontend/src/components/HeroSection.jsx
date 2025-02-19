@@ -11,10 +11,22 @@ const HeroSection = () => {
           <img src="/assets/LOGO.png" alt="Error to Clever" />
           <h2>ERROR TO CLEVER</h2>
         </div>
-        <div className="hero-search">
-          <input type="text" placeholder="Search for course" />
-          <button>🔍</button>
-        </div>
+
+        {/* Bootstrap Search Bar */}
+        <nav className="navbar navbar-light bg-light">
+          <form className="form-inline d-flex align-items-center">
+            <input
+              className="form-control search-input"
+              type="search"
+              placeholder="Search for course"
+              aria-label="Search"
+            />
+            <button className="btn btn-outline-success search-button" type="submit">
+              <i className="fas fa-search"></i> Search
+            </button>
+          </form>
+        </nav>
+
         <div className="hero-icons">
           <span>🛒</span> {/* Cart Icon */}
           <span>🔔</span> {/* Notification Icon */}

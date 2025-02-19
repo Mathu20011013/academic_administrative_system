@@ -1,0 +1,11 @@
+html, body {
+  overflow-x: hidden; /* Hide horizontal overflow */
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  box-sizing: border-box; /* Ensure padding and border are included in width */
+}
+
+* {
+  box-sizing: inherit; /* Inherit box-sizing from html */
+}

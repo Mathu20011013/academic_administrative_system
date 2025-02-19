@@ -1,0 +1,68 @@
+/* Navbar.css */
+.navbar {
+  width: 100%;
+  background-color: #f9b500; /* Orange background */
+  padding: 10px 0;
+  text-align: center;
+  border-radius: 10px;
+  position: relative;
+  display: flex;
+  justify-content: center; /* Center the navbar contents */
+}
+
+.navbar .navbar-brand {
+  font-size: 2rem;
+  font-weight: bold;
+  color: black; /* Logo text color */
+  margin-right: auto; /* Align brand to the left */
+}
+
+.navbar-nav {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex; /* Use flexbox to align navbar items */
+  justify-content: center; /* This will center the links horizontally */
+  gap: 30px; /* Spacing between nav items */
+  width: 100%; /* Ensure navbar items stretch to full width */
+}
+
+.nav-item {
+  display: inline-block;
+}
+
+.nav-link {
+  color: black; /* Default text color */
+  text-decoration: none;
+  font-size: 16px;
+  padding: 10px 20px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.nav-link:hover {
+  background-color: #d97d00; /* Hover effect with background color */
+  color: white; /* Text color on hover */
+}
+
+/* Active tab styles */
+.nav-link.active {
+  background-color: #d97d00; /* Highlight active tab with orange */
+  color: white; /* White text for active tab */
+}
+
+/* Navbar toggle button (hamburger) */
+.navbar-toggler {
+  border-color: white;
+}
+
+.navbar-toggler-icon {
+  background-color: white; /* Color for the hamburger icon */
+}
+
+@media (max-width: 767px) {
+  .navbar-nav {
+    flex-direction: column; /* Stack navbar items vertically on small screens */
+    gap: 15px; /* Increase the gap between navbar items */
+  }
+}

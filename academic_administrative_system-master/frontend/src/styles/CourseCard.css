@@ -1,0 +1,27 @@
+/* CourseCard.css */
+.course-card {
+  width: 18rem; /* Fixed width for all course cards */
+  height: 24rem; /* Fixed height for all course cards */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.course-card-img {
+  width: 100%; /* Ensure the image takes the full width of the card */
+  height: 10rem; /* Fixed height for the image */
+  object-fit: cover; /* Ensure the image covers the area without stretching */
+}
+
+.card-body {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.card-footer {
+  text-align: center;
+}

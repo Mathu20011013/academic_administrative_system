@@ -17,7 +17,7 @@ const App = () => {
       <Router>
         <Routes>
           {/* Redirect root URL "/" to "/login" */}
-          <Route path="/" element={<Navigate to="/Home" />} />
+          <Route path="/" element={<Navigate to="/login" />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
 

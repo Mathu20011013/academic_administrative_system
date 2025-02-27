@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../api/api';
 import { useNavigate } from 'react-router-dom';
 import '../styles/AuthPage.css';
 
@@ -7,29 +7,38 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', { email, password });
-      setMessage(response.data.message);
-      setTimeout(() => {
-        navigate('/dashboard'); // Redirect to dashboard or appropriate page
-      }, 2000);
+      const response = await api.post('/login', { email, password });
+      console.log(response);
+      if (response.status === 200) {
+        console.log(response.data);
+        setMessage(response.data.message);
+        localStorage.setItem('authToken', response.data.token);
+        setTimeout(() => {
+          navigate('/home');
+        }, 2000);
+      }
     } catch (error) {
-      setMessage(error.response.data.error);
+      console.error('Login failed', error);
+      setMessage(error.message || 'An error occurred during login');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="auth-container">
       <div className="auth-box">
-        {/* Image Section */}
         <div className="auth-image">
           <img src="/assets/Signuppageimg.png" alt="Login" className="signup-img" />
         </div>
-        {/* Form Section */}
         <div className="auth-form-container">
           <img src="/assets/LOGO.png" alt="Company Logo" className="auth-logo" />
           <h2 className="auth-title">ERROR TO CLEVER</h2>
@@ -49,7 +58,9 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            <button type="submit">Login</button>
+            <button type="submit" disabled={loading}>
+              {loading ? 'Logging in...' : 'Login'}
+            </button>
           </form>
           <p className="auth-alt-text">or you can</p>
           <p>

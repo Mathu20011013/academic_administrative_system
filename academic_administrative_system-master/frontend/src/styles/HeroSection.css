@@ -45,7 +45,7 @@
 .hero-search {
   display: flex;
   align-items: center;
-  background: white;
+background: white;
   padding: 5px;
   border-radius: 5px;
 }
@@ -55,7 +55,7 @@
   outline: none;
   padding: 5px;
   margin-right: 10px; /* Add space between search bar and button */
-  width: 200px; /* Adjust width as needed */
+  width: 300px; /* Increase width as needed */
   font-size: 14px;
 }
 
@@ -107,7 +107,7 @@
 
 /* Additional styles for search bar and button */
 .search-input {
-  width: 200px; /* Adjust width as needed */
+  width: 300px; /* Increase width as needed */
   padding: 5px; /* Adjust padding as needed */
 }
 

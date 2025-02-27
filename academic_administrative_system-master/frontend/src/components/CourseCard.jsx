@@ -1,10 +1,11 @@
 // src/components/CourseCard.jsx
 import React from "react";
+import "../styles/CourseCard.css"; // Import the CSS file
 
 const CourseCard = ({ title, instructor, price, imgSrc }) => {
   return (
-    <div className="card" style={{ width: "18rem" }}>
-      <img className="card-img-top" src={imgSrc} alt={title} />
+    <div className="card course-card">
+      <img className="card-img-top course-card-img" src={imgSrc} alt={title} />
       <div className="card-body">
         <h5 className="card-title">{title}</h5>
         <p className="card-text">{instructor}</p>

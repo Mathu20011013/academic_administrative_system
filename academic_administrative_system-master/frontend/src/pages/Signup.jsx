@@ -1,26 +1,57 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../api/api';
 import { useNavigate } from 'react-router-dom';
 import '../styles/AuthPage.css';
 
 const Signup = () => {
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [role, setRole] = useState('');
   const [message, setMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      setMessage("Passwords do not match");
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/signup', { email, password, confirmPassword, role });
-      setMessage(response.data.message);
-      setTimeout(() => {
-        navigate('/login');
-      }, 2000);
+      // Include username in the request
+      const response = await api.post('/signup', { 
+        username, 
+        email, 
+        password 
+      });
+      
+      console.log(response); // Log the entire response
+      
+      if (response.status === 201) {
+        console.log(response.data); // Log the response data
+        setMessage(response.data.message);
+        setTimeout(() => {
+          navigate('/home');
+        }, 2000);
+      }
     } catch (error) {
-      setMessage(error.response.data.error);
+      console.error("Signup error:", error); // Log the error to the console
+      
+      // Handle error response data if available
+      if (error.response && error.response.data) {
+        setMessage(error.response.data.error || "An error occurred during signup");
+        console.error("Error details:", error.response.data);
+      } else {
+        setMessage(error.message || "An error occurred during signup");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -37,6 +68,13 @@ const Signup = () => {
           <h2 className="auth-title">ERROR TO CLEVER</h2>
           <p className="auth-subtitle">Join us and get more benefits. We promise to keep your data safely.</p>
           <form onSubmit={handleSubmit} className="form-elements">
+            <input
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
             <input
               type="email"
               placeholder="Email Address"
@@ -58,14 +96,9 @@ const Signup = () => {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
             />
-            <input
-              type="text"
-              placeholder="Role"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              required
-            />
-            <button type="submit">Create Account</button>
+            <button type="submit" disabled={isLoading}>
+              {isLoading ? 'Signing Up...' : 'Sign Up'}
+            </button>
           </form>
           <p className="auth-alt-text">or you can</p>
           <p>

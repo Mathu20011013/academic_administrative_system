@@ -15,7 +15,7 @@ const Home = () => {
   return (
     <Layout>
       <div className="container mt-4 home-container">
-        {/* Row to hold the course cards */}
+                {/* Row to hold the course cards */}
         <div className="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
           {/* Dynamically rendering CourseCard components */}
           {courses.map((course, index) => (

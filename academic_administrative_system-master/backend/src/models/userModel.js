@@ -1,4 +1,5 @@
-const db = require('../config/db');
+// Exported functions to interact with the users table in the database
+const db = require('../config/db'); // Import the database connection
 
 // Function to create a new user
 const createUser = (userData, callback) => {
@@ -8,7 +9,7 @@ const createUser = (userData, callback) => {
     return;
   }
 
-  const query = 'INSERT INTO users SET ?';
+  const query = 'INSERT INTO users SET ?'; // Query to insert user data
   db.query(query, userData, (error, results) => {
     if (error) {
       console.error('Error inserting user:', error.message);
@@ -26,13 +27,15 @@ const findUserByEmail = (email, callback) => {
     return;
   }
 
-  const query = 'SELECT * FROM users WHERE email = ?';
+  const query = 'SELECT * FROM users WHERE email = ?';// Query to find user by email
   db.query(query, [email], (error, results) => {
     if (error) {
       console.error('Error finding user by email:', error.message);
       return callback(error);
     }
-    callback(null, results.length > 0 ? results[0] : null);
+    callback(null, results.length > 0 ? results[0] : null);//determines whether a user exists in the database and passes the result to the callback function.
+
+
   });
 };
 

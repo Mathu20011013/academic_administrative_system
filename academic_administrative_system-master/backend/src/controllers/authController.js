@@ -1,3 +1,4 @@
+//handles user authentication
 const bcrypt = require('bcrypt');
 const { generateToken } = require('../utils/jwtUtils');
 const User = require('../models/userModel');
@@ -5,6 +6,7 @@ const User = require('../models/userModel');
 const signup = async (req, res) => {
   const { username, email, password } = req.body;
   
+  // Check if email and password are provided
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password are required' });
   }
@@ -31,11 +33,11 @@ const signup = async (req, res) => {
       };
       
       // Add username if provided
-      if (username) {
+      /*if (username) {
         userData.username = username;
-      }
+      } */
       
-      // Create user using callback pattern
+      // Create user using callback pattern, save the data to the database
       User.createUser(userData, (createError, results) => {
         if (createError) {
           console.error('Error creating user:', createError);
@@ -68,6 +70,7 @@ const signup = async (req, res) => {
   });
 };
 
+// login function
 const login = (req, res) => {
   const { email, password } = req.body;
   

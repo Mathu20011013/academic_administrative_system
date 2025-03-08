@@ -1,3 +1,4 @@
+// Initialize Express app and set up routes
 const express = require('express');
 const path = require('path');
 const cors = require('cors');  // Import the cors package

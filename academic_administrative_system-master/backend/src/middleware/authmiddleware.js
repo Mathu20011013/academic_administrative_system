@@ -1,4 +1,5 @@
 // filepath: /d:/AAS/academic_administrative_system-master/academic_administrative_system-master/backend/src/middleware/authMiddleware.js
+//
 const jwt = require('jsonwebtoken');
 
 const authenticate = (req, res, next) => {

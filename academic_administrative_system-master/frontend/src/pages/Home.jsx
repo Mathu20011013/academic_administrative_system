@@ -6,10 +6,10 @@ import "../styles/Home.css"; // Import the CSS file
 const Home = () => {
   // Example data for the courses
   const courses = [
-    { title: "Web Dev for Beginners", instructor: "John Doe", price: "24.99", imgSrc: "/assets/Webdev.jpeg" },
-    { title: "UI Design", instructor: "Jane Smith", price: "19.99", imgSrc: "/assets/Ui.jpeg" },
-    { title: "Advanced React", instructor: "Alex Johnson", price: "29.99", imgSrc: "/assets/React.jpeg" },
-    { title: "Ai", instructor: "Emily White", price: "19.99", imgSrc: "/assets/Ai.jpeg" },
+    { title: "Web Dev for Beginners", instructor: "John Doe", price: "$24.99", imgSrc: "/assets/Webdev.jpeg" },
+    { title: "UI Design", instructor: "Jane Smith", price: "$19.99", imgSrc: "/assets/Ui.jpeg" },
+    { title: "Advanced React", instructor: "Alex Johnson", price: "$29.99", imgSrc: "/assets/React.jpeg" },
+    { title: "Ai", instructor: "Emily White", price: "$19.99", imgSrc: "/assets/Ai.jpeg" },
   ];
 
   return (

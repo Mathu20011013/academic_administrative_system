@@ -35,7 +35,7 @@ const Signup = () => {
       
       if (response.status === 201) {
         console.log(response.data); // Log the response data
-        setMessage(response.data.message);
+        setMessage(response.data.message); //success message
         setTimeout(() => {
           navigate('/home');
         }, 2000);
@@ -55,6 +55,7 @@ const Signup = () => {
     }
   };
 
+  // UI
   return (
     <div className="auth-container">
       <div className="auth-box">
@@ -67,6 +68,7 @@ const Signup = () => {
           <img src="/assets/LOGO.png" alt="Company Logo" className="auth-logo" />
           <h2 className="auth-title">ERROR TO CLEVER</h2>
           <p className="auth-subtitle">Join us and get more benefits. We promise to keep your data safely.</p>
+          
           <form onSubmit={handleSubmit} className="form-elements">
             <input
               type="text"

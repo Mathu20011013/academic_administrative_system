@@ -7,6 +7,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const [isSuccess, setIsSuccess] = useState(false); // New state to track success or error
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -20,6 +21,7 @@ const Login = () => {
       if (response.status === 200) {
         console.log(response.data);
         setMessage(response.data.message);
+        setIsSuccess(true); // Set to true for success
         localStorage.setItem('authToken', response.data.token);
         setTimeout(() => {
           navigate('/home');
@@ -28,6 +30,7 @@ const Login = () => {
     } catch (error) {
       console.error('Login failed', error);
       setMessage(error.message || 'An error occurred during login');
+      setIsSuccess(false); // Set to false for error
     } finally {
       setLoading(false);
     }
@@ -66,7 +69,9 @@ const Login = () => {
           <p>
             Need an Account? <a href="/signup">Sign Up</a>
           </p>
-          {message && <p className="error-message">{message}</p>}
+          {message && (
+            <p className={isSuccess ? "success-message" : "error-message"}>{message}</p>
+          )}
         </div>
       </div>
     </div>

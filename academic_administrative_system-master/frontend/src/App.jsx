@@ -10,6 +10,9 @@ import Home from "./pages/Home";
 import MyCourses from "./pages/MyCourses";
 import Forum from "./pages/Forum";
 import Chatbot from "./pages/Chatbotpage"; // Corrected import
+import AdminHome from "./pages/admin/adminhome"; // Import the AdminHome component
+import AdminStudents from "./pages/admin/adminstudents"; // Import the AdminStudents component
+import AdminTeachers from "./pages/admin/adminteachers"; // Import the AdminTeachers component
 
 const App = () => {
   return (
@@ -21,11 +24,14 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
 
-          {/* Protected Routes (Main Pages inside Layout) */}
+          {/* Main Pages inside Layout */}
           <Route path="/home" element={<Home />} />
           <Route path="/mycourses" element={<MyCourses />} />
           <Route path="/forum" element={<Forum />} />
           <Route path="/chatbot" element={<Chatbot />} />
+          <Route path="/adminhome" element={<AdminHome />} /> {/* Add the AdminHome route */}
+          <Route path="/adminstudents" element={<AdminStudents />} /> {/* Add the AdminStudents route */}
+          <Route path="/adminteachers" element={<AdminTeachers />} /> {/* Add the AdminTeachers route */}
         </Routes>
       </Router>
     </div>

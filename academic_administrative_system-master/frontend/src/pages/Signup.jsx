@@ -9,6 +9,7 @@ const Signup = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState('');
+  const [isSuccess, setIsSuccess] = useState(false); // New state to track success or error
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -19,6 +20,7 @@ const Signup = () => {
     // Check if passwords match
     if (password !== confirmPassword) {
       setMessage("Passwords do not match");
+      setIsSuccess(false); // Set to false for error
       setIsLoading(false);
       return;
     }
@@ -35,7 +37,8 @@ const Signup = () => {
       
       if (response.status === 201) {
         console.log(response.data); // Log the response data
-        setMessage(response.data.message); //success message
+        setMessage(response.data.message); // Set success message
+        setIsSuccess(true); // Set to true for success
         setTimeout(() => {
           navigate('/home');
         }, 2000);
@@ -50,6 +53,7 @@ const Signup = () => {
       } else {
         setMessage(error.message || "An error occurred during signup");
       }
+      setIsSuccess(false); // Set to false for error
     } finally {
       setIsLoading(false);
     }
@@ -106,7 +110,9 @@ const Signup = () => {
           <p>
             Already have an account? <a href="/login">Login</a>
           </p>
-          {message && <p className="error-message">{message}</p>}
+          {message && (
+            <p className={isSuccess ? "success-message" : "error-message"}>{message}</p>
+          )}
         </div>
       </div>
     </div>

@@ -103,7 +103,9 @@
 
 /* Error Message Styling */
 .error-message {
-  color: red;
-  margin-top: 10px;
-  font-size: 14px;
+  color: red; /* Change this to your desired error message color */
+}
+
+.success-message {
+  color: green; /* Change this to your desired success message color */
 }

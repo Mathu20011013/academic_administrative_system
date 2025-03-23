@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import api from '../api/api';
 import { useNavigate } from 'react-router-dom';
 import '../styles/AuthPage.css';
 
@@ -9,70 +8,62 @@ const Signup = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState('');
-  const [isSuccess, setIsSuccess] = useState(false); // New state to track success or error
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    
-    // Check if passwords match
+    setLoading(true);
+
     if (password !== confirmPassword) {
       setMessage("Passwords do not match");
-      setIsSuccess(false); // Set to false for error
-      setIsLoading(false);
+      setIsSuccess(false);
+      setLoading(false);
       return;
     }
 
     try {
-      // Include username in the request
-      const response = await api.post('/signup', { 
-        username, 
-        email, 
-        password 
+      const response = await fetch('http://localhost:5000/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, email, password }),
       });
-      
-      console.log(response); // Log the entire response
-      
-      if (response.status === 201) {
-        console.log(response.data); // Log the response data
-        setMessage(response.data.message); // Set success message
-        setIsSuccess(true); // Set to true for success
-        setTimeout(() => {
-          navigate('/home');
-        }, 2000);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
+
+      const data = await response.json();
+      console.log(data);
+      setMessage(data.message);
+      setIsSuccess(true);
+      localStorage.setItem('authToken', data.token);
+      setTimeout(() => {
+        navigate('/home');
+      }, 2000);
     } catch (error) {
-      console.error("Signup error:", error); // Log the error to the console
-      
-      // Handle error response data if available
-      if (error.response && error.response.data) {
-        setMessage(error.response.data.error || "An error occurred during signup");
-        console.error("Error details:", error.response.data);
-      } else {
-        setMessage(error.message || "An error occurred during signup");
-      }
-      setIsSuccess(false); // Set to false for error
+      console.error('Signup failed', error);
+      setMessage(error.message || 'An error occurred during signup');
+      setIsSuccess(false);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  // UI
   return (
     <div className="auth-container">
       <div className="auth-box">
-        {/* Image Section */}
         <div className="auth-image">
           <img src="/assets/Signuppageimg.png" alt="Signup" className="signup-img" />
         </div>
-        {/* Form Section */}
         <div className="auth-form-container">
           <img src="/assets/LOGO.png" alt="Company Logo" className="auth-logo" />
           <h2 className="auth-title">ERROR TO CLEVER</h2>
           <p className="auth-subtitle">Join us and get more benefits. We promise to keep your data safely.</p>
-          
+
           <form onSubmit={handleSubmit} className="form-elements">
             <input
               type="text"
@@ -102,13 +93,13 @@ const Signup = () => {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
             />
-            <button type="submit" disabled={isLoading}>
-              {isLoading ? 'Signing Up...' : 'Sign Up'}
+            <button type="submit" disabled={loading}>
+              {loading ? 'Signing up...' : 'Sign Up'}
             </button>
           </form>
           <p className="auth-alt-text">or you can</p>
           <p>
-            Already have an account? <a href="/login">Login</a>
+            Already have an account? <a href="/login">Log In</a>
           </p>
           {message && (
             <p className={isSuccess ? "success-message" : "error-message"}>{message}</p>

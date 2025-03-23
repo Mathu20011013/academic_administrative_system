@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import api from '../api/api';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import '../styles/AuthPage.css';
 
@@ -16,7 +16,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await api.post('/login', { email, password });
+      const response = await axios.post('http://localhost:5000/api/auth/login', { email, password }); // Update the URL here
       console.log(response);
       if (response.status === 200) {
         console.log(response.data);

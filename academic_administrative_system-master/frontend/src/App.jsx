@@ -13,6 +13,7 @@ import Chatbot from "./pages/Chatbotpage"; // Corrected import
 import AdminHome from "./pages/admin/adminhome"; // Import the AdminHome component
 import AdminStudents from "./pages/admin/adminstudents"; // Import the AdminStudents component
 import AdminTeachers from "./pages/admin/adminteachers"; // Import the AdminTeachers component
+import AdminForum from "./pages/admin/adminforum"; // Import the AdminForum component
 
 const App = () => {
   return (
@@ -32,6 +33,7 @@ const App = () => {
           <Route path="/adminhome" element={<AdminHome />} /> {/* Add the AdminHome route */}
           <Route path="/adminstudents" element={<AdminStudents />} /> {/* Add the AdminStudents route */}
           <Route path="/adminteachers" element={<AdminTeachers />} /> {/* Add the AdminTeachers route */}
+          <Route path="/adminforum" element={<AdminForum />} /> {/* Add the AdminForum route */}
         </Routes>
       </Router>
     </div>

@@ -3,6 +3,7 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');  // Import the cors package
 const authRoutes = require('./routes/authRoutes');
+const adminRoutes = require('./routes/adminRoutes'); // Import other route files here
 
 const app = express();
 
@@ -15,7 +16,11 @@ app.use(cors());  // This will allow requests from all origins
 // }));
 
 app.use(express.json());
-app.use('/api', authRoutes);
+
+// Use the route files
+app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
+// Use other route files here
 
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, '../../frontend/dist')));
@@ -26,4 +31,3 @@ app.get('*', (req, res) => {
 });
 
 module.exports = app;
-// comment

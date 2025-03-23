@@ -8,8 +8,7 @@ const AdminStudents = () => {
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-        // Update the fetch URL to the backend server (localhost:5000)
-        const response = await fetch("http://localhost:5000/api/students"); 
+        const response = await fetch("http://localhost:5000/api/admin/students"); // Ensure the URL is correct
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -26,17 +25,12 @@ const AdminStudents = () => {
 
   // Define the columns for the student table
   const studentColumns = [
-    { header: "User ID", key: "User ID" },
-    { header: "Username", key: "Username" },
-    { header: "Email", key: "email" },
-    { header: "Phone", key: "phone" },
-    { header: "Address", key: "address" },
-    { header: "DOB", key: "dob" },
-    { header: "Gender", key: "gender" },
-    { header: "Guardian Name", key: "Guardian Name" },
-    { header: "Guardian Contact", key: "Guardian Contact" },
-    { header: "Role", key: "role" },
-    { header: "Created At", key: "created_at" }
+    { header: "User ID", key: "User ID" },  // Ensure this matches the alias in the SQL query
+    { header: "Username", key: "Username" },  // Ensure this matches the alias in the SQL query
+    { header: "Email", key: "Email" },  // Ensure this matches the alias in the SQL query
+    { header: "Phone", key: "Phone" },  // Ensure this matches the alias in the SQL query
+    { header: "Role", key: "Role" },  // Ensure this matches the alias in the SQL query
+    { header: "Signup Date", key: "Signup Date" }  // Ensure this matches the alias in the SQL query
   ];
 
   // Define the styles for the table container
@@ -48,7 +42,8 @@ const AdminStudents = () => {
   return (
     <Layout>
       <div className="admin-home-container">
-        <Table data={students} columns={studentColumns} style={tableStyle} /> {/* Pass columns, data, and styles */}
+        <h2>Admin Students</h2>
+        <Table data={students} columns={studentColumns} /> {/* Pass columns and data */}
       </div>
     </Layout>
   );

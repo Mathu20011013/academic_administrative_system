@@ -1,9 +1,15 @@
 import React from "react";
+import "../styles/table.css"; // Import the CSS file for styling
 
 const Table = ({ data, columns, style }) => {
+  const tableStyle = {
+    padding: "20px", // Add padding around the table
+    ...style, // Merge with any additional styles passed as props
+  };
+
   return (
-    <div style={style}>
-      <table className="table">
+    <div style={tableStyle} className="table-container">
+      <table className="styled-table">
         <thead>
           <tr>
             {columns.map((column, index) => (

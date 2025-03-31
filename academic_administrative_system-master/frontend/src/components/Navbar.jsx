@@ -20,17 +20,41 @@ const Navbar = () => {
         </button>
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
+            {/* Home Tab */}
             <li className="nav-item">
-              <NavLink className="nav-link" to="/" activeClassName="active">Home</NavLink>
+              <NavLink
+                className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+                to="/home"
+              >
+                Home
+              </NavLink>
             </li>
+            {/* My Courses Tab */}
             <li className="nav-item">
-              <NavLink className="nav-link" to="/mycourses" activeClassName="active">My Courses</NavLink>
+              <NavLink
+                className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+                to="/mycourses"
+              >
+                My Courses
+              </NavLink>
             </li>
+            {/* Forum Tab */}
             <li className="nav-item">
-              <NavLink className="nav-link" to="/forum" activeClassName="active">Forum</NavLink>
+              <NavLink
+                className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+                to="/forum"
+              >
+                Forum
+              </NavLink>
             </li>
+            {/* Chatbot Tab */}
             <li className="nav-item">
-              <NavLink className="nav-link" to="/chatbot" activeClassName="active">Chatbot</NavLink>
+              <NavLink
+                className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+                to="/chatbot"
+              >
+                Chatbot
+              </NavLink>
             </li>
           </ul>
         </div>

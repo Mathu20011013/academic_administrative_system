@@ -65,6 +65,7 @@
   margin-bottom: 20px;
 }
 
+/* Input and Button Styling */
 .form-elements input,
 .form-elements button {
   width: 90%;
@@ -72,6 +73,24 @@
   padding: 12px;
   border: 1px solid #ddd;
   border-radius: 5px;
+  background-color: #ffffff; /* Ensure input fields have a white background */
+  color: #000000; /* Black text */
+  box-shadow: none; /* Remove any shadow */
+}
+
+/* Autofill styles for Webkit-based browsers */
+input:-webkit-autofill {
+  background-color: #ffffff !important; /* Force white background */
+  color: #000000 !important; /* Black text */
+  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important; /* Remove autofill background */
+  border: 1px solid #ddd; /* Light gray border */
+}
+
+/* Autofill styles for Mozilla Firefox */
+input:-moz-autofill {
+  background-color: #ffffff !important; /* Force white background */
+  color: #000000 !important; /* Black text */
+  border: 1px solid #ddd; /* Light gray border */
 }
 
 .form-elements button {
@@ -86,6 +105,7 @@
   background-color: #0056b3;
 }
 
+/* Alternate Text Styling */
 .auth-alt-text {
   margin-top: 10px;
   font-size: 14px;
@@ -103,9 +123,7 @@
 
 /* Error Message Styling */
 .error-message {
-  color: red; /* Change this to your desired error message color */
-}
-
-.success-message {
-  color: green; /* Change this to your desired success message color */
+  color: red;
+  margin-top: 10px;
+  font-size: 14px;
 }

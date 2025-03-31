@@ -9,7 +9,6 @@ const getAllStudents = (req, res) => {
       username AS "Username", 
       email AS "Email", 
       IFNULL(contact_number, '------') AS "Phone", -- Replace NULL with '-'
-      role AS "Role", 
       signup_date AS "Signup Date" 
     FROM user 
     WHERE role = 'student';

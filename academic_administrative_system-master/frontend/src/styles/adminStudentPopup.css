@@ -13,65 +13,114 @@
 
 .modal-content {
   background-color: white;
-  padding: 20px;
+  padding: 15px; /* Reduce padding to make the popup more compact */
   border-radius: 8px;
   width: 80%;
   max-width: 600px;
+  height: auto; /* Allow the height to adjust based on content */
+  max-height: 400px; /* Set a maximum height for the popup */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center-align the content horizontally */
+  overflow-y: auto; /* Add scrolling if content exceeds max height */
 }
 
 .modal-form {
   display: flex;
   flex-direction: column;
+  align-items: center; /* Center-align the form elements */
+  width: 100%;
 }
 
 .form-group {
   margin-bottom: 15px;
+  width: 100%; /* Ensure full width for proper alignment */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center-align labels and inputs */
 }
 
 .form-group label {
   font-weight: bold;
   margin-bottom: 5px;
+  text-align: center; /* Center-align label text */
+  display: block; /* Ensure labels are block-level elements */
+  width: 100%; /* Take full width for proper alignment */
 }
 
 .form-group input {
   padding: 8px;
   font-size: 16px;
-  width: 100%;
+  width: 80%; /* Adjust width to make it visually centered */
   border-radius: 5px;
   border: 1px solid #ccc;
   box-sizing: border-box;
+  background-color: #ffffff; /* Ensure input fields have a white background */
+  color: #000000; /* Black text */
+  text-align: center; /* Center-align text inside input fields */
+}
+
+input::placeholder {
+  text-align: center; /* Center-align placeholder text */
+  color: #aaa; /* Optional: Adjust placeholder text color */
 }
 
 .modal-buttons {
   display: flex;
-  justify-content: space-between;
-  gap: 10px;
+  justify-content: space-between; /* Align buttons to the left and right ends */
+  width: 100%; /* Ensure buttons span the full width of the container */
+  margin-top: 20px; /* Add spacing above the buttons */
 }
 
-.btn-save, .btn-close {
-  padding: 10px 15px;
-  font-size: 16px;
-  border-radius: 5px;
-  cursor: pointer;
+.btn-save, .btn-normal {
+  width: 100px; /* Set width for the rectangle */
+  height: 40px; /* Set height for the rectangle */
+  font-size: 1.5rem; /* Adjust font size for better visibility */
+  border-radius: 8px; /* Rounded corners */
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center-align button text */
+  cursor: pointer; /* Change cursor to pointer */
+  border: none; /* Remove border */
+  color: white; 
+  font-size: medium;
 }
 
 .btn-save {
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-}
-
-.btn-save:hover {
   background-color: #45a049;
+
 }
 
-.btn-close {
-  background-color: #f44336;
-  color: white;
-  border: none;
+.btn-normal {
+  background-color: #d9534f; /* Red color */
 }
 
-.btn-close:hover {
-  background-color: #e53935;
+/* Box containing the table and the button */
+.table-box {
+  position: relative; /* Set relative positioning for the container */
+  margin: 20px auto; /* Center the box horizontally */
+  padding: 20px; /* Add padding inside the box */
+  background-color: #f9f9f9; /* Light background for the box */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+/* Add New Instructor button styling */
+.add-instructor-button {
+  position: absolute; /* Position the button absolutely within the box */
+  top: 10px; /* Align the button to the top */
+  right: 120px; /* Align the button to the right */
+  padding: 8px 16px;
+  background-color: #4CAF50; /* Green background */
+  color: white; /* White text */
+  border: none; /* Remove border */
+  border-radius: 4px; /* Rounded corners */
+  cursor: pointer; /* Pointer cursor on hover */
+  font-size: 14px; /* Adjust font size */
+  z-index: 10; /* Ensure the button appears above other elements */
+}
+
+.add-instructor-button:hover {
+  background-color: #45a049; /* Darker green on hover */
 }

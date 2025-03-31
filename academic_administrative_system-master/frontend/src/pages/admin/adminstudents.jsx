@@ -93,7 +93,7 @@ const AdminStudents = () => {
     { header: "Username", key: "Username" },
     { header: "Email", key: "Email" },
     { header: "Phone", key: "Phone" },
-    { header: "Role", key: "Role" },
+   // { header: "Role", key: "Role" },
     { header: "Signup Date", key: "Signup Date" },
     { header: "Actions", key: "Actions" }, // Action column for buttons
   ];

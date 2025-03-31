@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import '../../styles/adminStudentPopup.css';  // Import the modal CSS
+import '../../styles/adminStudentPopup.css';  // Reusing the same styling
 
-const Modal = ({ student, onSave, onClose }) => {
-  const [formData, setFormData] = useState(student);
+const Modal = ({ instructor, onSave, onClose }) => {
+  const [formData, setFormData] = useState(instructor);
 
-  // Re-set form data when the student prop changes
+  // Re-set form data when the instructor prop changes
   useEffect(() => {
-    setFormData(student);
-  }, [student]);
+    setFormData(instructor);
+  }, [instructor]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -19,12 +19,19 @@ const Modal = ({ student, onSave, onClose }) => {
 
   const handleSave = () => {
     // Ensure all required fields are filled in
-    if (!formData.Username || !formData.Email || !formData.Phone || !formData.Role) {
-      alert("All fields are required!");
+    if (!formData.Username || !formData.Email || !formData.Role) {
+      alert("Username, Email, and Role are required!");
       return;
     }
 
-    onSave(formData);  // Pass the updated student data back to the parent
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.Email)) {
+      alert("Please enter a valid email address!");
+      return;
+    }
+
+    onSave(formData);  // Pass the updated instructor data back to the parent
   };
 
   const handleClose = () => {
@@ -34,7 +41,7 @@ const Modal = ({ student, onSave, onClose }) => {
   return (
     <div className="modal-overlay">
       <div className="modal-content">
-        <h2>Edit Student</h2>
+        <h2>Edit Instructor</h2>
         <div className="modal-form">
           <div className="form-group">
             <label>Username</label>
@@ -61,9 +68,26 @@ const Modal = ({ student, onSave, onClose }) => {
             <input
               type="text"
               name="Phone"
-              value={formData.Phone === null || formData.Phone === "" ? "-" : formData.Phone}
+              value={formData.Phone === null || formData.Phone === "" ? "" : formData.Phone}
               onChange={handleChange}
-              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Qualification</label>
+            <input
+              type="text"
+              name="Qualification"
+              value={formData.Qualification || ""}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="form-group">
+            <label>Specialization</label>
+            <input
+              type="text"
+              name="Specialization"
+              value={formData.Specialization || ""}
+              onChange={handleChange}
             />
           </div>
           <div className="form-group">
@@ -74,16 +98,15 @@ const Modal = ({ student, onSave, onClose }) => {
               value={formData.Role}
               onChange={handleChange}
               required
+              readOnly={true} // Make role field read-only for instructors
             />
           </div>
           <div className="modal-buttons">
-            {/* Save button */}
             <button className="btn-save" onClick={handleSave} aria-label="Save">
               Save
             </button>
-            {/* Normal Close button with close functionality */}
             <button className="btn-normal" onClick={handleClose} aria-label="Close">
-              Close
+              Cancel
             </button>
           </div>
         </div>

@@ -24,12 +24,18 @@ const Signup = () => {
     }
 
     try {
+      // Include role as 'student' in the request body
       const response = await fetch('http://localhost:5000/api/auth/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, email, password }),
+        body: JSON.stringify({
+          username,
+          email,
+          password,
+          role: 'student',  // Always set the role to 'student'
+        }),
       });
 
       if (!response.ok) {

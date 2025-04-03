@@ -132,8 +132,12 @@ const AdminInstructors = () => {
     ...instructor,
     Actions: (
       <div style={{ display: "flex", gap: "8px" }}>
-        <button onClick={() => handleEditClick(instructor)}>Edit</button>
-        <button onClick={() => handleDeleteClick(instructor['User ID'])}>Delete</button>
+        <button className="btn-edit" onClick={() => handleEditClick(instructor)}>
+          Edit
+        </button>
+        <button className="btn-delete" onClick={() => handleDeleteClick(instructor['User ID'])}>
+          Delete
+        </button>
       </div>
     ),
   }));
@@ -154,10 +158,10 @@ const AdminInstructors = () => {
   return (
     <Layout>
       <div className="admin-home-container">
-        <div className="table-box">
+        <div className="table-container" style={{ position: "relative" }}>
           <button 
             onClick={handleAddNewClick}
-            className="add-instructor-button"
+            className="add-button"
           >
             Add New Instructor
           </button>

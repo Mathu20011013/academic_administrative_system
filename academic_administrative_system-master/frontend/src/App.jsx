@@ -10,9 +10,9 @@ import Home from "./pages/Home";
 import MyCourses from "./pages/MyCourses";
 import Forum from "./pages/Forum";
 import Chatbot from "./pages/Chatbotpage"; // Corrected import
-import AdminHome from "./pages/admin/adminhome"; // Import the AdminHome component
-import AdminStudents from "./pages/admin/adminstudents"; // Import the AdminStudents component
-import AdminForum from "./pages/admin/adminforum"; // Import the AdminForum component
+import AdminHome from "./pages/admin/adminCourses"; // Corrected import path
+import AdminStudents from "./pages/admin/adminstudents";
+import AdminForum from "./pages/admin/adminforum";
 import AdminInstructors from './pages/admin/adminInstructor';
 
 const App = () => {
@@ -30,10 +30,10 @@ const App = () => {
           <Route path="/mycourses" element={<MyCourses />} />
           <Route path="/forum" element={<Forum />} />
           <Route path="/chatbot" element={<Chatbot />} />
-          <Route path="/adminhome" element={<AdminHome />} /> {/* Add the AdminHome route */}
-          <Route path="/adminstudents" element={<AdminStudents />} /> {/* Add the AdminStudents route */}
-          <Route path="/admininstructors" element={<AdminInstructors />} /> {/* Add the AdminTeachers route */}
-          <Route path="/adminforum" element={<AdminForum />} /> {/* Add the AdminForum route */}
+          <Route path="/adminCourses" element={<AdminHome />} />
+          <Route path="/adminstudents" element={<AdminStudents />} />
+          <Route path="/admininstructors" element={<AdminInstructors />} />
+          <Route path="/adminforum" element={<AdminForum />} />
         </Routes>
       </Router>
     </div>

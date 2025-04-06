@@ -81,8 +81,12 @@ const AdminStudents = () => {
     ...student,
     Actions: (
       <div style={{ display: "flex", gap: "8px" }}>
-        <button onClick={() => handleEditClick(student)}>Edit</button>
-        <button onClick={() => handleDeleteClick(student['User ID'])}>Delete</button>
+        <button className="btn-edit" onClick={() => handleEditClick(student)}>
+          Edit
+        </button>
+        <button className="btn-delete" onClick={() => handleDeleteClick(student['User ID'])}>
+          Delete
+        </button>
       </div>
     ),
   }));

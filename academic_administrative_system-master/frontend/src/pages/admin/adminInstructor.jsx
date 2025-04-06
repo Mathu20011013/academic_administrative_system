@@ -21,7 +21,6 @@ const AdminInstructors = () => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       const data = await response.json();
-      console.log("Fetched instructor data:", data);
       setInstructors(data);
     } catch (error) {
       console.error("Error fetching instructors:", error);
@@ -41,34 +40,36 @@ const AdminInstructors = () => {
 
   // Handle deleting an instructor
   const handleDeleteClick = async (user_id) => {
-    try {
-      const response = await fetch(`http://localhost:5000/api/admin/instructors/${user_id}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) {
-        throw new Error(`Error deleting instructor with ID: ${user_id}`);
+    if (confirm("Are you sure you want to delete this instructor?")) {
+      try {
+        const response = await fetch(`http://localhost:5000/api/admin/instructors/${user_id}`, {
+          method: "DELETE",
+        });
+        if (!response.ok) {
+          throw new Error(`Error deleting instructor with ID: ${user_id}`);
+        }
+        setInstructors(instructors.filter(instructor => instructor['User ID'] !== user_id));
+      } catch (error) {
+        console.error("Error deleting instructor:", error);
+        alert("Failed to delete instructor: " + error.message);
       }
-      setInstructors(instructors.filter(instructor => instructor['User ID'] !== user_id));
-    } catch (error) {
-      console.error("Error deleting instructor:", error);
     }
   };
 
   // Handle saving edited instructor information
   const handleSaveChanges = async (updatedInstructor) => {
-    console.log("Saving instructor:", updatedInstructor);
-
     const payload = {
       username: updatedInstructor.Username,
       email: updatedInstructor.Email,
       contact_number: updatedInstructor.Phone,
       qualification: updatedInstructor.Qualification,
       specialization: updatedInstructor.Specialization,
+      bio: updatedInstructor.Bio,
       role: updatedInstructor.Role,
+      password: updatedInstructor.Password // Include password in the payload
     };
 
     try {
-      // Edit existing instructor
       const response = await fetch(`http://localhost:5000/api/admin/instructors/${updatedInstructor['User ID']}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -79,61 +80,32 @@ const AdminInstructors = () => {
         throw new Error(`Error updating instructor data`);
       }
 
-      // Refresh the instructor list after successful update
       fetchInstructors();
       setShowEditModal(false);
+      alert("Instructor updated successfully!");
     } catch (error) {
       console.error(`Error updating instructor:`, error);
       alert("Failed to update instructor: " + error.message);
     }
   };
 
-  // Handle adding a new instructor
-  const handleAddInstructor = async (newInstructor) => {
-    console.log("Adding new instructor:", newInstructor);
-
-    const payload = {
-      username: newInstructor.Username,
-      email: newInstructor.Email,
-      password: newInstructor.Password, // Include password in the payload
-      contact_number: newInstructor.Phone,
-      qualification: newInstructor.Qualification,
-      specialization: newInstructor.Specialization,
-      role: newInstructor.Role,
-    };
-
-    try {
-      // Add new instructor
-      const response = await fetch("http://localhost:5000/api/admin/instructors", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Error adding instructor");
-      }
-
-      // Refresh the instructor list after successful addition
-      fetchInstructors();
-      setShowAddModal(false);
-      alert("Instructor added successfully!");
-    } catch (error) {
-      console.error(`Error adding instructor:`, error);
-      alert("Failed to add instructor: " + error.message);
-    }
+  // Function to mask password with symbols based on length
+  const maskPassword = (password) => {
+    return password ? '*'.repeat(password.length) : '******';
   };
 
-  // Enhance instructor data to include action buttons
+  // Enhance instructor data to include action buttons and mask the password
   const enhancedInstructors = instructors.map((instructor) => ({
     ...instructor,
+    Password: maskPassword(instructor.Password),  // Mask the password dynamically based on its length
     Actions: (
       <div style={{ display: "flex", gap: "8px" }}>
-        <button onClick={() => handleEditClick(instructor)}>Edit</button>
-        <button onClick={() => handleDeleteClick(instructor['User ID'])}>Delete</button>
+        <button className="btn-edit" onClick={() => handleEditClick(instructor)} aria-label="Edit">
+          Edit
+        </button>
+        <button className="btn-delete" onClick={() => handleDeleteClick(instructor['User ID'])} aria-label="Delete">
+          Delete
+        </button>
       </div>
     ),
   }));
@@ -146,18 +118,30 @@ const AdminInstructors = () => {
     { header: "Phone", key: "Phone" },
     { header: "Qualification", key: "Qualification" },
     { header: "Specialization", key: "Specialization" },
+    { header: "Bio", key: "Bio" },
     { header: "Role", key: "Role" },
-    { header: "Signup Date", key: "Signup Date" },
+    { header: "Password", key: "Password" }, // Add Password column for viewing the masked password
     { header: "Actions", key: "Actions" },
   ];
 
   return (
     <Layout>
       <div className="admin-home-container">
-        <div className="table-box">
+        <div className="table-container" style={{ position: "relative" }}>
           <button 
             onClick={handleAddNewClick}
-            className="add-instructor-button"
+            className="add-button"
+            style={{
+              position: "absolute",
+              top: "10px",
+              right: "10px",
+              padding: "8px 16px",
+              backgroundColor: "#4CAF50",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer"
+            }}
           >
             Add New Instructor
           </button>
@@ -174,7 +158,7 @@ const AdminInstructors = () => {
         
         {showAddModal && (
           <AddInstructorModal 
-            onSave={handleAddInstructor} 
+            onSave={handleSaveChanges} 
             onClose={() => setShowAddModal(false)} 
           />
         )}

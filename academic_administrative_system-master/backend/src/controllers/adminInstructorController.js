@@ -1,21 +1,25 @@
 const db = require('../config/db');
-const bcrypt = require('bcrypt'); // You'll need to install this package for password hashing
+const bcrypt = require('bcrypt');
 
-// Get all instructors
+// Get all instructors with joined data from user and instructor tables
 const getAllInstructors = (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   const query = `
     SELECT 
-      user_id AS "User ID", 
-      username AS "Username", 
-      email AS "Email", 
-      IFNULL(contact_number, '------') AS "Phone",
-      IFNULL(qualification, '------') AS "Qualification",
-      IFNULL(specialization, '------') AS "Specialization",
-      role AS "Role", 
-      signup_date AS "Signup Date" 
-    FROM user 
-    WHERE role = 'instructor';
+      u.user_id AS "User ID", 
+      u.username AS "Username", 
+      i.instructor_id AS "Instructor ID",
+      u.email AS "Email", 
+      IFNULL(u.contact_number, '------') AS "Phone",
+      IFNULL(i.qualification, '------') AS "Qualification",
+      IFNULL(i.specialization, '------') AS "Specialization",
+      u.role AS "Role",
+      i.bio AS "Bio",
+      i.rating_average AS "Rating",
+      u.signup_date AS "Signup Date" 
+    FROM user u
+    LEFT JOIN instructor i ON u.user_id = i.user_id
+    WHERE u.role = 'instructor';
   `;
   
   db.query(query, (error, results) => {
@@ -27,9 +31,9 @@ const getAllInstructors = (req, res) => {
   });
 };
 
-// Add new instructor
+// Add new instructor - create entry in both user and instructor tables
 const addInstructor = async (req, res) => {
-  const { username, email, password, contact_number, qualification, specialization, role } = req.body;
+  const { username, email, password, contact_number, qualification, specialization, bio, role } = req.body;
   
   console.log("Received data to add new instructor:", req.body);
 
@@ -61,52 +65,100 @@ const addInstructor = async (req, res) => {
       // Email is unique, proceed with adding the instructor
       const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
       
-      const insertQuery = `
+      const insertUserQuery = `
         INSERT INTO user (
           username, 
           email,
           password,
           contact_number, 
-          qualification, 
-          specialization, 
           role, 
           signup_date
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+        ) VALUES (?, ?, ?, ?, ?, ?);
       `;
 
-      const values = [
+      const userValues = [
         username,
         email,
         hashedPassword,
         contact_number || null,
-        qualification || null,
-        specialization || null,
         role,
         currentDate
       ];
 
-      db.query(insertQuery, values, (insertError, insertResults) => {
-        if (insertError) {
-          console.error('Error adding instructor:', insertError);
+      // Start transaction to ensure both tables are updated
+      db.beginTransaction(async function(err) {
+        if (err) {
+          console.error('Error starting transaction:', err);
           return res.status(500).json({ error: 'Internal Server Error' });
         }
 
-        res.status(201).json({ 
-          message: 'Instructor added successfully',
-          instructorId: insertResults.insertId
+        // First insert into user table
+        db.query(insertUserQuery, userValues, async (userError, userResults) => {
+          if (userError) {
+            return db.rollback(() => {
+              console.error('Error adding user:', userError);
+              res.status(500).json({ error: 'Internal Server Error' });
+            });
+          }
+
+          const userId = userResults.insertId;
+
+          // Now insert into instructor table
+          const insertInstructorQuery = `
+            INSERT INTO instructor (
+              user_id,
+              bio,
+              qualification,
+              specialization,
+              rating_average
+            ) VALUES (?, ?, ?, ?, ?);
+          `;
+
+          const instructorValues = [
+            userId,
+            bio || null,
+            qualification || null,
+            specialization || null,
+            0.0 // Default rating for new instructor
+          ];
+
+          db.query(insertInstructorQuery, instructorValues, (instructorError, instructorResults) => {
+            if (instructorError) {
+              return db.rollback(() => {
+                console.error('Error adding instructor details:', instructorError);
+                res.status(500).json({ error: 'Internal Server Error' });
+              });
+            }
+
+            // Commit the transaction
+            db.commit((commitErr) => {
+              if (commitErr) {
+                return db.rollback(() => {
+                  console.error('Error committing transaction:', commitErr);
+                  res.status(500).json({ error: 'Internal Server Error' });
+                });
+              }
+
+              res.status(201).json({ 
+                message: 'Instructor added successfully',
+                userId: userId,
+                instructorId: instructorResults.insertId
+              });
+            });
+          });
         });
       });
     } catch (error) {
-      console.error('Error hashing password:', error);
+      console.error('Error creating instructor account:', error);
       return res.status(500).json({ error: 'Error creating account' });
     }
   });
 };
 
-// Edit instructor details
+// Edit instructor details in both user and instructor tables
 const editInstructor = (req, res) => {
   const { user_id } = req.params;
-  const { username, email, contact_number, qualification, specialization, role } = req.body;
+  const { username, email, contact_number, qualification, specialization, bio, role } = req.body;
 
   console.log("Received data to update:", req.body);
 
@@ -128,41 +180,100 @@ const editInstructor = (req, res) => {
       return res.status(409).json({ error: 'Email already in use by another user' });
     }
 
-    // Email is valid, proceed with update
-    const updateQuery = `
-      UPDATE user
-      SET username = ?, 
-          email = ?, 
-          contact_number = ?, 
-          qualification = ?,
-          specialization = ?,
-          role = ?
-      WHERE user_id = ?;
-    `;
-
-    // Execute the query with the provided values
-    db.query(updateQuery, [
-      username, 
-      email, 
-      contact_number || null, 
-      qualification || null, 
-      specialization || null, 
-      role, 
-      user_id
-    ], (updateError, updateResults) => {
-      if (updateError) {
-        console.error('Error updating instructor:', updateError);
+    // Begin transaction to update both tables
+    db.beginTransaction(function(err) {
+      if (err) {
+        console.error('Error starting transaction:', err);
         return res.status(500).json({ error: 'Internal Server Error' });
       }
 
-      console.log("Query executed successfully:", updateResults);
+      // Update user table
+      const updateUserQuery = `
+        UPDATE user
+        SET username = ?, 
+            email = ?, 
+            contact_number = ?, 
+            role = ?
+        WHERE user_id = ?;
+      `;
 
-      // Check if any rows were updated
-      if (updateResults.affectedRows === 0) {
-        return res.status(404).json({ error: 'Instructor not found' });
-      }
+      db.query(updateUserQuery, [
+        username, 
+        email, 
+        contact_number || null, 
+        role, 
+        user_id
+      ], (updateUserError, updateUserResults) => {
+        if (updateUserError) {
+          return db.rollback(() => {
+            console.error('Error updating user data:', updateUserError);
+            res.status(500).json({ error: 'Internal Server Error' });
+          });
+        }
 
-      res.status(200).json({ message: 'Instructor updated successfully' });
+        // Check if user was found and updated
+        if (updateUserResults.affectedRows === 0) {
+          return db.rollback(() => {
+            res.status(404).json({ error: 'Instructor not found' });
+          });
+        }
+
+        // Check if instructor record exists first
+        const checkInstructorQuery = `SELECT * FROM instructor WHERE user_id = ?`;
+        
+        db.query(checkInstructorQuery, [user_id], (checkError, checkResults) => {
+          if (checkError) {
+            return db.rollback(() => {
+              console.error('Error checking instructor record:', checkError);
+              res.status(500).json({ error: 'Internal Server Error' });
+            });
+          }
+
+          let instructorQuery;
+          let instructorValues;
+
+          if (checkResults.length > 0) {
+            // Update existing instructor record
+            instructorQuery = `
+              UPDATE instructor
+              SET qualification = ?,
+                  specialization = ?,
+                  bio = ?
+              WHERE user_id = ?;
+            `;
+            instructorValues = [qualification || null, specialization || null, bio || null, user_id];
+          } else {
+            // Create new instructor record
+            instructorQuery = `
+              INSERT INTO instructor (user_id, qualification, specialization, bio, rating_average)
+              VALUES (?, ?, ?, ?, ?);
+            `;
+            instructorValues = [user_id, qualification || null, specialization || null, bio || null, 0.0];
+          }
+
+          // Execute instructor query
+          db.query(instructorQuery, instructorValues, (instructorError, instructorResults) => {
+            if (instructorError) {
+              return db.rollback(() => {
+                console.error('Error updating instructor details:', instructorError);
+                res.status(500).json({ error: 'Internal Server Error' });
+              });
+            }
+
+            // Commit transaction
+            db.commit((commitErr) => {
+              if (commitErr) {
+                return db.rollback(() => {
+                  console.error('Error committing transaction:', commitErr);
+                  res.status(500).json({ error: 'Internal Server Error' });
+                });
+              }
+
+              res.status(200).json({ message: 'Instructor updated successfully' });
+            });
+          });
+        });
+      });
     });
   });
 };
@@ -209,24 +320,59 @@ const resetInstructorPassword = async (req, res) => {
   }
 };
 
-// Delete instructor
+// Delete instructor - remove from both tables
 const deleteInstructor = (req, res) => {
   const { user_id } = req.params;
 
-  const query = `DELETE FROM user WHERE user_id = ? AND role = 'instructor';`;
-
-  db.query(query, [user_id], (error, results) => {
-    if (error) {
-      console.error('Error deleting instructor:', error);
+  // Begin transaction
+  db.beginTransaction(function(err) {
+    if (err) {
+      console.error('Error starting transaction:', err);
       return res.status(500).json({ error: 'Internal Server Error' });
     }
 
-    // If no rows were deleted
-    if (results.affectedRows === 0) {
-      return res.status(404).json({ error: 'Instructor not found' });
-    }
+    // First delete from instructor table
+    const deleteInstructorQuery = `DELETE FROM instructor WHERE user_id = ?;`;
+    
+    db.query(deleteInstructorQuery, [user_id], (instructorError, instructorResults) => {
+      if (instructorError) {
+        return db.rollback(() => {
+          console.error('Error deleting instructor record:', instructorError);
+          res.status(500).json({ error: 'Internal Server Error' });
+        });
+      }
+      
+      // Now delete from user table
+      const deleteUserQuery = `DELETE FROM user WHERE user_id = ? AND role = 'instructor';`;
+      
+      db.query(deleteUserQuery, [user_id], (userError, userResults) => {
+        if (userError) {
+          return db.rollback(() => {
+            console.error('Error deleting user record:', userError);
+            res.status(500).json({ error: 'Internal Server Error' });
+          });
+        }
 
-    res.status(200).json({ message: 'Instructor deleted successfully' });
+        // If no rows were deleted
+        if (userResults.affectedRows === 0) {
+          return db.rollback(() => {
+            res.status(404).json({ error: 'Instructor not found' });
+          });
+        }
+
+        // Commit transaction
+        db.commit((commitErr) => {
+          if (commitErr) {
+            return db.rollback(() => {
+              console.error('Error committing transaction:', commitErr);
+              res.status(500).json({ error: 'Internal Server Error' });
+            });
+          }
+
+          res.status(200).json({ message: 'Instructor deleted successfully' });
+        });
+      });
+    });
   });
 };
 

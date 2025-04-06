@@ -8,9 +8,10 @@ const AddInstructorModal = ({ onSave, onClose }) => {
     "Username": "",
     "Email": "",
     "Phone": "",
-    "Password": "", // Added password field
+    "Password": "",
     "Qualification": "",
     "Specialization": "",
+    "Bio": "",
     "Role": "instructor",
     "Signup Date": new Date().toISOString().split('T')[0]
   };
@@ -106,6 +107,15 @@ const AddInstructorModal = ({ onSave, onClose }) => {
             name="Specialization"
             value={formData.Specialization}
             onChange={handleChange}
+          />
+        </div>
+        <div className="form-group">
+          <label>Bio</label>
+          <textarea
+            name="Bio"
+            value={formData.Bio}
+            onChange={handleChange}
+            rows="4"
           />
         </div>
         <div className="form-group">

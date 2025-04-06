@@ -145,7 +145,6 @@ const AdminCourses = () => {
       </div>
     ),
   }));
-  
 
   // Define the columns for the course table
   const courseColumns = [
@@ -156,12 +155,11 @@ const AdminCourses = () => {
     { header: "Instructor ID", key: "Instructor ID" },
     { header: "Actions", key: "Actions" },
   ];
-  
 
   return (
     <Layout>
       <div className="admin-home-container">
-        <div className="table-container" style={{ position: "relative" }}>
+        <div className="table-container" style={{ position: "relative", zIndex: 1 }}>
           <button 
             onClick={handleAddNewClick}
             className="add-button"
@@ -185,9 +183,6 @@ const AdminCourses = () => {
             onClose={() => setShowAddModal(false)} 
           />
         )}
-        
-
-        
       </div>
     </Layout>
   );

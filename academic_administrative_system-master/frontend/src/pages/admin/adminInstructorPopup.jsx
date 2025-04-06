@@ -5,7 +5,6 @@ import '../../styles/adminStudentPopup.css';  // Keeping the same styling
 const InstructorModal = ({ instructor, onSave, onClose }) => {
   const [formData, setFormData] = useState(instructor);
 
-  // Re-set form data when the instructor prop changes
   useEffect(() => {
     setFormData(instructor);
   }, [instructor]);
@@ -29,6 +28,12 @@ const InstructorModal = ({ instructor, onSave, onClose }) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.Email)) {
       alert("Please enter a valid email address!");
+      return;
+    }
+
+    // Include password check if needed
+    if (formData.Password && formData.Password.length < 6) {
+      alert("Password must be at least 6 characters long!");
       return;
     }
 
@@ -59,11 +64,20 @@ const InstructorModal = ({ instructor, onSave, onClose }) => {
           />
         </div>
         <div className="form-group">
+          <label>Password</label>
+          <input
+            type="password"
+            name="Password"
+            value={formData.Password || ""}
+            onChange={handleChange}
+          />
+        </div>
+        <div className="form-group">
           <label>Phone</label>
           <input
             type="text"
             name="Phone"
-            value={formData.Phone === null || formData.Phone === "" ? "" : formData.Phone}
+            value={formData.Phone || ""}
             onChange={handleChange}
           />
         </div>
@@ -86,6 +100,15 @@ const InstructorModal = ({ instructor, onSave, onClose }) => {
           />
         </div>
         <div className="form-group">
+          <label>Bio</label>
+          <textarea
+            name="Bio"
+            value={formData.Bio || ""}
+            onChange={handleChange}
+            rows="4"
+          />
+        </div>
+        <div className="form-group">
           <label>Role</label>
           <input
             type="text"
@@ -93,7 +116,7 @@ const InstructorModal = ({ instructor, onSave, onClose }) => {
             value={formData.Role}
             onChange={handleChange}
             required
-            readOnly={true} // Make role field read-only for instructors
+            readOnly={true} // Make role field read-only
           />
         </div>
         <div className="modal-buttons">

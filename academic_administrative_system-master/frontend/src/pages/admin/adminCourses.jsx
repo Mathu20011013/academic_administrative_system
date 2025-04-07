@@ -21,25 +21,21 @@ const AdminCourses = () => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       const data = await response.json();
-      console.log("Fetched course data:", data);
       setCourses(data);
     } catch (error) {
       console.error("Error fetching courses:", error);
     }
   };
 
-  // Handle clicking the Edit button
   const handleEditClick = (course) => {
     setSelectedCourse(course);
     setShowEditModal(true);
   };
 
-  // Handle clicking Add New Course button
   const handleAddNewClick = () => {
     setShowAddModal(true);
   };
 
-  // Handle deleting a course
   const handleDeleteClick = async (course_id) => {
     try {
       const response = await fetch(`http://localhost:5000/api/admin/courses/${course_id}`, {
@@ -56,10 +52,7 @@ const AdminCourses = () => {
     }
   };
 
-  // Handle saving edited course information
   const handleSaveChanges = async (updatedCourse) => {
-    console.log("Saving course:", updatedCourse);
-
     const payload = {
       title: updatedCourse.Title,
       description: updatedCourse.Description,
@@ -71,7 +64,6 @@ const AdminCourses = () => {
     };
 
     try {
-      // Edit existing course
       const response = await fetch(`http://localhost:5000/api/admin/courses/${updatedCourse['Course ID']}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -82,7 +74,6 @@ const AdminCourses = () => {
         throw new Error(`Error updating course data`);
       }
 
-      // Refresh the course list after successful update
       fetchCourses();
       setShowEditModal(false);
       alert("Course updated successfully!");
@@ -92,10 +83,7 @@ const AdminCourses = () => {
     }
   };
 
-  // Handle adding a new course
   const handleAddCourse = async (newCourse) => {
-    console.log("Adding new course:", newCourse);
-
     const payload = {
       title: newCourse.Title,
       description: newCourse.Description,
@@ -107,7 +95,6 @@ const AdminCourses = () => {
     };
 
     try {
-      // Add new course
       const response = await fetch("http://localhost:5000/api/admin/courses", {
         method: "POST",
         headers: { 
@@ -121,7 +108,6 @@ const AdminCourses = () => {
         throw new Error(errorData.error || "Error adding course");
       }
 
-      // Refresh the course list after successful addition
       fetchCourses();
       setShowAddModal(false);
       alert("Course added successfully!");
@@ -131,7 +117,6 @@ const AdminCourses = () => {
     }
   };
 
-  // Enhance course data to include action buttons
   const enhancedCourses = courses.map((course) => ({
     ...course,
     Actions: (
@@ -146,10 +131,9 @@ const AdminCourses = () => {
     ),
   }));
 
-  // Define the columns for the course table
   const courseColumns = [
     { header: "Course ID", key: "Course ID" },
-    { header: "Course Name", key: "Course Name" }, // Updated to match backend response
+    { header: "Course Name", key: "Course Name" },
     { header: "Syllabus", key: "Syllabus" },
     { header: "Price", key: "Price" },
     { header: "Instructor ID", key: "Instructor ID" },
@@ -158,17 +142,33 @@ const AdminCourses = () => {
 
   return (
     <Layout>
-      <div className="admin-home-container">
-        <div className="table-container" style={{ position: "relative", zIndex: 1 }}>
+      <div className="admin-home-container" style={{ backgroundColor: "transparent", boxShadow: "none" }}>
+        <div className="table-container" style={{ position: "relative", zIndex: 1, backgroundColor: "transparent", boxShadow: "none" }}>
+          {/* Add New Course Button */}
           <button 
             onClick={handleAddNewClick}
             className="add-button"
+            style={{
+              marginBottom: "20px", // Adjusting the margin for spacing
+              padding: "10px 20px", // Increased padding for better button size
+              backgroundColor: "#007BFF", // Button color set to blue (like "Add New Instructor")
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              position: "absolute", // Positioned at the top-right of the table
+              top: "0px",
+              right: "90px",
+              zIndex: 2,
+            }}
           >
             Add New Course
           </button>
+
+          {/* Table */}
           <Table data={enhancedCourses} columns={courseColumns} />
         </div>
-        
+
         {showEditModal && (
           <EditCourseModal 
             course={selectedCourse} 

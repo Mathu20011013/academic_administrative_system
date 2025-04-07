@@ -3,6 +3,7 @@ import Layout from "../../components/admin/ad-Layout";
 import Table from "../../components/table";
 import Modal from "../admin/adminInstructorPopup";
 import AddInstructorModal from "../admin/adminAddInstructorPopup";
+import '../../styles/scrollbar.css'; // Adjust the path according to your project structure
 
 const AdminInstructors = () => {
   const [instructors, setInstructors] = useState([]);
@@ -27,18 +28,15 @@ const AdminInstructors = () => {
     }
   };
 
-  // Handle clicking the Edit button
   const handleEditClick = (instructor) => {
     setSelectedInstructor(instructor);
     setShowEditModal(true);
   };
 
-  // Handle clicking Add New Instructor button
   const handleAddNewClick = () => {
     setShowAddModal(true);
   };
 
-  // Handle deleting an instructor
   const handleDeleteClick = async (user_id) => {
     if (confirm("Are you sure you want to delete this instructor?")) {
       try {
@@ -56,7 +54,6 @@ const AdminInstructors = () => {
     }
   };
 
-  // Handle saving edited instructor information
   const handleSaveChanges = async (updatedInstructor) => {
     const payload = {
       username: updatedInstructor.Username,
@@ -66,15 +63,18 @@ const AdminInstructors = () => {
       specialization: updatedInstructor.Specialization,
       bio: updatedInstructor.Bio,
       role: updatedInstructor.Role,
-      password: updatedInstructor.Password // Include password in the payload
+      password: updatedInstructor.Password,
     };
 
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/instructors/${updatedInstructor['User ID']}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        `http://localhost:5000/api/admin/instructors/${updatedInstructor["User ID"]}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Error updating instructor data`);
@@ -89,28 +89,29 @@ const AdminInstructors = () => {
     }
   };
 
-  // Function to mask password with symbols based on length
   const maskPassword = (password) => {
-    return password ? '*'.repeat(password.length) : '******';
+    return password ? "*".repeat(password.length) : "******";
   };
 
-  // Enhance instructor data to include action buttons and mask the password
   const enhancedInstructors = instructors.map((instructor) => ({
     ...instructor,
-    Password: maskPassword(instructor.Password),  // Mask the password dynamically based on its length
+    Password: maskPassword(instructor.Password),
     Actions: (
       <div style={{ display: "flex", gap: "8px" }}>
         <button className="btn-edit" onClick={() => handleEditClick(instructor)} aria-label="Edit">
           Edit
         </button>
-        <button className="btn-delete" onClick={() => handleDeleteClick(instructor['User ID'])} aria-label="Delete">
+        <button
+          className="btn-delete"
+          onClick={() => handleDeleteClick(instructor["User ID"])}
+          aria-label="Delete"
+        >
           Delete
         </button>
       </div>
     ),
   }));
 
-  // Define the columns for the instructor table
   const instructorColumns = [
     { header: "User ID", key: "User ID" },
     { header: "Username", key: "Username" },
@@ -120,46 +121,51 @@ const AdminInstructors = () => {
     { header: "Specialization", key: "Specialization" },
     { header: "Bio", key: "Bio" },
     { header: "Role", key: "Role" },
-    { header: "Password", key: "Password" }, // Add Password column for viewing the masked password
+    { header: "Password", key: "Password" },
     { header: "Actions", key: "Actions" },
   ];
 
   return (
     <Layout>
-      <div className="admin-home-container">
-        <div className="table-container" style={{ position: "relative" }}>
-          <button 
+      <div className="admin-home-container" style={{ backgroundColor: "transparent", boxShadow: "none" }}>
+        <div className="table-container" style={{ position: "relative", zIndex: 1, backgroundColor: "transparent", boxShadow: "none" }}>
+          {/* Add New Instructor Button - styled similar to Add New Course button */}
+          <button
             onClick={handleAddNewClick}
             className="add-button"
             style={{
-              position: "absolute",
-              top: "10px",
-              right: "10px",
-              padding: "8px 16px",
-              backgroundColor: "#4CAF50",
+              marginBottom: "20px", // Adjusting the margin for spacing
+              padding: "10px 20px", // Increased padding for better button size
+              backgroundColor: "#007BFF", // Button color set to blue (like "Add New Course")
               color: "white",
               border: "none",
               borderRadius: "4px",
-              cursor: "pointer"
+              cursor: "pointer",
+              position: "absolute", // Positioned at the top-right of the table
+              top: "0px",
+              right: "90px",
+              zIndex: 2,
             }}
           >
             Add New Instructor
           </button>
+
+          {/* Table */}
           <Table data={enhancedInstructors} columns={instructorColumns} />
         </div>
-        
+
         {showEditModal && (
-          <Modal 
-            instructor={selectedInstructor} 
-            onSave={handleSaveChanges} 
-            onClose={() => setShowEditModal(false)} 
+          <Modal
+            instructor={selectedInstructor}
+            onSave={handleSaveChanges}
+            onClose={() => setShowEditModal(false)}
           />
         )}
-        
+
         {showAddModal && (
-          <AddInstructorModal 
-            onSave={handleSaveChanges} 
-            onClose={() => setShowAddModal(false)} 
+          <AddInstructorModal
+            onSave={handleSaveChanges}
+            onClose={() => setShowAddModal(false)}
           />
         )}
       </div>

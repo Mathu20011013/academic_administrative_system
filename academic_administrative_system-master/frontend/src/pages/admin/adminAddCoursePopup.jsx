@@ -3,15 +3,12 @@ import ModalPopup from '../../components/admin/ModalPopup';
 import '../../styles/adminStudentPopup.css';
 
 const AddCourseModal = ({ onSave, onClose }) => {
-  // Create a new course template
+  // Create a new course template matching the database schema
   const newCourseTemplate = {
-    "Title": "",
-    "Description": "",
-    "Price": "",
-    "Duration": "",
-    "Instructor ID": "",
-    "Category": "",
-    "Status": "active"
+    course_name: "",
+    syllabus: "",
+    price: "",
+    instructor_id: "",
   };
 
   const [formData, setFormData] = useState(newCourseTemplate);
@@ -44,38 +41,38 @@ const AddCourseModal = ({ onSave, onClose }) => {
 
   const handleSave = () => {
     // Ensure all required fields are filled in
-    if (!formData.Title || !formData.Description || !formData.Price || !formData["Instructor ID"]) {
-      alert("Title, Description, Price and Instructor are required!");
+    if (!formData.course_name || !formData.syllabus || !formData.price || !formData.instructor_id) {
+      alert("Course Name, Syllabus, Price, and Instructor are required!");
       return;
     }
 
     // Price validation - must be a positive number
-    if (parseFloat(formData.Price) <= 0) {
+    if (parseFloat(formData.price) <= 0) {
       alert("Price must be a positive number!");
       return;
     }
 
-    onSave(formData);  // Pass the new course data back to the parent
+    onSave(formData); // Pass the new course data back to the parent
   };
 
   return (
     <ModalPopup title="Add New Course" onClose={onClose} size="medium">
       <div className="modal-form">
         <div className="form-group">
-          <label>Title</label>
+          <label>Course Name</label>
           <input
             type="text"
-            name="Title"
-            value={formData.Title}
+            name="course_name"
+            value={formData.course_name}
             onChange={handleChange}
             required
           />
         </div>
         <div className="form-group">
-          <label>Description</label>
+          <label>Syllabus</label>
           <textarea
-            name="Description"
-            value={formData.Description}
+            name="syllabus"
+            value={formData.syllabus}
             onChange={handleChange}
             required
           />
@@ -84,18 +81,8 @@ const AddCourseModal = ({ onSave, onClose }) => {
           <label>Price</label>
           <input
             type="number"
-            name="Price"
-            value={formData.Price}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label>Duration (in weeks)</label>
-          <input
-            type="number"
-            name="Duration"
-            value={formData.Duration}
+            name="price"
+            value={formData.price}
             onChange={handleChange}
             required
           />
@@ -103,8 +90,8 @@ const AddCourseModal = ({ onSave, onClose }) => {
         <div className="form-group">
           <label>Instructor</label>
           <select
-            name="Instructor ID"
-            value={formData["Instructor ID"]}
+            name="instructor_id"
+            value={formData.instructor_id}
             onChange={handleChange}
             required
           >
@@ -114,29 +101,6 @@ const AddCourseModal = ({ onSave, onClose }) => {
                 {instructor.Username}
               </option>
             ))}
-          </select>
-        </div>
-        <div className="form-group">
-          <label>Category</label>
-          <input
-            type="text"
-            name="Category"
-            value={formData.Category}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label>Status</label>
-          <select
-            name="Status"
-            value={formData.Status}
-            onChange={handleChange}
-            required
-          >
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-            <option value="draft">Draft</option>
           </select>
         </div>
         <div className="modal-buttons">

@@ -8,27 +8,22 @@ const EditCourseModal = ({ course, onSave, onClose }) => {
     syllabus: '',
     price: '',
     instructor_id: '',
-    category: '',
-    status: 'active', // Default value for status
   });
   const [instructors, setInstructors] = useState([]);
 
-  // This effect runs whenever the `course` prop changes
   useEffect(() => {
     if (course) {
       setFormData({
+        course_id: course['Course ID'], // Add this line
         course_name: course['Course Name'],
         syllabus: course['Syllabus'],
         price: course['Price'],
         instructor_id: course['Instructor ID'],
-        category: course['Category'], // Assuming you have this field
-        status: course['Status'] || 'active', // Set default if status is undefined
       });
     }
-    fetchInstructors(); // Fetch instructors whenever the modal is opened
+    fetchInstructors();
   }, [course]);
 
-  // Fetch instructors from the backend
   const fetchInstructors = async () => {
     try {
       const response = await fetch("http://localhost:5000/api/admin/instructors");
@@ -42,7 +37,6 @@ const EditCourseModal = ({ course, onSave, onClose }) => {
     }
   };
 
-  // Handle form field changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -51,9 +45,7 @@ const EditCourseModal = ({ course, onSave, onClose }) => {
     }));
   };
 
-  // Handle saving the changes
   const handleSave = () => {
-    // Ensure all required fields are filled in
     if (!formData.course_name || !formData.syllabus || !formData.price || !formData.instructor_id) {
       alert("Course Name, Syllabus, Price, and Instructor are required!");
       return;
@@ -65,7 +57,7 @@ const EditCourseModal = ({ course, onSave, onClose }) => {
       return;
     }
 
-    onSave(formData); // Pass the updated course data back to the parent
+    onSave(formData);  // Pass the updated course data back to the parent
   };
 
   return (
@@ -114,29 +106,6 @@ const EditCourseModal = ({ course, onSave, onClose }) => {
                 {instructor.Username}
               </option>
             ))}
-          </select>
-        </div>
-        <div className="form-group">
-          <label>Category</label>
-          <input
-            type="text"
-            name="category"
-            value={formData.category || ""}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label>Status</label>
-          <select
-            name="status"
-            value={formData.status}
-            onChange={handleChange}
-            required
-          >
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-            <option value="draft">Draft</option>
           </select>
         </div>
         <div className="modal-buttons">

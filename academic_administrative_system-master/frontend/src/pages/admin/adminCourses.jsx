@@ -28,7 +28,7 @@ const AdminCourses = () => {
   };
 
   const handleEditClick = (course) => {
-    setSelectedCourse(course);
+    setSelectedCourse(course); // Ensure course contains course_id
     setShowEditModal(true);
   };
 
@@ -53,25 +53,25 @@ const AdminCourses = () => {
   };
 
   const handleSaveChanges = async (updatedCourse) => {
+    console.log("Updated Course Data:", updatedCourse); // Debugging
+
     const payload = {
-      title: updatedCourse.Title,
-      description: updatedCourse.Description,
-      price: updatedCourse.Price,
-      duration: updatedCourse.Duration,
-      instructor_id: updatedCourse['Instructor ID'],
-      category: updatedCourse.Category,
-      status: updatedCourse.Status
+      course_name: updatedCourse.course_name,
+      syllabus: updatedCourse.syllabus,
+      price: updatedCourse.price,
+      instructor_id: updatedCourse.instructor_id,
     };
 
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/courses/${updatedCourse['Course ID']}`, {
+      const response = await fetch(`http://localhost:5000/api/admin/courses/${updatedCourse.course_id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
-        throw new Error(`Error updating course data`);
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error updating course data");
       }
 
       fetchCourses();
@@ -85,16 +85,14 @@ const AdminCourses = () => {
 
   const handleAddCourse = async (newCourse) => {
     const payload = {
-      title: newCourse.Title,
-      description: newCourse.Description,
-      price: newCourse.Price,
-      duration: newCourse.Duration,
-      instructor_id: newCourse['Instructor ID'],
-      category: newCourse.Category,
-      status: newCourse.Status || "active"
+      course_name: newCourse.course_name,  // Changed from newCourse.Title
+      syllabus: newCourse.syllabus,        // Changed from newCourse.Description
+      price: newCourse.price,              // Changed from newCourse.Price
+      instructor_id: newCourse.instructor_id, // Changed from newCourse['Instructor ID']
     };
-
-    try {
+  
+    // ...rest of the function remains unchanged
+    try { 
       const response = await fetch("http://localhost:5000/api/admin/courses", {
         method: "POST",
         headers: { 
@@ -144,19 +142,18 @@ const AdminCourses = () => {
     <Layout>
       <div className="admin-home-container" style={{ backgroundColor: "transparent", boxShadow: "none" }}>
         <div className="table-container" style={{ position: "relative", zIndex: 1, backgroundColor: "transparent", boxShadow: "none" }}>
-          {/* Add New Course Button */}
           <button 
             onClick={handleAddNewClick}
             className="add-button"
             style={{
-              marginBottom: "20px", // Adjusting the margin for spacing
-              padding: "10px 20px", // Increased padding for better button size
-              backgroundColor: "#007BFF", // Button color set to blue (like "Add New Instructor")
+              marginBottom: "20px",
+              padding: "10px 20px",
+              backgroundColor: "#007BFF",
               color: "white",
               border: "none",
               borderRadius: "4px",
               cursor: "pointer",
-              position: "absolute", // Positioned at the top-right of the table
+              position: "absolute",
               top: "0px",
               right: "90px",
               zIndex: 2,
@@ -165,7 +162,6 @@ const AdminCourses = () => {
             Add New Course
           </button>
 
-          {/* Table */}
           <Table data={enhancedCourses} columns={courseColumns} />
         </div>
 

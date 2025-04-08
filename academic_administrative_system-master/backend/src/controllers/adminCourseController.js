@@ -74,9 +74,9 @@ const editCourse = (req, res) => {
   const { course_id } = req.params;
   const { course_name, syllabus, price, instructor_id } = req.body;
 
-  console.log("Received data to update course:", req.body);
+  console.log("Course ID:", course_id); // Debugging
+  console.log("Request Body:", req.body); // Debugging
 
-  // Validate required fields
   if (!course_name || !syllabus || !price || !instructor_id) {
     return res.status(400).json({
       error: "Course name, syllabus, price, and instructor_id are required!",
@@ -89,7 +89,7 @@ const editCourse = (req, res) => {
       course_name = ?, 
       syllabus = ?, 
       price = ?, 
-      instructor_id = ?
+      instructor_id = ? 
     WHERE course_id = ?;
   `;
 
@@ -101,7 +101,6 @@ const editCourse = (req, res) => {
       return res.status(500).json({ error: "Internal Server Error" });
     }
 
-    // Check if any rows were updated
     if (updateResults.affectedRows === 0) {
       return res.status(404).json({ error: "Course not found" });
     }

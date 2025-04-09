@@ -12,8 +12,7 @@ const AddInstructorModal = ({ onSave, onClose }) => {
     "Qualification": "",
     "Specialization": "",
     "Bio": "",
-    "Role": "instructor",
-    "Signup Date": new Date().toISOString().split('T')[0]
+    "Role": "instructor"
   };
 
   const [formData, setFormData] = useState(newInstructorTemplate);

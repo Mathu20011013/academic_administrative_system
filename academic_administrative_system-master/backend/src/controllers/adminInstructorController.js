@@ -21,7 +21,7 @@ const getAllInstructors = (req, res) => {
     LEFT JOIN instructor i ON u.user_id = i.user_id
     WHERE u.role = 'instructor';
   `;
-  
+
   db.query(query, (error, results) => {
     if (error) {
       console.error('Error fetching instructors:', error);
@@ -34,7 +34,7 @@ const getAllInstructors = (req, res) => {
 // Add new instructor - create entry in both user and instructor tables
 const addInstructor = async (req, res) => {
   const { username, email, password, contact_number, qualification, specialization, bio, role } = req.body;
-  
+
   console.log("Received data to add new instructor:", req.body);
 
   // Validate required fields
@@ -44,9 +44,9 @@ const addInstructor = async (req, res) => {
     });
   }
 
-  // Check if user with this email already exists
+  // Check if email already exists
   const checkEmailQuery = `SELECT * FROM user WHERE email = ?`;
-  
+
   db.query(checkEmailQuery, [email], async (emailError, emailResults) => {
     if (emailError) {
       console.error('Error checking email:', emailError);
@@ -62,84 +62,64 @@ const addInstructor = async (req, res) => {
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
       
-      // Email is unique, proceed with adding the instructor
       const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
-      
-      const insertUserQuery = `
-        INSERT INTO user (
-          username, 
-          email,
-          password,
-          contact_number, 
-          role, 
-          signup_date
-        ) VALUES (?, ?, ?, ?, ?, ?);
-      `;
-
-      const userValues = [
-        username,
-        email,
-        hashedPassword,
-        contact_number || null,
-        role,
-        currentDate
-      ];
 
       // Start transaction to ensure both tables are updated
-      db.beginTransaction(async function(err) {
+      db.beginTransaction(function(err) {
         if (err) {
           console.error('Error starting transaction:', err);
           return res.status(500).json({ error: 'Internal Server Error' });
         }
 
-        // First insert into user table
-        db.query(insertUserQuery, userValues, async (userError, userResults) => {
+        // Insert into user table
+        const insertUserQuery = `
+          INSERT INTO user (username, email, password, contact_number, role, signup_date) 
+          VALUES (?, ?, ?, ?, ?, ?);
+        `;
+        const userValues = [username, email, hashedPassword, contact_number || null, role, currentDate];
+        
+        db.query(insertUserQuery, userValues, (userError, userResults) => {
           if (userError) {
+            console.error('Error adding user:', userError);
             return db.rollback(() => {
-              console.error('Error adding user:', userError);
-              res.status(500).json({ error: 'Internal Server Error' });
+              res.status(500).json({ error: 'Error adding user: ' + userError.message });
             });
           }
 
           const userId = userResults.insertId;
 
-          // Now insert into instructor table
+          // Now insert into instructor table - INCLUDE ONLY RELEVANT FIELDS
           const insertInstructorQuery = `
-            INSERT INTO instructor (
-              user_id,
-              bio,
-              qualification,
-              specialization,
-              rating_average
-            ) VALUES (?, ?, ?, ?, ?);
+            INSERT INTO instructor (user_id, bio, qualification, specialization, rating_average, email)
+            VALUES (?, ?, ?, ?, ?, ?);
           `;
-
           const instructorValues = [
-            userId,
-            bio || null,
-            qualification || null,
-            specialization || null,
-            0.0 // Default rating for new instructor
+            userId, 
+            bio || null, 
+            qualification || null, 
+            specialization || null, 
+            0.0, // Default rating for new instructor
+            email  // Adding email to match your database schema
           ];
-
+          
           db.query(insertInstructorQuery, instructorValues, (instructorError, instructorResults) => {
             if (instructorError) {
+              console.error('Error adding instructor details:', instructorError);
               return db.rollback(() => {
-                console.error('Error adding instructor details:', instructorError);
-                res.status(500).json({ error: 'Internal Server Error' });
+                res.status(500).json({ error: 'Error adding instructor details: ' + instructorError.message });
               });
             }
 
             // Commit the transaction
             db.commit((commitErr) => {
               if (commitErr) {
+                console.error('Error committing transaction:', commitErr);
                 return db.rollback(() => {
-                  console.error('Error committing transaction:', commitErr);
-                  res.status(500).json({ error: 'Internal Server Error' });
+                  res.status(500).json({ error: 'Error committing transaction: ' + commitErr.message });
                 });
               }
 
-              res.status(201).json({ 
+              res.status(201).json({
                 message: 'Instructor added successfully',
                 userId: userId,
                 instructorId: instructorResults.insertId
@@ -150,17 +130,18 @@ const addInstructor = async (req, res) => {
       });
     } catch (error) {
       console.error('Error creating instructor account:', error);
-      return res.status(500).json({ error: 'Error creating account' });
+      return res.status(500).json({ error: 'Error creating account: ' + error.message });
     }
   });
 };
 
+
 // Edit instructor details in both user and instructor tables
 const editInstructor = (req, res) => {
   const { user_id } = req.params;
-  const { username, email, contact_number, qualification, specialization, bio, role } = req.body;
+  const { username, email, password, contact_number, qualification, specialization, bio, role } = req.body;
 
-  console.log("Received data to update:", req.body);
+  console.log("Received data to update instructor:", req.body);
 
   // Validate required fields
   if (!username || !email || !role) {
@@ -181,99 +162,127 @@ const editInstructor = (req, res) => {
     }
 
     // Begin transaction to update both tables
-    db.beginTransaction(function(err) {
+    db.beginTransaction(async function(err) {
       if (err) {
         console.error('Error starting transaction:', err);
         return res.status(500).json({ error: 'Internal Server Error' });
       }
 
-      // Update user table
-      const updateUserQuery = `
-        UPDATE user
-        SET username = ?, 
-            email = ?, 
-            contact_number = ?, 
-            role = ?
-        WHERE user_id = ?;
-      `;
-
-      db.query(updateUserQuery, [
-        username, 
-        email, 
-        contact_number || null, 
-        role, 
-        user_id
-      ], (updateUserError, updateUserResults) => {
-        if (updateUserError) {
-          return db.rollback(() => {
-            console.error('Error updating user data:', updateUserError);
-            res.status(500).json({ error: 'Internal Server Error' });
-          });
+      try {
+        // If password is provided, hash it
+        let hashedPassword = null;
+        if (password) {
+          const saltRounds = 10;
+          hashedPassword = await bcrypt.hash(password, saltRounds);
         }
 
-        // Check if user was found and updated
-        if (updateUserResults.affectedRows === 0) {
-          return db.rollback(() => {
-            res.status(404).json({ error: 'Instructor not found' });
-          });
+        // Update user table
+        let updateUserQuery;
+        let userValues;
+
+        if (password) {
+          // Include password update
+          updateUserQuery = `
+            UPDATE user
+            SET username = ?, 
+                email = ?, 
+                contact_number = ?, 
+                role = ?,
+                password = ?
+            WHERE user_id = ?;
+          `;
+          userValues = [username, email, contact_number || null, role, hashedPassword, user_id];
+        } else {
+          // Exclude password update
+          updateUserQuery = `
+            UPDATE user
+            SET username = ?, 
+                email = ?, 
+                contact_number = ?, 
+                role = ?
+            WHERE user_id = ?;
+          `;
+          userValues = [username, email, contact_number || null, role, user_id];
         }
 
-        // Check if instructor record exists first
-        const checkInstructorQuery = `SELECT * FROM instructor WHERE user_id = ?`;
-        
-        db.query(checkInstructorQuery, [user_id], (checkError, checkResults) => {
-          if (checkError) {
+        db.query(updateUserQuery, userValues, (updateUserError, updateUserResults) => {
+          if (updateUserError) {
             return db.rollback(() => {
-              console.error('Error checking instructor record:', checkError);
-              res.status(500).json({ error: 'Internal Server Error' });
+              console.error('Error updating user data:', updateUserError);
+              res.status(500).json({ error: 'Error updating user data: ' + updateUserError.message });
             });
           }
 
-          let instructorQuery;
-          let instructorValues;
-
-          if (checkResults.length > 0) {
-            // Update existing instructor record
-            instructorQuery = `
-              UPDATE instructor
-              SET qualification = ?,
-                  specialization = ?,
-                  bio = ?
-              WHERE user_id = ?;
-            `;
-            instructorValues = [qualification || null, specialization || null, bio || null, user_id];
-          } else {
-            // Create new instructor record
-            instructorQuery = `
-              INSERT INTO instructor (user_id, qualification, specialization, bio, rating_average)
-              VALUES (?, ?, ?, ?, ?);
-            `;
-            instructorValues = [user_id, qualification || null, specialization || null, bio || null, 0.0];
+          // Check if user was found and updated
+          if (updateUserResults.affectedRows === 0) {
+            return db.rollback(() => {
+              res.status(404).json({ error: 'Instructor not found' });
+            });
           }
 
-          // Execute instructor query
-          db.query(instructorQuery, instructorValues, (instructorError, instructorResults) => {
-            if (instructorError) {
+          // Check if instructor record exists first
+          const checkInstructorQuery = `SELECT * FROM instructor WHERE user_id = ?`;
+          
+          db.query(checkInstructorQuery, [user_id], (checkError, checkResults) => {
+            if (checkError) {
               return db.rollback(() => {
-                console.error('Error updating instructor details:', instructorError);
-                res.status(500).json({ error: 'Internal Server Error' });
+                console.error('Error checking instructor record:', checkError);
+                res.status(500).json({ error: 'Error checking instructor record: ' + checkError.message });
               });
             }
 
-            // Commit transaction
-            db.commit((commitErr) => {
-              if (commitErr) {
+            let instructorQuery;
+            let instructorValues;
+
+            if (checkResults.length > 0) {
+              // Update existing instructor record
+              instructorQuery = `
+                UPDATE instructor
+                SET qualification = ?,
+                    specialization = ?,
+                    bio = ?,
+                    email = ?
+                WHERE user_id = ?;
+              `;
+              instructorValues = [qualification || null, specialization || null, bio || null, email, user_id];
+            } else {
+              // Create new instructor record
+              instructorQuery = `
+                INSERT INTO instructor (user_id, qualification, specialization, bio, rating_average, email)
+                VALUES (?, ?, ?, ?, ?, ?);
+              `;
+              instructorValues = [user_id, qualification || null, specialization || null, bio || null, 0.0, email];
+            }
+
+            // Execute instructor query
+            db.query(instructorQuery, instructorValues, (instructorError, instructorResults) => {
+              if (instructorError) {
                 return db.rollback(() => {
-                  console.error('Error committing transaction:', commitErr);
-                  res.status(500).json({ error: 'Internal Server Error' });
+                  console.error('Error updating instructor details:', instructorError);
+                  res.status(500).json({ error: 'Error updating instructor details: ' + instructorError.message });
                 });
               }
 
-              res.status(200).json({ message: 'Instructor updated successfully' });
+              // Commit transaction
+              db.commit((commitErr) => {
+                if (commitErr) {
+                  return db.rollback(() => {
+                    console.error('Error committing transaction:', commitErr);
+                    res.status(500).json({ error: 'Error committing transaction: ' + commitErr.message });
+                  });
+                }
+
+                res.status(200).json({ message: 'Instructor updated successfully' });
+              });
             });
           });
         });
-      });
+      } catch (error) {
+        return db.rollback(() => {
+          console.error('Error in transaction:', error);
+          res.status(500).json({ error: 'Error updating instructor: ' + error.message });
+        });
+      }
     });
   });
 };

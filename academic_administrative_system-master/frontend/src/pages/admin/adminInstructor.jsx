@@ -3,13 +3,15 @@ import Layout from "../../components/admin/ad-Layout";
 import Table from "../../components/table";
 import Modal from "../admin/adminInstructorPopup";
 import AddInstructorModal from "../admin/adminAddInstructorPopup";
-import '../../styles/scrollbar.css'; // Adjust the path according to your project structure
+import '../../styles/scrollbar.css';
 
 const AdminInstructors = () => {
   const [instructors, setInstructors] = useState([]);
   const [selectedInstructor, setSelectedInstructor] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchInstructors();
@@ -17,6 +19,7 @@ const AdminInstructors = () => {
 
   const fetchInstructors = async () => {
     try {
+      setIsLoading(true);
       const response = await fetch("http://localhost:5000/api/admin/instructors");
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -25,6 +28,9 @@ const AdminInstructors = () => {
       setInstructors(data);
     } catch (error) {
       console.error("Error fetching instructors:", error);
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -38,8 +44,9 @@ const AdminInstructors = () => {
   };
 
   const handleDeleteClick = async (user_id) => {
-    if (confirm("Are you sure you want to delete this instructor?")) {
+    if (window.confirm("Are you sure you want to delete this instructor?")) {
       try {
+        setIsLoading(true);
         const response = await fetch(`http://localhost:5000/api/admin/instructors/${user_id}`, {
           method: "DELETE",
         });
@@ -47,14 +54,26 @@ const AdminInstructors = () => {
           throw new Error(`Error deleting instructor with ID: ${user_id}`);
         }
         setInstructors(instructors.filter(instructor => instructor['User ID'] !== user_id));
+        alert("Instructor deleted successfully!");
       } catch (error) {
         console.error("Error deleting instructor:", error);
         alert("Failed to delete instructor: " + error.message);
+      } finally {
+        setIsLoading(false);
       }
     }
   };
 
-  const handleSaveChanges = async (updatedInstructor) => {
+  // Function for updating an existing instructor
+  const handleUpdateInstructor = async (updatedInstructor) => {
+    const userId = updatedInstructor["User ID"];
+    
+    if (!userId) {
+      console.error("Error: Cannot update instructor without User ID");
+      alert("Failed to update: Missing User ID");
+      return;
+    }
+    
     const payload = {
       username: updatedInstructor.Username,
       email: updatedInstructor.Email,
@@ -63,12 +82,17 @@ const AdminInstructors = () => {
       specialization: updatedInstructor.Specialization,
       bio: updatedInstructor.Bio,
       role: updatedInstructor.Role,
-      password: updatedInstructor.Password,
     };
 
+    // Only include password if it was changed
+    if (updatedInstructor.Password && updatedInstructor.Password !== "******") {
+      payload.password = updatedInstructor.Password;
+    }
+
     try {
+      setIsLoading(true);
       const response = await fetch(
-        `http://localhost:5000/api/admin/instructors/${updatedInstructor["User ID"]}`,
+        `http://localhost:5000/api/admin/instructors/${userId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -77,7 +101,8 @@ const AdminInstructors = () => {
       );
 
       if (!response.ok) {
-        throw new Error(`Error updating instructor data`);
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Error updating instructor data`);
       }
 
       fetchInstructors();
@@ -86,11 +111,64 @@ const AdminInstructors = () => {
     } catch (error) {
       console.error(`Error updating instructor:`, error);
       alert("Failed to update instructor: " + error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  // Updated function for adding a new instructor
+  const handleAddInstructor = async (newInstructorData) => {
+    try {
+      setIsLoading(true);
+      // Prepare the payload according to your backend expectations
+      const payload = {
+        username: newInstructorData.Username,
+        email: newInstructorData.Email,
+        password: newInstructorData.Password,
+        contact_number: newInstructorData.Phone || null,
+        qualification: newInstructorData.Qualification || null,
+        specialization: newInstructorData.Specialization || null,
+        bio: newInstructorData.Bio || null,
+        role: 'instructor'
+      };
+
+      console.log("Sending data to add instructor:", payload);
+      
+      const response = await fetch("http://localhost:5000/api/admin/instructors", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload)
+      });
+
+      // Handle non-JSON responses
+      const contentType = response.headers.get("content-type");
+      let errorMessage = "Failed to add instructor";
+      
+      if (!response.ok) {
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } else {
+          errorMessage = await response.text() || errorMessage;
+        }
+        throw new Error(errorMessage);
+      }
+
+      alert("Instructor added successfully!");
+      fetchInstructors(); // Refresh the instructor list
+      setShowAddModal(false); // Close the modal
+    } catch (error) {
+      console.error("Error adding instructor:", error);
+      alert("Failed to add instructor: " + error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
   const maskPassword = (password) => {
-    return password ? "*".repeat(password.length) : "******";
+    return password ? "*".repeat(Math.min(password.length, 6)) : "******";
   };
 
   const enhancedInstructors = instructors.map((instructor) => ({
@@ -121,27 +199,29 @@ const AdminInstructors = () => {
     { header: "Specialization", key: "Specialization" },
     { header: "Bio", key: "Bio" },
     { header: "Role", key: "Role" },
-    { header: "Password", key: "Password" },
+    { header: "Rating", key: "Rating" },
     { header: "Actions", key: "Actions" },
   ];
 
   return (
     <Layout>
       <div className="admin-home-container" style={{ backgroundColor: "transparent", boxShadow: "none" }}>
+        {isLoading && <div className="loading-spinner">Loading...</div>}
+        {error && <div className="error-message">Error: {error}</div>}
+        
         <div className="table-container" style={{ position: "relative", zIndex: 1, backgroundColor: "transparent", boxShadow: "none" }}>
-          {/* Add New Instructor Button - styled similar to Add New Course button */}
           <button
             onClick={handleAddNewClick}
             className="add-button"
             style={{
-              marginBottom: "20px", // Adjusting the margin for spacing
-              padding: "10px 20px", // Increased padding for better button size
-              backgroundColor: "#007BFF", // Button color set to blue (like "Add New Course")
+              marginBottom: "20px",
+              padding: "10px 20px",
+              backgroundColor: "#007BFF",
               color: "white",
               border: "none",
               borderRadius: "4px",
               cursor: "pointer",
-              position: "absolute", // Positioned at the top-right of the table
+              position: "absolute",
               top: "0px",
               right: "90px",
               zIndex: 2,
@@ -150,21 +230,20 @@ const AdminInstructors = () => {
             Add New Instructor
           </button>
 
-          {/* Table */}
           <Table data={enhancedInstructors} columns={instructorColumns} />
         </div>
 
         {showEditModal && (
           <Modal
             instructor={selectedInstructor}
-            onSave={handleSaveChanges}
+            onSave={handleUpdateInstructor}
             onClose={() => setShowEditModal(false)}
           />
         )}
 
         {showAddModal && (
           <AddInstructorModal
-            onSave={handleSaveChanges}
+            onSave={handleAddInstructor}
             onClose={() => setShowAddModal(false)}
           />
         )}

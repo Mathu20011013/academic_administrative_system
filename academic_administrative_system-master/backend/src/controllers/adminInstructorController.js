@@ -7,6 +7,7 @@ const getAllInstructors = (req, res) => {
   const query = `
     SELECT 
       u.user_id AS "User ID", 
+      i.instructor_id AS "Instructor ID",
       u.username AS "Username", 
       i.instructor_id AS "Instructor ID",
       u.email AS "Email", 

@@ -173,6 +173,7 @@ const AdminInstructors = () => {
 
   const enhancedInstructors = instructors.map((instructor) => ({
     ...instructor,
+    "Instructor ID": instructor["Instructor ID"],
     Password: maskPassword(instructor.Password),
     Actions: (
       <div style={{ display: "flex", gap: "8px" }}>
@@ -192,6 +193,7 @@ const AdminInstructors = () => {
 
   const instructorColumns = [
     { header: "User ID", key: "User ID" },
+    { header: "Instructor ID", key: "Instructor ID" },
     { header: "Username", key: "Username" },
     { header: "Email", key: "Email" },
     { header: "Phone", key: "Phone" },
@@ -223,8 +225,12 @@ const AdminInstructors = () => {
               cursor: "pointer",
               position: "absolute",
               top: "0px",
-              right: "90px",
+              right: "110px",
               zIndex: 2,
+              height: "50px", // Set the height
+              width: "200px",
+              fontSize: "17px",
+              fontWeight: "bold",
             }}
           >
             Add New Instructor

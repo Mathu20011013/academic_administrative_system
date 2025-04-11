@@ -155,8 +155,12 @@ const AdminCourses = () => {
               cursor: "pointer",
               position: "absolute",
               top: "0px",
-              right: "90px",
+              right: "110px",
               zIndex: 2,
+              height: "50px", // Set the height
+              width: "200px",
+              fontSize: "17px",
+              fontWeight: "bold",
             }}
           >
             Add New Course

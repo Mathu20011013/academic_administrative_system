@@ -1,24 +1,26 @@
 import React, { useState, useEffect } from "react";
-import ModalPopup from '../../components/admin/ModalPopup';
-import '../../styles/adminStudentPopup.css';
+import ModalPopup from "../../components/admin/ModalPopup";
+import "../../styles/adminStudentPopup.css";
 
 const EditCourseModal = ({ course, onSave, onClose }) => {
   const [formData, setFormData] = useState({
-    course_name: '',
-    syllabus: '',
-    price: '',
-    instructor_id: '',
+    course_name: "",
+    syllabus: "",
+    price: "",
+    instructor_id: "",
+    image_url: "",
   });
   const [instructors, setInstructors] = useState([]);
 
   useEffect(() => {
     if (course) {
       setFormData({
-        course_id: course['Course ID'], // Add this line
-        course_name: course['Course Name'],
-        syllabus: course['Syllabus'],
-        price: course['Price'],
-        instructor_id: course['Instructor ID'],
+        course_id: course["Course ID"], // Add this line
+        course_name: course["Course Name"],
+        syllabus: course["Syllabus"],
+        price: course["Price"],
+        instructor_id: course["Instructor ID"],
+        image_url: course["Image URL"],
       });
     }
     fetchInstructors();
@@ -26,7 +28,9 @@ const EditCourseModal = ({ course, onSave, onClose }) => {
 
   const fetchInstructors = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/admin/instructors");
+      const response = await fetch(
+        "http://localhost:5000/api/admin/instructors"
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -46,7 +50,12 @@ const EditCourseModal = ({ course, onSave, onClose }) => {
   };
 
   const handleSave = () => {
-    if (!formData.course_name || !formData.syllabus || !formData.price || !formData.instructor_id) {
+    if (
+      !formData.course_name ||
+      !formData.syllabus ||
+      !formData.price ||
+      !formData.instructor_id
+    ) {
       alert("Course Name, Syllabus, Price, and Instructor are required!");
       return;
     }
@@ -57,7 +66,7 @@ const EditCourseModal = ({ course, onSave, onClose }) => {
       return;
     }
 
-    onSave(formData);  // Pass the updated course data back to the parent
+    onSave(formData); // Pass the updated course data back to the parent
   };
 
   return (
@@ -102,14 +111,29 @@ const EditCourseModal = ({ course, onSave, onClose }) => {
           >
             <option value="">Select Instructor</option>
             {instructors.map((instructor) => (
-              <option key={instructor['User ID']} value={instructor['User ID']}>
+              <option key={instructor["User ID"]} value={instructor["User ID"]}>
                 {instructor.Username}
               </option>
             ))}
           </select>
         </div>
+        <div className="form-group">
+          <label>Image URL</label>
+          <input
+            type="text"
+            name="image_url"
+            value={formData.image_url || ""}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
         <div className="modal-buttons">
-          <button className="btn-save" onClick={handleSave} aria-label="Save Changes">
+          <button
+            className="btn-save"
+            onClick={handleSave}
+            aria-label="Save Changes"
+          >
             Save Changes
           </button>
           <button className="btn-cancel" onClick={onClose} aria-label="Cancel">

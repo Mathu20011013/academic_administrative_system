@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import ModalPopup from '../../components/admin/ModalPopup';
-import '../../styles/adminStudentPopup.css';
+import ModalPopup from "../../components/admin/ModalPopup";
+import "../../styles/adminStudentPopup.css";
 
 const AddCourseModal = ({ onSave, onClose }) => {
   // Create a new course template matching the database schema
@@ -9,6 +9,7 @@ const AddCourseModal = ({ onSave, onClose }) => {
     syllabus: "",
     price: "",
     instructor_id: "",
+    image_url: "",
   };
 
   const [formData, setFormData] = useState(newCourseTemplate);
@@ -20,7 +21,9 @@ const AddCourseModal = ({ onSave, onClose }) => {
 
   const fetchInstructors = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/admin/instructors");
+      const response = await fetch(
+        "http://localhost:5000/api/admin/instructors"
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -41,7 +44,12 @@ const AddCourseModal = ({ onSave, onClose }) => {
 
   const handleSave = () => {
     // Ensure all required fields are filled in
-    if (!formData.course_name || !formData.syllabus || !formData.price || !formData.instructor_id) {
+    if (
+      !formData.course_name ||
+      !formData.syllabus ||
+      !formData.price ||
+      !formData.instructor_id
+    ) {
       alert("Course Name, Syllabus, Price, and Instructor are required!");
       return;
     }
@@ -87,6 +95,7 @@ const AddCourseModal = ({ onSave, onClose }) => {
             required
           />
         </div>
+
         <div className="form-group">
           <label>Instructor</label>
           <select
@@ -96,15 +105,29 @@ const AddCourseModal = ({ onSave, onClose }) => {
             required
           >
             <option value="">Select Instructor</option>
-            {instructors.map(instructor => (
-              <option key={instructor['User ID']} value={instructor['User ID']}>
+            {instructors.map((instructor) => (
+              <option key={instructor["User ID"]} value={instructor["User ID"]}>
                 {instructor.Username}
               </option>
             ))}
           </select>
         </div>
+        <div className="form-group">
+          <label>Image URL</label>
+          <input
+            type="text"
+            name="image_url"
+            value={formData.image_url}
+            onChange={handleChange}
+            required
+          />
+        </div>
         <div className="modal-buttons">
-          <button className="btn-save" onClick={handleSave} aria-label="Add Course">
+          <button
+            className="btn-save"
+            onClick={handleSave}
+            aria-label="Add Course"
+          >
             Add Course
           </button>
           <button className="btn-cancel" onClick={onClose} aria-label="Cancel">

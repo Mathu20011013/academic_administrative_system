@@ -60,6 +60,7 @@ const AdminCourses = () => {
       syllabus: updatedCourse.syllabus,
       price: updatedCourse.price,
       instructor_id: updatedCourse.instructor_id,
+      image_url:updatedCourse.image_url,
     };
 
     try {
@@ -135,6 +136,7 @@ const AdminCourses = () => {
     { header: "Syllabus", key: "Syllabus" },
     { header: "Price", key: "Price" },
     { header: "Instructor ID", key: "Instructor ID" },
+    { header: "Image", key: "Image URL" },
     { header: "Actions", key: "Actions" },
   ];
 

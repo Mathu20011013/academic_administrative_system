@@ -9,7 +9,8 @@ const getAllCourses = (req, res) => {
       course_name AS "Course Name", 
       syllabus AS "Syllabus", 
       price AS "Price",
-      instructor_id AS "Instructor ID"
+      instructor_id AS "Instructor ID",
+      image_url AS "Image URL"
     FROM course;
   `;
 
@@ -24,7 +25,7 @@ const getAllCourses = (req, res) => {
 
 // Add new course
 const addCourse = (req, res) => {
-  const { course_name, syllabus, price, instructor_id } = req.body;
+  const { course_name, syllabus, price, instructor_id, image_url } = req.body;
 
   console.log("Received data to add new course:", req.body);
 
@@ -49,11 +50,11 @@ const addCourse = (req, res) => {
 
     // If instructor_id is valid, proceed to insert the course
     const insertQuery = `
-      INSERT INTO course (course_name, syllabus, price, instructor_id)
+      INSERT INTO course (course_name, syllabus, price, instructor_id, image_url)
       VALUES (?, ?, ?, ?);
     `;
 
-    const values = [course_name, syllabus, price, instructor_id];
+    const values = [course_name, syllabus, price, instructor_id, image_url];
 
     db.query(insertQuery, values, (insertError, insertResults) => {
       if (insertError) {
@@ -72,7 +73,7 @@ const addCourse = (req, res) => {
 // Edit course details
 const editCourse = (req, res) => {
   const { course_id } = req.params;
-  const { course_name, syllabus, price, instructor_id } = req.body;
+  const { course_name, syllabus, price, instructor_id, image_url} = req.body;
 
   console.log("Course ID:", course_id); // Debugging
   console.log("Request Body:", req.body); // Debugging
@@ -89,11 +90,12 @@ const editCourse = (req, res) => {
       course_name = ?, 
       syllabus = ?, 
       price = ?, 
-      instructor_id = ? 
+      instructor_id = ?,
+      image_url =?
     WHERE course_id = ?;
   `;
 
-  const values = [course_name, syllabus, price, instructor_id, course_id];
+  const values = [course_name, syllabus, price, instructor_id, image_url, course_id];
 
   db.query(updateQuery, values, (updateError, updateResults) => {
     if (updateError) {

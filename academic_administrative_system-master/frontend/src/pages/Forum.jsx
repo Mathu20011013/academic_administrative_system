@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import Layout from "../components/Layout"; // Modify the Layout component to hide the sidebar if necessary
-import "../styles/Forum.css"; // Import the new CSS file
+import React, { useState, useEffect } from "react";
+import Layout from "../components/Layout";
+import "../styles/Forum.css";
+import axios from "axios";
 
 // NewDiscussion Component for adding a new discussion thread
 const NewDiscussion = ({ onPostDiscussion }) => {
@@ -44,20 +45,84 @@ const NewDiscussion = ({ onPostDiscussion }) => {
 };
 
 const Forum = () => {
-  const [forumPosts, setForumPosts] = useState([
-    { title: "Best UI tools?", replies: 12 },
-    { title: "React vs Vue?", replies: 20 },
-    { title: "JavaScript Tips and Tricks", replies: 5 },
-    { title: "Learning React Hooks", replies: 8 },
-  ]);
+  const [forumPosts, setForumPosts] = useState([]);
+  const [replies, setReplies] = useState({});
+  const [newReply, setNewReply] = useState("");
 
+  // Fetch discussions on page load
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/api/forum/discussions")
+      .then((response) => {
+        setForumPosts(response.data);
+        response.data.forEach((post) => {
+          fetchComments(post.forum_id); // Fetch comments for each discussion
+        });
+      })
+      .catch((error) => {
+        console.error("Error fetching the discussions:", error);
+      });
+  }, []);
+
+  // Fetch comments (replies) for a specific discussion
+  const fetchComments = (forum_id) => {
+    axios
+      .get(`http://localhost:5000/api/forum/comments/forum/${forum_id}`)
+      .then((response) => {
+        setReplies((prevReplies) => ({
+          ...prevReplies,
+          [forum_id]: response.data, // Store replies for the specific forum_id
+        }));
+      })
+      .catch((error) => {
+        console.error("Error fetching replies:", error);
+      });
+  };
+
+  // Handle posting a new discussion
   const handlePostDiscussion = (title, description) => {
-    const newPost = {
+    const newDiscussion = {
+      course_id: 1, // Example course_id, update as per your logic
+      user_id: 2,   // Example user_id, update based on your user authentication
       title: title,
-      description: description,
-      replies: 0,
+      question: description,
     };
-    setForumPosts([newPost, ...forumPosts]); // Add new post at the top
+
+    // Post the new discussion to the backend
+    axios
+      .post("http://localhost:5000/api/forum/discussions", newDiscussion)
+      .then((response) => {
+        setForumPosts([response.data, ...forumPosts]); // Add new post at the top
+        fetchComments(response.data.forum_id); // Fetch comments for the newly created post
+      })
+      .catch((error) => {
+        console.error("Error posting the discussion:", error);
+      });
+  };
+
+  // Handle posting a new reply
+  const handlePostReply = (forum_id, user_id, reply) => {
+    if (!reply) return;
+
+    const newComment = {
+      forum_id: forum_id,
+      user_id: user_id,
+      comment: reply,
+    };
+
+    // Post the new comment to the backend
+    axios
+      .post("http://localhost:5000/api/forum/comments", newComment)
+      .then((response) => {
+        setReplies((prevReplies) => ({
+          ...prevReplies,
+          [forum_id]: [...(prevReplies[forum_id] || []), response.data], // Add new reply to the discussion
+        }));
+        setNewReply(""); // Clear the reply input
+      })
+      .catch((error) => {
+        console.error("Error posting the reply:", error);
+      });
   };
 
   return (
@@ -66,22 +131,52 @@ const Forum = () => {
         <div className="heading-container">
           <h2 className="text-center">Discussion Forum</h2>
         </div>
-        
+
         {/* New Discussion Section */}
         <NewDiscussion onPostDiscussion={handlePostDiscussion} />
-        
+
         {/* Forum Posts */}
         <div className="forum-posts-container">
-          {forumPosts.map((post, index) => (
-            <div key={index} className="forum-post-card">
-              <div className="card-body">
-                <h5 className="card-title">{post.title}</h5>
-                <p className="card-text">Replies: {post.replies}</p>
-                <textarea className="reply-textarea" placeholder="Write your reply here..."></textarea>
-                <button className="reply-button">Reply</button>
+          {forumPosts.length > 0 ? (
+            forumPosts.map((post, index) => (
+              <div key={index} className="forum-post-card">
+                <div className="card-body">
+                  <h5 className="card-title">{post.title}</h5>
+                  <p className="card-text">{post.question}</p>
+
+                  {/* Display replies for each post */}
+                  <p className="card-text">
+                    <strong>Replies:</strong> {replies[post.forum_id]?.length || 0}
+                  </p>
+
+                  {/* Display replies */}
+                  <div className="replies-container">
+                    {replies[post.forum_id]?.map((reply, index) => (
+                      <div key={index} className="reply">
+                        <p>{reply.comment}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Add New Reply */}
+                  <textarea
+                    value={newReply}
+                    onChange={(e) => setNewReply(e.target.value)}
+                    placeholder="Write your reply here..."
+                    className="reply-textarea"
+                  ></textarea>
+                  <button
+                    onClick={() => handlePostReply(post.forum_id, 2, newReply)} // Example: user_id = 2
+                    className="reply-button"
+                  >
+                    Reply
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p>No discussions available yet. Be the first to post a question!</p>
+          )}
         </div>
       </div>
     </Layout>

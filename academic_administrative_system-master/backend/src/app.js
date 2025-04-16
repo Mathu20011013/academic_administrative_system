@@ -4,6 +4,8 @@ const path = require('path');
 const cors = require('cors');  // Import the cors package
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes'); // Import other route files here
+const forumRoutes = require('./routes/forumRoutes'); // Import the combined forum routes
+
 
 const app = express();
 
@@ -20,6 +22,7 @@ app.use(express.json());
 // Use the route files
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/forum', forumRoutes);
 // Use other route files here
 
 // Serve static files from the React app

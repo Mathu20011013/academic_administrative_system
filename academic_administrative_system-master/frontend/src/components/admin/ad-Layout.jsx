@@ -1,6 +1,6 @@
 import React from "react";
 import Navbar from "./ad-navbar";
-import HeroSection from "./ad-HeroSection";
+import HeroSection from "../HeroSection";
 import Footer from "../../components/Footer";
 
 const Layout = ({ children }) => {

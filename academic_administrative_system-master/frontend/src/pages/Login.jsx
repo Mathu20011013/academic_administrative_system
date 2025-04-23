@@ -7,7 +7,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
-  const [isSuccess, setIsSuccess] = useState(false); // New state to track success or error
+  const [isSuccess, setIsSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -16,21 +16,64 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', { email, password }); // Update the URL here
-      console.log(response);
+      const response = await axios.post('http://localhost:5000/api/auth/login', { email, password });
+      
+      console.log('Login response:', response.data);
+      
       if (response.status === 200) {
-        console.log(response.data);
         setMessage(response.data.message);
-        setIsSuccess(true); // Set to true for success
+        setIsSuccess(true);
+        
+        // Store the token
         localStorage.setItem('authToken', response.data.token);
+        
+        // Store user data if available in the response
+        if (response.data.user) {
+          localStorage.setItem('userId', response.data.user.user_id);
+          localStorage.setItem('userRole', response.data.user.role);
+          localStorage.setItem('userEmail', response.data.user.email);
+          localStorage.setItem('userName', response.data.user.username);
+          console.log('Stored user data:', {
+            userId: response.data.user.user_id,
+            role: response.data.user.role,
+            email: response.data.user.email
+          });
+        } else {
+          // Extract from token as fallback
+          try {
+            const token = response.data.token;
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const payload = JSON.parse(window.atob(base64));
+            
+            console.log('Token payload:', payload);
+            
+            // Store user data from token
+            localStorage.setItem('userId', payload.id);
+            localStorage.setItem('userRole', payload.role);
+            localStorage.setItem('userEmail', payload.email);
+            localStorage.setItem('userName', payload.username);
+          } catch (error) {
+            console.error('Error extracting data from token:', error);
+          }
+        }
+        
+        // Check if data was stored properly
+        console.log('LocalStorage after login:', {
+          token: localStorage.getItem('authToken') ? 'Set' : 'Not set',
+          userId: localStorage.getItem('userId'),
+          role: localStorage.getItem('userRole'),
+          email: localStorage.getItem('userEmail')
+        });
+        
         setTimeout(() => {
           navigate('/home');
-        }, 2000);
+        }, 1500);
       }
     } catch (error) {
       console.error('Login failed', error);
-      setMessage(error.message || 'An error occurred during login');
-      setIsSuccess(false); // Set to false for error
+      setMessage(error.response?.data?.error || 'An error occurred during login');
+      setIsSuccess(false);
     } finally {
       setLoading(false);
     }

@@ -43,10 +43,29 @@ const Signup = () => {
       }
 
       const data = await response.json();
-      console.log(data);
+      console.log('Signup response:', data);
+      
       setMessage(data.message);
       setIsSuccess(true);
+      
+      // Store the token
       localStorage.setItem('authToken', data.token);
+      
+      // Extract and store user ID and role from the token
+      if (data.token) {
+        const base64Url = data.token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const payload = JSON.parse(window.atob(base64));
+        
+        console.log('Token payload:', payload);
+        
+        // Store user data from token
+        localStorage.setItem('userId', payload.id);
+        localStorage.setItem('userRole', payload.role);
+        localStorage.setItem('userEmail', payload.email);
+        localStorage.setItem('userName', payload.username);
+      }
+      
       setTimeout(() => {
         navigate('/home');
       }, 2000);

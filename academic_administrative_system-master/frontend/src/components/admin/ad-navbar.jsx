@@ -33,7 +33,7 @@ const Navbar = () => {
                 className={({ isActive }) => "nav-link" + (isActive ? " active" : "")}
                 to="/adminInstructors"
               >
-                Teachers
+                Instructors
               </NavLink>
             </li>
             <li className="nav-item">

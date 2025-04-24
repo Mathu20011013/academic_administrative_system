@@ -3,7 +3,12 @@ const db = require('../config/db');
 
 // Get all discussions from the `discussion_forum` table
 const getAllDiscussions = (callback) => {
-  db.query('SELECT * FROM discussion_forum ORDER BY created_at DESC', callback);
+  db.query(
+    `SELECT df.*, u.email, u.role FROM discussion_forum df
+     JOIN user u ON df.user_id = u.user_id
+     ORDER BY df.created_at DESC`,
+    callback
+  );
 };
 
 // Get a single discussion by ID

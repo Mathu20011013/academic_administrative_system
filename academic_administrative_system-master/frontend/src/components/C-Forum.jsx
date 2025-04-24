@@ -78,7 +78,7 @@ const Forum = () => {
   const handlePostDiscussion = (title, description) => {
     const newDiscussion = {
       course_id: 1,
-      user_id: 2,
+      user_id: 2, // Example user_id, replace with dynamic user ID if necessary
       title: title,
       question: description,
     };
@@ -132,6 +132,12 @@ const Forum = () => {
               <div className="card-body">
                 <h5 className="card-title">{post.title}</h5>
                 <p className="card-text">{post.question}</p>
+
+                {/* Display user email and role for the post */}
+                <p className="card-text">
+                  <strong>Posted by:</strong> {post.email} <strong>({post.role})</strong>
+                </p>
+
                 <p className="card-text">
                   <strong>Replies:</strong> {replies[post.forum_id]?.length || 0}
                 </p>
@@ -139,6 +145,11 @@ const Forum = () => {
                   {replies[post.forum_id]?.map((reply, index) => (
                     <div key={index} className="reply">
                       <p>{reply.comment}</p>
+
+                      {/* Display user email and role for the reply */}
+                      <p>
+                        <strong>Commented by:</strong> {reply.user_email} <strong>({reply.role})</strong>
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -149,7 +160,7 @@ const Forum = () => {
                   className="reply-textarea"
                 ></textarea>
                 <button
-                  onClick={() => handlePostReply(post.forum_id, 2, newReply)}
+                  onClick={() => handlePostReply(post.forum_id, 2, newReply)} // Example user_id, replace with dynamic user ID
                   className="reply-button"
                 >
                   Reply

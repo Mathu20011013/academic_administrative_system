@@ -4,7 +4,11 @@ const db = require('../config/db');
 // Get all comments for a specific forum (discussion)
 const getCommentsByForumId = (forum_id, callback) => {
   db.query(
-    'SELECT c.comment_id, c.comment, c.created_at, u.email AS user_email FROM comment c JOIN user u ON c.user_id = u.user_id WHERE c.forum_id = ? ORDER BY c.created_at',
+    `SELECT c.comment_id, c.comment, c.created_at, u.email AS user_email, u.role
+     FROM comment c
+     JOIN user u ON c.user_id = u.user_id
+     WHERE c.forum_id = ?
+     ORDER BY c.created_at`,
     [forum_id],
     callback
   );

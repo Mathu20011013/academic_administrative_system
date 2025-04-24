@@ -117,6 +117,8 @@
 /* Input and Select Styling */
 input[type="text"],
 input[type="number"],
+input[type="email"], /* Add email input */
+input[type="password"], /* Add password input */
 textarea,
 select {
   background-color: #d3d3d3; /* Light grey/ash color */
@@ -130,6 +132,8 @@ select {
 
 input[type="text"]:focus,
 input[type="number"]:focus,
+input[type="email"]:focus, /* Add focus styles for email */
+input[type="password"]:focus, /* Add focus styles for password */
 textarea:focus,
 select:focus {
   outline: none;

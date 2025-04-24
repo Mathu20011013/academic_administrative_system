@@ -14,6 +14,9 @@ import AdminHome from "./pages/admin/adminCourses"; // Corrected import path
 import AdminStudents from "./pages/admin/adminstudents";
 import AdminForum from "./pages/admin/adminforum";
 import AdminInstructors from './pages/admin/adminInstructor';
+import InstructorForum from './pages/instructor/instructorForum';
+import InstructorCourses from './pages/instructor/instructorCourses';
+import InstructorChatbot from './pages/instructor/instructorChatbot'; // Corrected import path
 
 const App = () => {
   return (
@@ -34,6 +37,12 @@ const App = () => {
           <Route path="/adminstudents" element={<AdminStudents />} />
           <Route path="/admininstructors" element={<AdminInstructors />} />
           <Route path="/adminforum" element={<AdminForum />} />
+
+          <Route path="/instructorForum" element={<InstructorForum />} />
+          <Route path="/instructorCourses" element={<InstructorCourses />} />
+          <Route path="/instructorChatbot" element={<InstructorChatbot />} />
+
+          {/* Catch-all route for 404 Not Found */}
         </Routes>
       </Router>
     </div>

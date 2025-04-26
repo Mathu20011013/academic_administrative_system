@@ -67,7 +67,16 @@ const Login = () => {
         });
         
         setTimeout(() => {
-          navigate('/home');
+          const userRole = localStorage.getItem('userRole');
+          
+          if (userRole === 'admin') {
+            navigate('/adminCourses');
+          } else if (userRole === 'instructor') {
+            navigate('/instructorCourses');
+          } else {
+            // Default for students or any other role
+            navigate('/home');
+          }
         }, 1500);
       }
     } catch (error) {

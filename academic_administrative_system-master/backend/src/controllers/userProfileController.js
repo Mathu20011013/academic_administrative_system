@@ -39,7 +39,7 @@ const getUserProfile = (req, res) => {
     if (role === "admin") {
         query = `
             SELECT u.user_id, u.username, u.email, u.contact_number, u.role,
-                   a.admin_name, a.profile_picture, a.bio, a.contact_number as admin_contact_number
+                   a.admin_name, a.profile_picture, a.bio
             FROM user u
             LEFT JOIN admin a ON u.user_id = a.user_id
             WHERE u.user_id = ?;

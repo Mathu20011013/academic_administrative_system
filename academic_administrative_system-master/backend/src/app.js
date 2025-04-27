@@ -6,7 +6,7 @@ const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes'); // Import other route files here
 const forumRoutes = require('./routes/forumRoutes'); // Import the combined forum routes
 const profileRoutes = require('./routes/profileRoutes');
-
+const uploadRoutes = require('./routes/uploadRoutes'); // Import the upload routes
 
 const app = express();
 
@@ -25,7 +25,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/forum', forumRoutes);
 app.use('/api/profile', profileRoutes);
-// Use other route files here
+app.use('/api/uploads', uploadRoutes); // Add the upload routes
 
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, '../../frontend/dist')));

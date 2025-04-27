@@ -1,3 +1,4 @@
+const uploadToCloudinary = require('../utils/uploadToCloudinary');
 const db = require("../config/db");
 
 // Get all courses

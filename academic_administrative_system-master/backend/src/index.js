@@ -1,6 +1,10 @@
 const app = require('./app');
+const db = require('./config/db'); // Ensure the database connection is established
 
-const PORT = process.env.PORT || 5001; // Change the port number here
+// Load environment variables from .env
+require('dotenv').config();
+
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

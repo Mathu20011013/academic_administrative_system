@@ -1,5 +1,5 @@
 const app = require('./app');
-const db = require('./config/db'); // Ensure the database connection is established
+const db = require('./config/db');
 
 // Load environment variables from .env
 require('dotenv').config();

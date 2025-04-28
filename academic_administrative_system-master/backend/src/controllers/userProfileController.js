@@ -106,10 +106,18 @@ const updateUserProfile = (req, res) => {
             // Update student data if the role is 'student'
             if (role === 'student') {
                 const updateStudentQuery = `
-                    UPDATE student SET guardian_name = ?, guardian_contact = ?, gender = ?, dob = ?, address = ?
-                    WHERE user_id = ?
-                `;
-                const studentValues = [guardian_name, guardian_contact, gender, dob, address, user_id];
+    UPDATE student SET guardian_name = ?, guardian_contact = ?, gender = ?, dob = ?, address = ?
+    WHERE user_id = ?`;
+const studentValues = [
+    guardian_name, 
+    guardian_contact, 
+    gender, 
+    // Format the date to 'YYYY-MM-DD' before sending to the database
+    new Date(dob).toISOString().split('T')[0], 
+    address, 
+    user_id
+];
+
 
                 db.query(updateStudentQuery, studentValues, (studentError) => {
                     if (studentError) {

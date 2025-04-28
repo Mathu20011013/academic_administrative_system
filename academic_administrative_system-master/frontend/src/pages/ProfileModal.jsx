@@ -115,9 +115,17 @@ const ProfileModal = ({ userId, role, closeModal }) => {
     }
   };
 
+  const handleKeyDown = (e) => {
+    // Prevent form submission if Enter key is pressed in any input except textareas
+    if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+      e.preventDefault();
+    }
+  };
+
   // Handle profile form submission
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log("Form submission triggered by:", e.target);
 
     // Validate authentication token before proceeding
     const token = checkAuthToken();
@@ -597,7 +605,10 @@ const ProfileModal = ({ userId, role, closeModal }) => {
                 ) : (
                   <button
                     type="button"
-                    onClick={() => setIsEditable(true)}
+                    onClick={(e) => {
+                      e.preventDefault(); 
+                      setIsEditable(true);
+                    }}
                     className="edit-button"
                   >
                     Edit Profile
@@ -622,8 +633,8 @@ const ProfileModal = ({ userId, role, closeModal }) => {
           )}
 
         {/* Password Reset Form */}
-        {!loading && showPasswordReset && (
-          <form onSubmit={handlePasswordReset} className="password-form">
+        {!loading && Object.keys(profileData).length > 0  && showPasswordReset && (
+          <form onSubmit={handlePasswordReset} onKeyDown={handleKeyDown} className="password-form">
             <div className="form-group">
               <label>New Password:</label>
               <input

@@ -1,23 +1,21 @@
-// Initialize Express app and set up routes
 const express = require('express');
 const path = require('path');
 const cors = require('cors');  // Import the cors package
 const authRoutes = require('./routes/authRoutes');
-const adminRoutes = require('./routes/adminRoutes'); // Import other route files here
-const forumRoutes = require('./routes/forumRoutes'); // Import the combined forum routes
+const adminRoutes = require('./routes/adminRoutes');
+const forumRoutes = require('./routes/forumRoutes');
 const profileRoutes = require('./routes/profileRoutes');
-const uploadRoutes = require('./routes/uploadRoutes'); // Import the upload routes
+const uploadRoutes = require('./routes/uploadRoutes');
+const courseRoutes = require('./routes/courseRoutes'); // Add course routes
+const submissionRoutes = require('./routes/submissionRoutes'); // Add submission routes
+const enrollmentRoutes = require('./routes/enrollmentRoutes'); // Add enrollment routes
 
 const app = express();
 
 // Enable CORS for all routes
-app.use(cors());  // This will allow requests from all origins
+app.use(cors());
 
-// Alternatively, you can restrict CORS to specific origins like this:
-// app.use(cors({
-//     origin: 'http://localhost:5173',  // Your React app's URL
-// }));
-
+// Body parsing middleware
 app.use(express.json());
 
 // Use the route files
@@ -26,13 +24,16 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/forum', forumRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/uploads', uploadRoutes); // Add the upload routes
+app.use('/api/courses', courseRoutes); // Add course routes
+app.use('/api/submissions', submissionRoutes); // Add submission routes
+app.use('/api/enrollments', enrollmentRoutes); // Add enrollment routes
 
 // Serve static files from the React app
-app.use(express.static(path.join(__dirname, '../../frontend/dist')));
+app.use(express.static(path.join(__dirname, '../frontend/build'))); // Ensure the correct path to React build
 
 // The "catchall" handler: for any request that doesn't match one above, send back index.html
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../frontend/dist', 'index.html'));
+  res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
 });
 
 module.exports = app;

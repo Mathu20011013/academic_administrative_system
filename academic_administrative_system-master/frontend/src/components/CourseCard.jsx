@@ -1,22 +1,35 @@
-// src/components/CourseCard.jsx
 import React from "react";
 import "../styles/CourseCard.css"; // Import the CSS file
-import axios from 'axios';  // Import axios for API calls
+import axios from "axios"; // Import axios for API calls
 
-const CourseCard = ({ title, instructor, price, imgSrc, courseId, studentId, buttonText, onClick }) => {
-  // Fallback image when the URL is invalid or missing
-  const defaultImg = "https://via.placeholder.com/150";  // Placeholder image URL
+const CourseCard = ({
+  title,
+  instructor,
+  price,
+  imgSrc,
+  description,
+  buttonText,
+  onClick,  // Ensure onClick is passed as a prop from the parent component
+}) => {
+  // Debugging props to ensure they are passed correctly
+  console.log("CourseCard props:", {
+    title,
+    instructor,
+    price,
+    imgSrc,
+    description,
+  });
 
-  // Check if the imgSrc is available, else use the fallback image
+  const defaultImg = "https://via.placeholder.com/150";
   const courseImg = imgSrc ? imgSrc : defaultImg;
-
-  // Function to handle the "Buy" button click and enroll the student
+  
+  // Function to handle the "Enroll" button click and enroll the student
   const handleEnroll = async () => {
     try {
       // Make API call to enroll the student in the course
-      const response = await axios.post('http://localhost:5000/api/enroll', {
-        student_id: studentId,
-        course_id: courseId
+      const response = await axios.post("http://localhost:5000/api/enroll", {
+        student_id: 1,  // Example student ID, replace with actual data
+        course_id: 1,   // Example course ID, replace with actual data
       });
 
       // Handle success
@@ -29,6 +42,15 @@ const CourseCard = ({ title, instructor, price, imgSrc, courseId, studentId, but
     }
   };
 
+  // Define the default onClick if not passed as a prop
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    } else {
+      console.log("Course card clicked, but no handler defined.");
+    }
+  };
+
   return (
     <div className="card course-card">
       {/* Display either the course image or a placeholder */}
@@ -36,21 +58,30 @@ const CourseCard = ({ title, instructor, price, imgSrc, courseId, studentId, but
       <div className="card-body">
         <h5 className="card-title">{title}</h5>
         <p className="card-text">{instructor}</p>
-        <p className="card-text">{price}</p>
+
+        {/* Conditionally render description and price for Home Page */}
+        {buttonText === "Enroll" && (
+          <>
+            <p className="card-text">{description}</p> {/* Description for Home */}
+            <p className="card-text">Price: ${price}</p> {/* Price for Home */}
+          </>
+        )}
+
         {/* Conditionally render button based on the buttonText prop */}
-        {buttonText ? (
+        {buttonText === "Enroll" ? (
           <button className="btn btn-primary" onClick={handleEnroll}>
-            {buttonText} {/* "Enroll" button text */}
+            Enroll
           </button>
         ) : (
-          <button className="btn btn-secondary" onClick={onClick}> 
-            View Course {/* This will be used in My Courses or Instructor pages */}
+          <button className="btn btn-secondary" onClick={handleClick}>
+            Access Course {/* This will be used in My Courses page */}
           </button>
         )}
       </div>
       <div className="card-footer">
-        {/* Display a fallback message if the image URL is invalid */}
-        {imgSrc ? null : <small className="text-muted">No image available for this course</small>}
+        {imgSrc ? null : (
+          <small className="text-muted">No image available for this course</small>
+        )}
       </div>
     </div>
   );

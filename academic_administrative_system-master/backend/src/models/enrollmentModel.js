@@ -30,20 +30,20 @@ module.exports = {
     });
   },
 
-  // Get all courses a student is enrolled in
+  // Get all courses a student is enrolled in with instructor name
   getEnrolledCourses: (student_id) => {
     return new Promise((resolve, reject) => {
       const query = `
-        SELECT c.* 
+        SELECT c.*, u.username AS instructor_name
         FROM course c
         JOIN enrollment e ON c.course_id = e.course_id
-        WHERE e.student_id = ?
-      `;
+        JOIN user u ON c.instructor_id = u.user_id
+        WHERE e.student_id = ?`; // Query joining course and user to get instructor name
       db.query(query, [student_id], (err, results) => {
         if (err) {
           reject(err);
         } else if (!results || results.length === 0) {
-          resolve([]); // Return empty array instead of throwing error
+          resolve([]); // Return empty array if no results found
         } else {
           resolve(results); // Return the courses
         }

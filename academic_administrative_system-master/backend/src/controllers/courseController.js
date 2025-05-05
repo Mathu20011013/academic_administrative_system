@@ -1,14 +1,25 @@
 // src/controllers/courseController.js
 const Course = require('../models/courseModel');
+const db = require('../config/db'); // Make sure this line is present
 
-// Get all courses
+// getAllCourses
 exports.getAllCourses = async (req, res) => {
   try {
-    const courses = await Course.getAll();
-    res.status(200).json({ courses });
+    const query = `
+      SELECT c.course_id, c.course_name, c.price, c.image_url, u.username AS instructor_name, c.syllabus AS description
+      FROM course c
+      JOIN user u ON c.instructor_id = u.user_id`;  // Use 'syllabus' as the description
+
+    db.query(query, (err, results) => {
+      if (err) {
+        console.error("Error fetching courses:", err);
+        return res.status(500).json({ message: "Failed to fetch courses", error: err });
+      }
+      res.status(200).json({ courses: results });
+    });
   } catch (error) {
-    console.error('Error fetching courses:', error);
-    res.status(500).json({ message: 'Failed to fetch courses', error });
+    console.error("Error fetching courses:", error);
+    res.status(500).json({ message: "Failed to fetch courses", error });
   }
 };
 

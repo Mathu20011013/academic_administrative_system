@@ -17,7 +17,22 @@ module.exports = {
       });
     });
   },
-
+ // Function to get courses assigned to a specific instructor
+ getInstructorCourses: (instructor_id) => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT c.course_id, c.course_name, c.price, c.image_url, u.username AS instructor_name, c.syllabus AS description
+      FROM course c
+      JOIN user u ON c.instructor_id = u.user_id
+      WHERE c.instructor_id = ?`;
+    db.query(query, [instructor_id], (err, results) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(results);
+    });
+  });
+},
   // Get course by ID
   getById: (course_id) => {
     return new Promise((resolve, reject) => {
@@ -86,3 +101,4 @@ module.exports = {
     });
   },
 };
+

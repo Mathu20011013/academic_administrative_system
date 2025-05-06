@@ -1,8 +1,9 @@
 // src/routes/courseRoutes.js
 const express = require('express');
 const router = express.Router();
-const { createCourse, getAllCourses, getCourseById, updateCourse, deleteCourse } = require('../controllers/courseController');
+const { createCourse, getAllCourses, getCourseById, updateCourse, deleteCourse, getInstructorCourses } = require('../controllers/courseController');
 const { check } = require('express-validator'); // Input validation
+const authenticate = require('../middleware/authmiddleware').authenticate; // Import the authenticate middleware
 
 // Route to create a course (admin only)
 router.post('/create',
@@ -24,5 +25,9 @@ router.put('/:courseId', updateCourse);
 
 // Route to delete a course (admin only)
 router.delete('/:courseId', deleteCourse);
+
+// Route to get courses assigned to a specific instructor (based on login credentials)
+// This route requires authentication
+router.get('/instructor/courses', authenticate, getInstructorCourses); // Fetch courses assigned to the logged-in instructor
 
 module.exports = router;

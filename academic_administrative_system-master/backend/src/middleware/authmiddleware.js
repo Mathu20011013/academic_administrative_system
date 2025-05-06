@@ -1,5 +1,6 @@
 // Path: /middleware/authMiddleware.js
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 // Make sure this matches EXACTLY with the JWT_SECRET in jwtUtils.js
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';

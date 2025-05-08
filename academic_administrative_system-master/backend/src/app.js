@@ -7,8 +7,14 @@ const forumRoutes = require('./routes/forumRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const courseRoutes = require('./routes/courseRoutes'); // Add course routes
-const submissionRoutes = require('./routes/submissionRoutes'); // Add submission routes
+const submissionRoutes = require('./routes/submissionRoutes') // Add submission routes
 const enrollmentRoutes = require('./routes/enrollmentRoutes'); // Add enrollment routes
+
+const courseContentRoutes = require('./routes/courseContentRoutes');
+const assignmentRoutes = require('./routes/assignmentRoutes');
+const classLinkRoutes = require('./routes/classLinkRoutes');
+const courseRatingRoutes = require('./routes/courseRatingRoutes');
+const announcementRoutes = require('./routes/announcementRoutes');
 
 const app = express();
 
@@ -25,8 +31,13 @@ app.use('/api/forum', forumRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/uploads', uploadRoutes); // Add the upload routes
 app.use('/api/courses', courseRoutes); // Add course routes
-app.use('/api/submissions', submissionRoutes); // Add submission routes
+app.use('/api/submission', submissionRoutes); // Add submission routes
 app.use('/api/enrollments', enrollmentRoutes); // Add enrollment routes
+app.use('/api/content', courseContentRoutes); // Add course content routes
+app.use('/api/assignment', assignmentRoutes);
+app.use('/api/classlink', classLinkRoutes);
+app.use('/api/rating', courseRatingRoutes);
+app.use('/api/announcement', announcementRoutes);
 
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, '../frontend/build'))); // Ensure the correct path to React build

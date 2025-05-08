@@ -1,10 +1,10 @@
 // src/routes/submissionRoutes.js
 const express = require('express');
 const router = express.Router();
-const upload = require('../middleware/upload'); // File upload middleware
-const { submitAssignment } = require('../controllers/submissionController'); // Controller function for submitting assignments
+const submissionController = require('../controllers/submissionController');
+const upload = require('../middleware/upload'); // For file uploads
 
-// Endpoint to submit assignment (student)
-router.post('/submit-assignment', upload.single('file'), submitAssignment);  // Use upload middleware and controller
+router.post('/create', upload.single('file'), submissionController.submitAssignment);
+router.put('/:submissionId/grade', submissionController.gradeSubmission);
 
 module.exports = router;

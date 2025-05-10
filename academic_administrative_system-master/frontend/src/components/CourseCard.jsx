@@ -9,7 +9,8 @@ const CourseCard = ({
   imgSrc,
   description,
   buttonText,
-  onClick,  // Ensure onClick is passed as a prop from the parent component
+  onClick,
+  course_id  // Added course_id prop
 }) => {
   // Debugging props to ensure they are passed correctly
   console.log("CourseCard props:", {
@@ -18,18 +19,20 @@ const CourseCard = ({
     price,
     imgSrc,
     description,
+    course_id
   });
 
   const defaultImg = "https://via.placeholder.com/150";
   const courseImg = imgSrc ? imgSrc : defaultImg;
   
   // Function to handle the "Enroll" button click and enroll the student
-  const handleEnroll = async () => {
+  const handleEnroll = async (e) => {
+    e.stopPropagation(); // Prevent the card click event from firing
     try {
       // Make API call to enroll the student in the course
       const response = await axios.post("http://localhost:5000/api/enroll", {
         student_id: 1,  // Example student ID, replace with actual data
-        course_id: 1,   // Example course ID, replace with actual data
+        course_id: course_id,  // Use the passed course_id
       });
 
       // Handle success
@@ -45,14 +48,14 @@ const CourseCard = ({
   // Define the default onClick if not passed as a prop
   const handleClick = () => {
     if (onClick) {
-      onClick();
+      onClick(course_id); // Pass course_id to the onClick handler
     } else {
       console.log("Course card clicked, but no handler defined.");
     }
   };
 
   return (
-    <div className="card course-card">
+    <div className="card course-card" onClick={handleClick}>
       {/* Display either the course image or a placeholder */}
       <img className="card-img-top course-card-img" src={courseImg} alt={title} />
       <div className="card-body">
@@ -73,7 +76,10 @@ const CourseCard = ({
             Enroll
           </button>
         ) : (
-          <button className="btn btn-secondary" onClick={handleClick}>
+          <button className="btn btn-primary" onClick={(e) => {
+            e.stopPropagation(); // Prevent double navigation
+            handleClick();
+          }}>
             Access Course {/* This will be used in My Courses page */}
           </button>
         )}

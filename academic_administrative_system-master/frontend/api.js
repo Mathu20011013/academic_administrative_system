@@ -28,6 +28,91 @@ export const signup = async (username, email, password) => {
   }
 };
 
+// Course functions
+export const getCourseContent = async (courseId) => {
+  try {
+    const response = await api.get(`/content/course/${courseId}`);
+    return response.data;
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || 'Error fetching course content';
+    throw new Error(errorMessage);
+  }
+};
+
+export const createAssignment = async (assignmentData) => {
+  try {
+    const response = await api.post('/assignment/create', assignmentData);
+    return response.data;
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || 'Error creating assignment';
+    throw new Error(errorMessage);
+  }
+};
+
+export const submitAssignment = async (submissionData, file) => {
+  try {
+    const formData = new FormData();
+    formData.append('assignment_id', submissionData.assignment_id);
+    formData.append('student_id', submissionData.student_id);
+    formData.append('file', file);
+    
+    const response = await api.post('/submission/create', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    return response.data;
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || 'Error submitting assignment';
+    throw new Error(errorMessage);
+  }
+};
+
+export const gradeSubmission = async (submissionId, gradeData) => {
+  try {
+    const response = await api.put(`/submission/${submissionId}/grade`, gradeData);
+    return response.data;
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || 'Error grading submission';
+    throw new Error(errorMessage);
+  }
+};
+
+export const createAnnouncement = async (announcementData) => {
+  try {
+    const response = await api.post('/content/create', {
+      ...announcementData,
+      content_type: 'announcement'
+    });
+    return response.data;
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || 'Error creating announcement';
+    throw new Error(errorMessage);
+  }
+};
+
+export const getStudentCourses = async (studentId) => {
+  try {
+    const response = await api.get(`/enrollments/my-courses/${studentId}`);
+    return response.data;
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || 'Error fetching student courses';
+    throw new Error(errorMessage);
+  }
+};
+
+export const getInstructorCourses = async (instructorId) => {
+  try {
+    const response = await api.get(`/instructor/courses/${instructorId}`);
+    return response.data;
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || 'Error fetching instructor courses';
+    throw new Error(errorMessage);
+  }
+};
+
+// Add more API functions here for other routes as needed
+
 // Add more API functions here for other routes like /home, /mycourses, etc.
 
 export default api;

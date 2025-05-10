@@ -1,0 +1,55 @@
+.class-link {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  .class-link.upcoming {
+    border-left: 4px solid #28a745;
+  }
+  
+  .class-link h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+  }
+  
+  .class-description {
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  .meeting-details {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+  }
+  
+  .meeting-details p {
+    margin-bottom: 15px;
+  }
+  
+  .join-meeting-btn {
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  
+  .join-meeting-btn i {
+    margin-right: 8px;
+  }
+  
+  .join-meeting-btn:hover {
+    background-color: #0069d9;
+    text-decoration: none;
+    color: white;
+  }
+  

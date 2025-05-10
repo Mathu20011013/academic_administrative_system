@@ -58,7 +58,8 @@ const InstructorCourses = () => {
                   imgSrc={course.image_url || "https://via.placeholder.com/150"}
                   description={course.description} // Ensure description is passed
                   buttonText="Access Course"
-                  onClick={() => handleAccessCourse(course.course_id)} // Navigate to course details
+                  course_id={course.course_id} // Pass course_id as a prop
+                  onClick={handleAccessCourse} // Pass the handler function directly
                 />
               </div>
             ))

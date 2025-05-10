@@ -27,13 +27,31 @@ exports.getAllCourses = async (req, res) => {
 exports.getCourseById = async (req, res) => {
   const course_id = req.params.courseId;
   try {
-    const course = await Course.getById(course_id);
-    res.status(200).json({ course });
+    const query = `
+      SELECT c.course_id, c.course_name, c.price, c.image_url, 
+             u.username AS instructor_name, c.syllabus AS description
+      FROM course c
+      LEFT JOIN user u ON c.instructor_id = u.user_id
+      WHERE c.course_id = ?`;
+    
+    db.query(query, [course_id], (err, results) => {
+      if (err) {
+        console.error("Error fetching course:", err);
+        return res.status(500).json({ message: "Failed to fetch course", error: err });
+      }
+      
+      if (results.length === 0) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+      
+      res.status(200).json({ course: results[0] });
+    });
   } catch (error) {
     console.error('Error fetching course by ID:', error);
     res.status(500).json({ message: 'Failed to fetch course by ID', error });
   }
 };
+
 
 // Create a course
 exports.createCourse = async (req, res) => {

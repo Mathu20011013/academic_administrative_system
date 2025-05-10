@@ -1,0 +1,56 @@
+.material {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  .material h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+  }
+  
+  .material-description {
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  .material-files {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .file-item {
+    display: flex;
+    align-items: center;
+    background-color: #f8f9fa;
+    padding: 10px 15px;
+    border-radius: 5px;
+  }
+  
+  .file-item i {
+    margin-right: 10px;
+    font-size: 1.2rem;
+    color: #6c757d;
+  }
+  
+  .file-name {
+    flex-grow: 1;
+    margin-right: 15px;
+  }
+  
+  .download-btn {
+    color: #007bff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+  }
+  
+  .download-btn:hover {
+    text-decoration: underline;
+  }
+  

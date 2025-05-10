@@ -1,0 +1,144 @@
+/* src/styles/CourseDetail.css */
+.course-detail-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 30px auto; /* This adds space above and below */
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .course-header {
+    position: relative;
+    margin-bottom: 30px;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 20px;
+  }
+  
+  .course-title {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: #333;
+  }
+  
+  .course-instructor {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 15px;
+  }
+  
+  .close-button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: transparent;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #666;
+    padding: 5px 10px;
+  }
+  
+  .close-button:hover {
+    color: #dc3545;
+  }
+  
+  .content-section {
+    margin-bottom: 40px;
+  }
+  
+  .content-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .content-filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  
+  .filter-btn {
+    padding: 8px 16px;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .filter-btn.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+  }
+  
+  .add-content-btn {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    font-weight: 500;
+  }
+  
+  .add-content-btn:hover {
+    background-color: #218838;
+  }
+  
+  .loading {
+    text-align: center;
+    padding: 20px;
+    font-size: 1.2rem;
+    color: #666;
+  }
+  
+  .error-message {
+    color: #dc3545;
+    padding: 15px;
+    background-color: #f8d7da;
+    border-radius: 4px;
+    margin-bottom: 20px;
+  }
+  
+  /* Weekly section styling (similar to Moodle) */
+  .week-section {
+    margin-bottom: 30px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  
+  .week-header {
+    background-color: #f8f9fa;
+    padding: 10px 15px;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .week-content {
+    padding: 15px;
+  }
+  
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .course-title {
+      font-size: 1.5rem;
+    }
+    
+    .filter-btn {
+      padding: 6px 12px;
+      font-size: 0.9rem;
+    }
+  }
+  .container {
+    margin-top: 30px;    /* Space between navbar and content */
+    margin-bottom: 30px; /* Space between content and footer */
+  }

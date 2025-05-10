@@ -37,7 +37,7 @@ const MyCourses = () => {
   return (
     <Layout>
       <div className="container mt-4">
-        <h1>My Enrolled Courses</h1>
+        
         <div className="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
           {courses.length > 0 ? (
             courses.map((course) => (
@@ -47,7 +47,8 @@ const MyCourses = () => {
                   instructor={course.instructor_name}
                   imgSrc={course.image_url || "https://via.placeholder.com/150"}
                   buttonText="Access Course"
-                  onClick={() => handleAccessCourse(course.course_id)} // Navigate to course details
+                  course_id={course.course_id} // Pass course_id as a prop
+                  onClick={handleAccessCourse} // Pass the handler function directly
                 />
               </div>
             ))

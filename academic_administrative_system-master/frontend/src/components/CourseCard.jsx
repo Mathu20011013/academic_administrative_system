@@ -1,6 +1,7 @@
 import React from "react";
 import "../styles/CourseCard.css"; // Import the CSS file
 import axios from "axios"; // Import axios for API calls
+import { useNavigate } from 'react-router-dom';
 
 const CourseCard = ({
   title,
@@ -12,6 +13,9 @@ const CourseCard = ({
   onClick,
   course_id  // Added course_id prop
 }) => {
+  // Initialize the navigate function
+  const navigate = useNavigate();
+  
   // Debugging props to ensure they are passed correctly
   console.log("CourseCard props:", {
     title,
@@ -27,21 +31,33 @@ const CourseCard = ({
   
   // Function to handle the "Enroll" button click and enroll the student
   const handleEnroll = async (e) => {
-    e.stopPropagation(); // Prevent the card click event from firing
+    e.stopPropagation();
     try {
-      // Make API call to enroll the student in the course
-      const response = await axios.post("http://localhost:5000/api/enroll", {
-        student_id: 1,  // Example student ID, replace with actual data
-        course_id: course_id,  // Use the passed course_id
-      });
-
-      // Handle success
-      if (response.status === 200) {
-        alert("Enrollment successful!");
+      // Get the user ID from localStorage
+      const student_id = localStorage.getItem('userId');
+      
+      if (!student_id) {
+        alert("Please log in to enroll in courses.");
+        return;
       }
+      
+      // Navigate to payment page instead of directly enrolling
+      navigate('/payment', { 
+        state: { 
+          course: {
+            course_id: parseInt(course_id),
+            title,
+            instructor,
+            price,
+            description
+          },
+          student_id: parseInt(student_id)
+        } 
+      });
     } catch (error) {
       console.error("Error enrolling in course:", error);
-      alert("Failed to enroll in the course. Please try again.");
+      const errorMessage = error.response?.data?.message || "Failed to enroll in the course";
+      alert(errorMessage);
     }
   };
 

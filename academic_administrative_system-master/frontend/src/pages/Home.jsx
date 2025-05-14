@@ -56,6 +56,7 @@ const Home = () => {
                   imgSrc={course.image_url || "https://via.placeholder.com/150"}
                   description={course.description} // Ensure description is passed
                   buttonText="Enroll"
+                   course_id={course.course_id} 
                 />
               </div>
             ))

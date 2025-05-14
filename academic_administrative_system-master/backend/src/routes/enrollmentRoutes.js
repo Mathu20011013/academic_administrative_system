@@ -1,12 +1,18 @@
 // src/routes/enrollmentRoutes.js
 const express = require('express');
 const router = express.Router();
-const { enrollStudent, getEnrolledCourses } = require('../controllers/enrollmentController');
+const enrollmentController = require('../controllers/enrollmentController');
 
-// POST: Enroll a student in a course
-router.post('/enroll', enrollStudent);
+// Check if a student is enrolled in a course
+router.get('/check/:studentId/:courseId', enrollmentController.checkEnrollment);
 
-// GET: Get all enrolled courses for a student
-router.get('/my-courses/:student_id', getEnrolledCourses);
+// Enroll a student in a course
+router.post('/enroll', enrollmentController.enrollStudent);
+
+// Get all enrolled courses for a student
+router.get('/student/:student_id', enrollmentController.getEnrolledCourses);
+
+//new route to match your frontend request
+router.get('/my-courses/:student_id', enrollmentController.getEnrolledCourses);
 
 module.exports = router;

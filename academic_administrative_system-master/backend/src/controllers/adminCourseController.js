@@ -52,7 +52,7 @@ const addCourse = (req, res) => {
     // If instructor_id is valid, proceed to insert the course
     const insertQuery = `
       INSERT INTO course (course_name, syllabus, price, instructor_id, image_url)
-      VALUES (?, ?, ?, ?);
+      VALUES (?, ?, ?, ?, ?);
     `;
 
     const values = [course_name, syllabus, price, instructor_id, image_url];

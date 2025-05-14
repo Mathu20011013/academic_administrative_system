@@ -15,7 +15,8 @@ const assignmentRoutes = require('./routes/assignmentRoutes');
 const classLinkRoutes = require('./routes/classLinkRoutes');
 const courseRatingRoutes = require('./routes/courseRatingRoutes');
 const announcementRoutes = require('./routes/announcementRoutes');
-
+const paymentRoutes = require('./routes/paymentRoutes');
+const enrollmentController = require('./controllers/enrollmentController');
 const app = express();
 
 // Enable CORS for all routes
@@ -38,7 +39,7 @@ app.use('/api/assignment', assignmentRoutes);
 app.use('/api/classlink', classLinkRoutes);
 app.use('/api/rating', courseRatingRoutes);
 app.use('/api/announcement', announcementRoutes);
-
+app.use('/api/payment', paymentRoutes);
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, '../frontend/build'))); // Ensure the correct path to React build
 
@@ -46,5 +47,7 @@ app.use(express.static(path.join(__dirname, '../frontend/build'))); // Ensure th
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
 });
+
+
 
 module.exports = app;

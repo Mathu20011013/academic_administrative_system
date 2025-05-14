@@ -17,18 +17,37 @@ module.exports = {
   },
 
   // Enroll a student into a course
-  create: (student_id, course_id) => {
-    return new Promise((resolve, reject) => {
+  // Enroll a student into a course
+create: (user_id, course_id) => {
+  return new Promise((resolve, reject) => {
+    // First find the student_id that corresponds to this user_id
+    const findStudentQuery = 'SELECT student_id FROM student WHERE user_id = ?';
+    db.query(findStudentQuery, [user_id], (err, results) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      
+      if (results.length === 0) {
+        reject(new Error('No student record found for this user'));
+        return;
+      }
+      
+      const studentId = results[0].student_id;
+      
+      // Now insert with the correct student_id
       const query = 'INSERT INTO enrollment (student_id, course_id) VALUES (?, ?)';
-      db.query(query, [student_id, course_id], (err, results) => {
+      db.query(query, [studentId, course_id], (err, results) => {
         if (err) {
           reject(err);
         } else {
-          resolve(results); // Return inserted result
+          resolve(results);
         }
       });
     });
-  },
+  });
+},
+
 
   // Get all courses a student is enrolled in with instructor name
   getEnrolledCourses: (student_id) => {

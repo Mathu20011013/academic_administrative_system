@@ -106,7 +106,7 @@ const AddCourseModal = ({ onSave, onClose }) => {
           >
             <option value="">Select Instructor</option>
             {instructors.map((instructor) => (
-              <option key={instructor["User ID"]} value={instructor["User ID"]}>
+              <option key={instructor["Instructor ID"]} value={instructor["Instructor ID"]}>
                 {instructor.Username}
               </option>
             ))}

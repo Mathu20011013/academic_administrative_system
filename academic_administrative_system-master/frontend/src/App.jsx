@@ -24,7 +24,7 @@ import SubmissionGrader from './components/instructor/SubmissionGrader';
 import ContentCreator from './components/instructor/ContentCreator';
 
 import NotFound from './components/NotFound';
-
+import Payment from './components/payment';
 
 const App = () => {
   return (
@@ -60,6 +60,7 @@ const App = () => {
           <Route path="/assignment/:assignmentId/submit" element={<SubmissionForm />} />
           <Route path="/assignment/:assignmentId/submissions" element={<SubmissionGrader />} />
           
+          <Route path="/payment" element={<Payment />} />
           <Route path="*" element={<NotFound />} />
 
         </Routes>

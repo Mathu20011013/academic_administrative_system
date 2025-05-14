@@ -17,28 +17,24 @@ exports.getAllCourses = async (req, res) => {
 // Enroll a student in a course
 exports.enrollStudent = async (req, res) => {
   const { student_id, course_id } = req.body;
-
+  
   if (!student_id || !course_id) {
     return res
       .status(400)
       .json({ message: "Student ID and Course ID are required" });
   }
-
+  
   try {
-    const student = await Student.findById(student_id);
-    const course = await Course.getById(course_id);
-
-    if (!student || !course) {
-      return res.status(404).json({ message: "Student or Course not found" });
-    }
-
+    // First check if the student is already enrolled
     const isEnrolled = await Enrollment.checkEnrollment(student_id, course_id);
     if (isEnrolled) {
       return res
         .status(400)
         .json({ message: "Already enrolled in this course" });
     }
-
+    
+    // Skip student validation or create student record if needed
+    // We'll directly create the enrollment
     await Enrollment.create(student_id, course_id);
     res.status(200).json({ message: "Enrollment successful!" });
   } catch (err) {
@@ -60,5 +56,19 @@ exports.getEnrolledCourses = async (req, res) => {
   } catch (error) {
     console.error("Error fetching enrolled courses:", error);
     return res.status(500).json({ message: "Error fetching enrolled courses", error });
+  }
+};
+
+// Check if a student is enrolled in a specific course
+exports.checkEnrollment = async (req, res) => {
+  const student_id = req.params.studentId;
+  const course_id = req.params.courseId;
+  
+  try {
+    const isEnrolled = await Enrollment.checkEnrollment(student_id, course_id);
+    res.status(200).json({ isEnrolled });
+  } catch (error) {
+    console.error("Error checking enrollment:", error);
+    res.status(500).json({ message: "Error checking enrollment status", error });
   }
 };

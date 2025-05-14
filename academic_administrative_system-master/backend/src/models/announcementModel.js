@@ -22,10 +22,12 @@ const Announcement = {
   // Create new announcement
   create: (announcementData) => {
     return new Promise((resolve, reject) => {
+      // Convert boolean to integer (0 or 1)
+      const isPinned = announcementData.is_pinned ? 1 : 0;
       const query = 'INSERT INTO announcements (content_id, is_pinned) VALUES (?, ?)';
       db.query(
         query,
-        [announcementData.content_id, announcementData.is_pinned || false],
+        [announcementData.content_id, isPinned],
         (err, result) => {
           if (err) {
             console.error('Error creating announcement:', err);
@@ -61,8 +63,10 @@ const Announcement = {
   // Update pin status
   updatePinStatus: (announcementId, isPinned) => {
     return new Promise((resolve, reject) => {
+      // Convert boolean to integer for update as well
+      const isPinnedValue = isPinned ? 1 : 0;
       const query = 'UPDATE announcements SET is_pinned = ? WHERE announcement_id = ?';
-      db.query(query, [isPinned, announcementId], (err, result) => {
+      db.query(query, [isPinnedValue, announcementId], (err, result) => {
         if (err) {
           console.error('Error updating pin status:', err);
           reject(err);

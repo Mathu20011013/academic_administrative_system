@@ -39,20 +39,20 @@ const Assignment = {
   },
   
   // Create assignment from content
-  createForContent: (contentId, dueDate, maxScore) => {
-    return new Promise((resolve, reject) => {
-      const query = 'INSERT INTO assignments (content_id, due_date, max_score) VALUES (?, ?, ?)';
-      db.query(query, [contentId, dueDate, maxScore], (err, result) => {
-        if (err) {
-          console.error('Error creating assignment:', err);
-          reject(err);
-        } else {
-          resolve(result.insertId);
-        }
-      });
+ createForContent: (contentId, dueDate, maxScore, courseId) => {
+  return new Promise((resolve, reject) => {
+    const query = 'INSERT INTO assignments (content_id, due_date, max_score, course_id) VALUES (?, ?, ?, ?)';
+    db.query(query, [contentId, dueDate, maxScore, courseId], (err, result) => {
+      if (err) {
+        console.error('Error creating assignment:', err);
+        reject(err);
+      } else {
+        resolve(result.insertId);
+      }
     });
-  },
-  
+  });
+},
+
   // Update assignment
   update: (assignmentId, assignmentData) => {
     return new Promise((resolve, reject) => {

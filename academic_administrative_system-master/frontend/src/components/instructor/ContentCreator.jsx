@@ -2,12 +2,13 @@
 // Purpose: Form to create different types of course content (announcements, materials, assignments, class links)
 
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../api/api';
 import '../../styles/ContentCreator.css';
 
 const ContentCreator = ({ onContentCreated }) => {
   const { courseId } = useParams();
+  const navigate = useNavigate();
   const [contentType, setContentType] = useState('material');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -19,65 +20,75 @@ const ContentCreator = ({ onContentCreated }) => {
   const [isPinned, setIsPinned] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  
+
 
   const handleFileChange = (e) => {
     setFiles(Array.from(e.target.files));
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+  e.preventDefault();
+  setLoading(true);
+  setError('');
 
-    try {
-      const formData = new FormData();
-      formData.append('course_id', courseId);
-      formData.append('content_type', contentType);
-      formData.append('title', title);
-      formData.append('description', description);
+  try {
+    const formData = new FormData();
+    formData.append('course_id', courseId);
+    formData.append('content_type', contentType);
+    formData.append('title', title);
+    formData.append('description', description);
 
-      // Add content-type specific fields
-      if (contentType === 'assignment') {
-        formData.append('due_date', dueDate);
-        formData.append('max_score', maxScore);
-      } else if (contentType === 'class_link') {
-        formData.append('meeting_url', meetingUrl);
-        if (meetingTime) formData.append('meeting_time', meetingTime);
-      } else if (contentType === 'announcement') {
-        formData.append('is_pinned', isPinned);
-      }
-
-      // Add files if any
-      files.forEach(file => {
-        formData.append('files', file);
-      });
-
-      const response = await api.post('/content/create', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-
-      // Reset form
-      setTitle('');
-      setDescription('');
-      setFiles([]);
-      setDueDate('');
-      setMaxScore(100);
-      setMeetingUrl('');
-      setMeetingTime('');
-      setIsPinned(false);
-
-      // Notify parent component
-      if (onContentCreated) {
-        onContentCreated(response.data);
-      }
-    } catch (err) {
-      setError(err.message || 'Failed to create content');
-    } finally {
-      setLoading(false);
+    // Add content-type specific fields
+    if (contentType === 'assignment') {
+      formData.append('due_date', dueDate);
+      formData.append('max_score', maxScore);
+    } else if (contentType === 'class_link') {
+      formData.append('meeting_url', meetingUrl);
+      if (meetingTime) formData.append('meeting_time', meetingTime);
+    } else if (contentType === 'announcement') {
+      formData.append('is_pinned', isPinned);
     }
-  };
+
+    // Add files if any
+    files.forEach(file => {
+      formData.append('files', file);
+    });
+
+    const response = await api.post('/content/create', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+
+    console.log('Content created successfully:', response.data);
+
+    // Reset form
+    setTitle('');
+    setDescription('');
+    setFiles([]);
+    setDueDate('');
+    setMaxScore(100);
+    setMeetingUrl('');
+    setMeetingTime('');
+    setIsPinned(false);
+
+    // Notify parent component
+    if (onContentCreated) {
+      onContentCreated(response.data);
+    }
+
+    // Navigate back to course page with refresh state
+    navigate(`/course/${courseId}`, { state: { refresh: true } });
+    
+  } catch (err) {
+    console.error('Error creating content:', err);
+    setError(err.response?.data?.message || err.message || 'Failed to create content');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="content-creator">

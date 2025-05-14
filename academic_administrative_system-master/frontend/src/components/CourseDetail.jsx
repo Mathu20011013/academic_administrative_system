@@ -1,6 +1,6 @@
 // src/components/CourseDetail.jsx
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import api from '../api/api';
 import Layout from '../components/Layout'; // For student view
 import InstructorLayout from '../components/instructor/in-Layout'; // For instructor view
@@ -12,6 +12,7 @@ import '../styles/CourseDetail.css';
 
 const CourseDetail = () => {
   const { courseId } = useParams();
+  const location = useLocation();
   const [content, setContent] = useState([]);
   const [courseInfo, setCourseInfo] = useState({});
   const [loading, setLoading] = useState(true);
@@ -28,41 +29,58 @@ const CourseDetail = () => {
     }
 
     const fetchCourseData = async () => {
-  try {
-    // Fetch course info
-    const courseResponse = await api.get(`/courses/${courseId}`);
-    console.log('Course response:', courseResponse.data); // Add this line
-    setCourseInfo(courseResponse.data.course);
+      try {
+        // Fetch course info
+        const courseResponse = await api.get(`/courses/${courseId}`);
+        console.log('Course response:', courseResponse.data);
+        setCourseInfo(courseResponse.data.course);
+        
+        // Fetch course content
+        const contentResponse = await api.get(`/content/course/${courseId}`);
+        console.log('Content response:', contentResponse.data);
+        setContent(contentResponse.data.content || []);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching course data:', err);
+        setError('Failed to load course content');
+        setLoading(false);
+      }
+    };
+
+    fetchCourseData();
     
-    // Fetch course content
-    const contentResponse = await api.get(`/content/course/${courseId}`);
-    console.log('Content response:', contentResponse.data); // Add this line too
-    setContent(contentResponse.data.content || []);
-    setLoading(false);
-  } catch (err) {
-    console.error('Error fetching course data:', err); // Add error logging
-    setError('Failed to load course content');
-    setLoading(false);
-  }
-};
+    // Check if we need to refresh data (coming back from content creation)
+    if (location.state?.refresh) {
+      fetchCourseData();
+    }
+  }, [courseId, location.state]);
 
-fetchCourseData();
+  const handleClose = () => {
+    const userRole = localStorage.getItem('userRole');
+    
+    if (userRole === 'instructor') {
+      navigate('/instructorCourses');
+    } else if (userRole === 'admin') {
+      navigate('/adminCourses');
+    } else {
+      navigate('/mycourses');
+    }
+  };
 
-  }, [courseId]);
-
-const handleClose = () => {
-  const userRole = localStorage.getItem('userRole');
-  
-  if (userRole === 'instructor') {
-    navigate('/instructorCourses');
-  } else if (userRole === 'admin') {
-    navigate('/adminCourses'); // Changed to match your file structure
-  } else {
-    navigate('/mycourses'); // Changed to match your route
-  }
-};
-
-
+  const handleDeleteContent = async (contentId) => {
+    if (!window.confirm('Are you sure you want to delete this content? This action cannot be undone.')) {
+      return;
+    }
+    
+    try {
+      await api.delete(`/content/${contentId}`);
+      // Remove the deleted content from state
+      setContent(prevContent => prevContent.filter(item => item.content_id !== contentId));
+    } catch (err) {
+      console.error('Error deleting content:', err);
+      setError('Failed to delete content. Please try again.');
+    }
+  };
 
   const filteredContent = activeTab === 'all' 
     ? content 
@@ -74,25 +92,46 @@ const handleClose = () => {
     if (filteredContent.length === 0) return <p>No content available in this section.</p>;
 
     return filteredContent.map(item => {
+      // Create the content element based on type
+      let contentElement;
       switch (item.content_type) {
         case 'announcement':
-          return <Announcement key={item.content_id} announcement={item} />;
+          contentElement = <Announcement announcement={item} />;
+          break;
         case 'assignment':
-          return (
+          contentElement = (
             <Assignment 
-              key={item.content_id} 
               assignment={item.assignmentData || item} 
               isInstructor={userRole === 'instructor'}
               studentId={localStorage.getItem('userId')}
             />
           );
+          break;
         case 'material':
-          return <Material key={item.content_id} material={item} />;
+          contentElement = <Material material={item} />;
+          break;
         case 'class_link':
-          return <ClassLink key={item.content_id} classLink={item.linkData || item} />;
+          contentElement = <ClassLink classLink={item.linkData || item} />;
+          break;
         default:
           return null;
       }
+
+      // Return the content wrapped with delete button for instructors
+      return (
+        <div key={item.content_id} className="content-item-container">
+          {contentElement}
+          {userRole === 'instructor' && (
+            <button 
+              className="delete-content-btn" 
+              onClick={() => handleDeleteContent(item.content_id)}
+              title="Delete this content"
+            >
+              <i className="fas fa-trash"></i>
+            </button>
+          )}
+        </div>
+      );
     });
   };
 
@@ -105,10 +144,9 @@ const handleClose = () => {
         <div className="course-header">
           <h1 className="course-title">{courseInfo.course_name || 'Course Details'}</h1>
           <p className="course-instructor">Instructor: {courseInfo.instructor_name || 'Not assigned'}</p>
-        <button className="close-button" onClick={handleClose}>
-  <span aria-hidden="true">&times;</span>
-</button>
-
+          <button className="close-button" onClick={handleClose}>
+            <span aria-hidden="true">&times;</span>
+          </button>
         </div>
 
         <div className="content-filters">

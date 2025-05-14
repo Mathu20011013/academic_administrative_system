@@ -1,13 +1,14 @@
 /* Navbar.css */
 .navbar {
   width: 100%;
-  background-color: #f9b500; /* Orange background */
+  background-color: #f9b500; /* Keep your brand color */
   padding: 10px 0;
   text-align: center;
   border-radius: 10px;
   position: relative;
   display: flex;
-  justify-content: center; /* Center the navbar contents */
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08); /* Add subtle shadow for depth */
 }
 
 .navbar .navbar-brand {
@@ -32,19 +33,21 @@
 }
 
 .nav-link {
-  color: black; /* Default text color */
+  color: #333333; /* Darker text for better contrast */
   text-decoration: none;
   font-size: 16px;
   padding: 10px 20px;
   border-radius: 5px;
   transition: background-color 0.3s ease;
-  width: 150px; /* Fixed width for all tabs */ width: 150px; /* Fixed width for all tabs */
-  text-align: center; /* Center the text */  text-align: center; /* Center the text */
+  width: 150px;
+  text-align: center;
+  border: 2px solid #f9b500;
 }
 
 .nav-link:hover {
-  background-color: #FFC107; /* Hover effect with background color */ background-color: #FFC107; /* Hover effect with background color */
-  color: white; /* Text color on hover */  color: white; /* Text color on hover */
+    background-color: #FFC107;
+    color: white;
+    /* Border is already applied from the default state */
 }
 
 /* Active tab styles */

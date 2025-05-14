@@ -59,7 +59,8 @@ exports.createContent = async (req, res) => {
       await Assignment.createForContent(
         contentId,
         req.body.due_date,
-        req.body.max_score || 100
+        req.body.max_score || 100,
+        course_id
       );
     }
 
@@ -77,7 +78,7 @@ exports.createContent = async (req, res) => {
       const Announcement = require("../models/announcementModel");
       await Announcement.create({
         content_id: contentId,
-        is_pinned: req.body.is_pinned || false,
+        is_pinned: req.body.is_pinned ? 1 : 0
       });
     }
 
@@ -88,9 +89,12 @@ exports.createContent = async (req, res) => {
     });
   } catch (error) {
     console.error("Error creating course content:", error);
-    res
-      .status(500)
-      .json({ message: "Error creating course content", error: error.message });
+    console.error("Error details:", JSON.stringify(error, null, 2));
+    res.status(500).json({ 
+      message: "Error creating course content", 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 };
 
@@ -117,19 +121,45 @@ exports.getCourseContent = async (req, res) => {
           const assignmentData = await Assignment.getByContentId(
             item.content_id
           );
-          return { ...item, files, assignmentData };
+          // Include title and description from course_content in the assignmentData
+          return { 
+            ...item, 
+            files, 
+            assignmentData: {
+              ...assignmentData,
+              title: item.title,
+              description: item.description
+            }
+          };
         }
 
         if (item.content_type === "class_link") {
           const linkData = await ClassLink.getByContentId(item.content_id);
-          return { ...item, files, linkData };
+          return { 
+            ...item, 
+            files, 
+            linkData: {
+              ...linkData,
+              title: item.title,
+              description: item.description
+            }
+          };
         }
+        
         if (item.content_type === "announcement") {
           const Announcement = require("../models/announcementModel");
           const announcementData = await Announcement.getByContentId(
             item.content_id
           );
-          return { ...item, files, announcementData };
+          return { 
+            ...item, 
+            files, 
+            announcementData: {
+              ...announcementData,
+              title: item.title,
+              description: item.description
+            }
+          };
         }
 
         return { ...item, files };

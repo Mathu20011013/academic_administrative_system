@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import ProfileModal from "../pages/ProfileModal"; 
-import "../styles/HeroSection.css"; 
-import logo from "../assets/LOGO.png"; 
-import { FaUser } from "react-icons/fa"; // Import React Icons
+import ProfileModal from "../pages/ProfileModal";
+import "../styles/HeroSection.css";
+import logo from "../assets/LOGO.png";
+import { FaUser, FaBell, FaShoppingCart, FaSearch } from "react-icons/fa";
 
 const HeroSection = ({ role, userId }) => {
   const [showProfileModal, setShowProfileModal] = useState(false);
-  
+
   // Debug log when props change
   useEffect(() => {
     console.log("HeroSection received props:", { userId, role });
@@ -15,14 +15,14 @@ const HeroSection = ({ role, userId }) => {
   // Function to handle profile icon click
   const handleProfileClick = () => {
     // Get userId and role from localStorage if not provided as props
-    const storedUserId = userId || localStorage.getItem('userId');
-    const storedRole = role || localStorage.getItem('userRole');
-    
-    console.log("Profile clicked, using:", { 
-      userId: storedUserId, 
-      role: storedRole 
+    const storedUserId = userId || localStorage.getItem("userId");
+    const storedRole = role || localStorage.getItem("userRole");
+
+    console.log("Profile clicked, using:", {
+      userId: storedUserId,
+      role: storedRole,
     });
-    
+
     if (storedUserId && storedRole) {
       setShowProfileModal(true);
     } else {
@@ -37,6 +37,9 @@ const HeroSection = ({ role, userId }) => {
     setShowProfileModal(false);
   };
 
+  // Determine user role for conditional rendering
+  const userRole = role || localStorage.getItem("userRole");
+
   return (
     <div className="hero-container">
       {/* Top Row: Logo, Name, Search Bar, Icons */}
@@ -46,35 +49,39 @@ const HeroSection = ({ role, userId }) => {
           <h2>ERROR TO CLEVER</h2>
         </div>
 
-        {/* Bootstrap Search Bar */}
-        <nav className="navbar navbar-light bg-light">
-          <form className="form-inline d-flex align-items-center">
-            <input
-              className="form-control search-input"
-              type="search"
-              placeholder="Search for course"
-              aria-label="Search"
-            />
-            <button className="btn btn-outline-success search-button" type="submit">
-              <i className="fas fa-search"></i> Search
-            </button>
-          </form>
-        </nav>
-
+        {/* Search Bar */}
+        <div className="hero-search">
+          <input
+            type="search"
+            placeholder="Search for course"
+            aria-label="Search"
+          />
+          <button type="submit">
+            <FaSearch />
+          </button>
+        </div>
         <div className="hero-icons">
-          {/* Conditionally render icons based on role */}
-          {(role === "student" || localStorage.getItem('userRole') === 'student') && 
-            <span>🛒</span>
-          } {/* Cart Icon for Student */}
-          <span>🔔</span> {/* Notification Icon */}
-          {/* Updated profile icon with better styling */}
-          <span 
-            onClick={handleProfileClick} 
+          {/* Conditionally render cart icon based on role */}
+          {userRole === "student" && (
+            <div className="cart-icon">
+              <FaShoppingCart />
+            </div>
+          )}
+
+          {/* Notification Icon */}
+          <div className="notification-icon">
+            <FaBell />
+            <span className="notification-badge">3</span>
+          </div>
+
+          {/* Profile Icon */}
+          <div
+            onClick={handleProfileClick}
             className="profile-icon"
             title="Your Profile"
           >
             <FaUser />
-          </span>
+          </div>
         </div>
       </div>
 
@@ -86,10 +93,10 @@ const HeroSection = ({ role, userId }) => {
 
       {/* Profile Modal */}
       {showProfileModal && (
-        <ProfileModal 
-          userId={userId || localStorage.getItem('userId')} 
-          role={role || localStorage.getItem('userRole')} 
-          closeModal={closeProfileModal} 
+        <ProfileModal
+          userId={userId || localStorage.getItem("userId")}
+          role={role || localStorage.getItem("userRole")}
+          closeModal={closeProfileModal}
         />
       )}
     </div>

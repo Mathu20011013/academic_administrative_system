@@ -21,6 +21,7 @@ import InstructorChatbot from './pages/instructor/instructorChatbot'; // Correct
 import CourseDetail from './components/CourseDetail';
 import SubmissionForm from './components/SubmissionForm';
 import SubmissionGrader from './components/instructor/SubmissionGrader';
+import ContentCreator from './components/instructor/ContentCreator';
 
 import NotFound from './components/NotFound';
 
@@ -55,9 +56,10 @@ const App = () => {
           {/* Catch-all route for 404 Not Found */}
 
           <Route path="/course/:courseId" element={<CourseDetail />} />
+          <Route path="/course/:courseId/add-content" element={<ContentCreator />} />
           <Route path="/assignment/:assignmentId/submit" element={<SubmissionForm />} />
           <Route path="/assignment/:assignmentId/submissions" element={<SubmissionGrader />} />
-          {/* Catch-all route for 404 Not Found */}
+          
           <Route path="*" element={<NotFound />} />
 
         </Routes>

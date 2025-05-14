@@ -19,6 +19,9 @@ const Home = () => {
       })
       .catch((error) => {
         console.error("Error fetching courses:", error);
+        if (error.response) {
+          console.error("Response data:", error.response.data);
+        }
         setLoading(false);
       });
   }, []);
@@ -56,7 +59,7 @@ const Home = () => {
                   imgSrc={course.image_url || "https://via.placeholder.com/150"}
                   description={course.description} // Ensure description is passed
                   buttonText="Enroll"
-                   course_id={course.course_id} 
+                  course_id={course.course_id} 
                 />
               </div>
             ))

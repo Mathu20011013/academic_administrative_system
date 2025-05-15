@@ -6,10 +6,9 @@ const db = require("../config/db"); // Make sure this line is present
 exports.getAllCourses = async (req, res) => {
   try {
     const query = `
-  SELECT c.course_id, c.course_name, c.price, c.image_url, u.username AS instructor_name, c.syllabus AS description
-  FROM course c
-  LEFT JOIN user u ON c.instructor_id = u.user_id`;
-    // Use 'syllabus' as the description
+      SELECT c.course_id, c.course_name, c.price, c.image_url, u.username AS instructor_name, c.syllabus AS description
+      FROM course c
+      LEFT JOIN user u ON c.instructor_id = u.user_id`;
 
     db.query(query, (err, results) => {
       if (err) {
@@ -24,7 +23,7 @@ exports.getAllCourses = async (req, res) => {
     console.error("Error fetching courses:", error);
     res.status(500).json({ message: "Failed to fetch courses", error });
   }
-};
+}; // Missing closing brace added
 
 // Get course by ID
 exports.getCourseById = async (req, res) => {
@@ -97,17 +96,62 @@ exports.deleteCourse = async (req, res) => {
 // Get instructor courses
 exports.getInstructorCourses = async (req, res) => {
   try {
-    const instructorId = req.user.id; // Extract the instructor's ID from the JWT token
-
-    const courses = await Course.getInstructorCourses(instructorId); // Fetch courses assigned to the instructor
-
-    if (!courses || courses.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No courses assigned to this instructor." });
+    // Check if req.user exists
+    if (!req.user) {
+      console.error("User not authenticated");
+      return res.status(401).json({ message: "Authentication required" });
     }
-
-    return res.status(200).json({ courses });
+    
+    const userId = req.user.id;
+    console.log("User ID from token:", userId);
+    
+    // First, get the instructor_id that corresponds to this user_id
+    const instructorQuery = `SELECT instructor_id FROM instructor WHERE user_id = ?`;
+    
+    db.query(instructorQuery, [userId], (err, instructorResults) => {
+      if (err) {
+        console.error("Error finding instructor:", err);
+        return res.status(500).json({ 
+          message: "Failed to find instructor record", 
+          error: err 
+        });
+      }
+      
+      if (instructorResults.length === 0) {
+        return res.status(404).json({ 
+          message: "No instructor record found for this user" 
+        });
+      }
+      
+      const instructorId = instructorResults[0].instructor_id;
+      console.log("Mapped instructor_id:", instructorId);
+      
+      // Now query for courses using the correct instructor_id
+      // Include the JOIN with user table to get instructor_name
+      const coursesQuery = `
+        SELECT c.course_id, c.course_name, c.price, c.image_url, u.username AS instructor_name, c.syllabus AS description
+        FROM course c
+        LEFT JOIN user u ON c.instructor_id = u.user_id
+        WHERE c.instructor_id = ?`;
+      
+      db.query(coursesQuery, [instructorId], (err, results) => {
+        if (err) {
+          console.error("Error fetching instructor courses:", err);
+          return res.status(500).json({ 
+            message: "Failed to fetch instructor courses", 
+            error: err 
+          });
+        }
+        
+        if (results.length === 0) {
+          return res.status(404).json({ 
+            message: "No courses assigned to this instructor." 
+          });
+        }
+        
+        return res.status(200).json({ courses: results });
+      });
+    });
   } catch (error) {
     console.error("Error fetching instructor courses:", error);
     return res

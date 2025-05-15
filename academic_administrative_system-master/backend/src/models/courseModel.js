@@ -18,21 +18,23 @@ module.exports = {
     });
   },
   // Function to get courses assigned to a specific instructor
-  getInstructorCourses: (instructor_id) => {
-    return new Promise((resolve, reject) => {
-      const query = `
+ getInstructorCourses: (instructor_id) => {
+  return new Promise((resolve, reject) => {
+    const query = `
       SELECT c.course_id, c.course_name, c.price, c.image_url, u.username AS instructor_name, c.syllabus AS description
       FROM course c
-      JOIN user u ON c.instructor_id = u.user_id
+      LEFT JOIN user u ON c.instructor_id = u.user_id
       WHERE c.instructor_id = ?`;
-      db.query(query, [instructor_id], (err, results) => {
-        if (err) {
-          return reject(err);
-        }
-        resolve(results);
-      });
+    
+    db.query(query, [instructor_id], (err, results) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(results);
     });
-  },
+  });
+},
+
   // Get course by ID
   getById: (course_id) => {
     return new Promise((resolve, reject) => {
@@ -83,26 +85,33 @@ module.exports = {
     return new Promise((resolve, reject) => {
       db.query(
         query,
-        [course_name, instructor_name, price, syllabus, image_url, course_id],
+        [course_name, instructor_id, price, syllabus, image_url, course_id], // Changed instructor_name to instructor_id
         (err, result) => {
-          // ...
+          if (err) {
+            console.error("Error updating course:", err);
+            reject(err);
+          } else {
+            console.log("Course updated successfully:", result);
+            resolve(result);
+          }
         }
       );
     });
   },
   // Delete a course
-  delete: (course_id) => {
-    const query = "DELETE FROM course WHERE course_id = ?";
-    return new Promise((resolve, reject) => {
-      db.query(query, [course_id], (err, result) => {
-        if (err) {
-          console.error("Error deleting course:", err);
-          reject(err);
-        } else {
-          console.log("Course deleted successfully:", result);
-          resolve(result);
-        }
-      });
+delete: (course_id) => {
+  const query = "DELETE FROM course WHERE course_id = ?";
+  return new Promise((resolve, reject) => {
+    db.query(query, [course_id], (err, result) => {
+      if (err) {
+        console.error("Error deleting course:", err);
+        reject(err);
+      } else {
+        console.log("Course and related enrollments deleted successfully");
+        resolve(result);
+      }
     });
-  },
+  });
+},
+
 };

@@ -28,6 +28,8 @@ const authenticate = (req, res, next) => {
     try {
       const decoded = jwt.verify(token, JWT_SECRET);
       console.log('Decoded token:', decoded);
+      console.log('Token user ID property:', decoded.id ? 'id' : decoded.user_id ? 'user_id' : 'not found');
+      
       req.user = decoded;
       next();
     } catch (verifyError) {

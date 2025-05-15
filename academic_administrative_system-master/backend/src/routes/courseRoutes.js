@@ -17,6 +17,10 @@ router.post('/create',
 // Route to get all courses (for students)
 router.get('/', getAllCourses);
 
+// Route to get courses assigned to a specific instructor (based on login credentials)
+// This route requires authentication
+router.get('/instructor/courses', authenticate, getInstructorCourses); // Fetch courses assigned to the logged-in instructor
+
 // Route to get a specific course by ID
 router.get('/:courseId', getCourseById);
 
@@ -25,9 +29,5 @@ router.put('/:courseId', updateCourse);
 
 // Route to delete a course (admin only)
 router.delete('/:courseId', deleteCourse);
-
-// Route to get courses assigned to a specific instructor (based on login credentials)
-// This route requires authentication
-router.get('/instructor/courses', authenticate, getInstructorCourses); // Fetch courses assigned to the logged-in instructor
 
 module.exports = router;

@@ -2,6 +2,7 @@
 const Enrollment = require("../models/enrollmentModel");
 const Course = require("../models/courseModel");
 const Student = require("../models/studentModel");
+const db = require('../config/db');
 
 // Get all courses with instructor name
 exports.getAllCourses = async (req, res) => {
@@ -33,8 +34,7 @@ exports.enrollStudent = async (req, res) => {
         .json({ message: "Already enrolled in this course" });
     }
     
-    // Skip student validation or create student record if needed
-    // We'll directly create the enrollment
+    // Create the enrollment with the user_id (which will be mapped to student_id in the model)
     await Enrollment.create(student_id, course_id);
     res.status(200).json({ message: "Enrollment successful!" });
   } catch (err) {
@@ -50,8 +50,28 @@ exports.getEnrolledCourses = async (req, res) => {
   const student_id = req.params.student_id;
 
   try {
+    // First check if we need to map from user_id to student_id
+    let studentId = student_id;
+    
+    // If this looks like a user_id rather than a student_id, map it
+    if (isNaN(studentId) || parseInt(studentId) > 1000) { // Assuming user_ids are larger than student_ids
+      const query = 'SELECT student_id FROM student WHERE user_id = ?';
+      const results = await new Promise((resolve, reject) => {
+        db.query(query, [student_id], (err, results) => {
+          if (err) reject(err);
+          else resolve(results);
+        });
+      });
+      
+      if (results.length === 0) {
+        return res.status(404).json({ message: "Student not found" });
+      }
+      
+      studentId = results[0].student_id;
+    }
+    
     // Fetch enrolled courses with instructor name
-    const courses = await Enrollment.getEnrolledCourses(student_id);
+    const courses = await Enrollment.getEnrolledCourses(studentId);
     res.status(200).json({ courses });
   } catch (error) {
     console.error("Error fetching enrolled courses:", error);
@@ -65,7 +85,27 @@ exports.checkEnrollment = async (req, res) => {
   const course_id = req.params.courseId;
   
   try {
-    const isEnrolled = await Enrollment.checkEnrollment(student_id, course_id);
+    // First check if we need to map from user_id to student_id
+    let studentId = student_id;
+    
+    // If this looks like a user_id rather than a student_id, map it
+    if (isNaN(studentId) || parseInt(studentId) > 1000) { // Assuming user_ids are larger than student_ids
+      const query = 'SELECT student_id FROM student WHERE user_id = ?';
+      const results = await new Promise((resolve, reject) => {
+        db.query(query, [student_id], (err, results) => {
+          if (err) reject(err);
+          else resolve(results);
+        });
+      });
+      
+      if (results.length === 0) {
+        return res.status(404).json({ message: "Student not found" });
+      }
+      
+      studentId = results[0].student_id;
+    }
+    
+    const isEnrolled = await Enrollment.checkEnrollment(studentId, course_id);
     res.status(200).json({ isEnrolled });
   } catch (error) {
     console.error("Error checking enrollment:", error);

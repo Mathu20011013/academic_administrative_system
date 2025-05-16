@@ -40,12 +40,22 @@ app.use('/api/classlink', classLinkRoutes);
 app.use('/api/rating', courseRatingRoutes);
 app.use('/api/announcement', announcementRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/materials', require('./routes/materialRoutes')); // Add materials routes
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, '../frontend/build'))); // Ensure the correct path to React build
 
 // The "catchall" handler: for any request that doesn't match one above, send back index.html
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+  res.status(200).send('API server is running. Frontend needs to be served separately in development.');
+});
+
+// Only handle API routes, don't try to serve frontend files
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    next();
+  } else {
+    res.status(200).send('API server is running. Frontend needs to be served separately in development.');
+  }
 });
 
 

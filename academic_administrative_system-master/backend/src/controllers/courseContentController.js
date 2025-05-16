@@ -30,27 +30,41 @@ exports.createContent = async (req, res) => {
     let fileUrls = [];
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
-        // Upload to Cloudinary
-        const result = await cloudinary.uploader.upload(file.path, {
-          resource_type: "auto",
-        });
+        try {
+          // Upload to Cloudinary with enhanced options for larger files
+          const result = await cloudinary.uploader.upload(file.path, {
+            resource_type: "auto",
+            folder: "course_materials",
+            use_filename: true,
+            chunk_size: 20000000, // 20MB chunks for larger files
+            timeout: 120000 // Increased timeout (120 seconds)
+          });
 
-        // Add file to database with course_id
-        await Material.addFile(
-          contentId,
-          course_id,
-          file.originalname,
-          result.secure_url
-        );
+          // Add file to database with course_id
+          await Material.addFile(
+            contentId,
+            course_id,
+            file.originalname,
+            result.secure_url,
+            result.public_id  // Store cloudinary public_id for later reference
+          );
 
-        // Add to response
-        fileUrls.push({
-          name: file.originalname,
-          url: result.secure_url,
-        });
+          // Add to response
+          fileUrls.push({
+            name: file.originalname,
+            url: result.secure_url,
+          });
 
-        // Remove temp file
-        fs.unlinkSync(file.path);
+          // Remove temp file
+          fs.unlinkSync(file.path);
+        } catch (uploadError) {
+          console.error(`Error uploading file ${file.originalname}:`, uploadError);
+          // Continue with other files even if one fails
+          fileUrls.push({
+            name: file.originalname,
+            error: uploadError.message,
+          });
+        }
       }
     }
 
@@ -115,7 +129,8 @@ exports.getCourseContent = async (req, res) => {
     const contentWithFiles = await Promise.all(
       content.map(async (item) => {
         const files = await Material.getFilesByContentId(item.content_id);
-
+        console.log(`Content ${item.content_id} (${item.title}) has ${files.length} files`);
+        
         // Get additional data based on content type
         if (item.content_type === "assignment") {
           const assignmentData = await Assignment.getByContentId(
@@ -188,27 +203,41 @@ exports.updateContent = async (req, res) => {
     let fileUrls = [];
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
-        // Upload to Cloudinary
-        const result = await cloudinary.uploader.upload(file.path, {
-          resource_type: "auto",
-        });
+        try {
+          // Upload to Cloudinary with enhanced options
+          const result = await cloudinary.uploader.upload(file.path, {
+            resource_type: "auto",
+            folder: "course_materials",
+            use_filename: true,
+            chunk_size: 20000000, // 20MB chunks for larger files
+            timeout: 120000 // Increased timeout (120 seconds)
+          });
 
-        // Add file to database
-        await Material.addFile(
-          contentId,
-          course_id,
-          file.originalname,
-          result.secure_url
-        );
+          // Add file to database
+          await Material.addFile(
+            contentId,
+            course_id,
+            file.originalname,
+            result.secure_url,
+            result.public_id
+          );
 
-        // Add to response
-        fileUrls.push({
-          name: file.originalname,
-          url: result.secure_url,
-        });
+          // Add to response
+          fileUrls.push({
+            name: file.originalname,
+            url: result.secure_url,
+          });
 
-        // Remove temp file
-        fs.unlinkSync(file.path);
+          // Remove temp file
+          fs.unlinkSync(file.path);
+        } catch (uploadError) {
+          console.error(`Error uploading file ${file.originalname}:`, uploadError);
+          // Continue with other files even if one fails
+          fileUrls.push({
+            name: file.originalname,
+            error: uploadError.message,
+          });
+        }
       }
     }
 

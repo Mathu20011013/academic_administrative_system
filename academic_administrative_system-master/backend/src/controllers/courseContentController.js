@@ -28,17 +28,49 @@ exports.createContent = async (req, res) => {
 
     // Handle file uploads if files are included
     let fileUrls = [];
+    const uploadToCloudinary = async (file) => {
+      try {
+        // Determine file type and set resource_type accordingly
+        const fileExtension = file.originalname.split(".").pop().toLowerCase();
+        const resourceType = [
+          "pdf",
+          "doc",
+          "docx",
+          "ppt",
+          "pptx",
+          "xls",
+          "xlsx",
+        ].includes(fileExtension)
+          ? "raw"
+          : "auto";
+
+        console.log(
+          `Uploading ${file.originalname} as resource_type: ${resourceType}`
+        );
+
+        // Upload to Cloudinary with correct resource type
+        const result = await cloudinary.uploader.upload(file.path, {
+          resource_type: resourceType,
+          folder: "course_materials",
+          use_filename: true,
+          chunk_size: 20000000, // 20MB chunks for larger files
+          timeout: 120000, // Increased timeout (120 seconds)
+        });
+
+        console.log(
+          `Upload success for ${file.originalname}: ${result.secure_url}`
+        );
+        return result;
+      } catch (error) {
+        console.error(`Upload failed for ${file.originalname}:`, error);
+        throw error;
+      }
+    };
+
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
         try {
-          // Upload to Cloudinary with enhanced options for larger files
-          const result = await cloudinary.uploader.upload(file.path, {
-            resource_type: "auto",
-            folder: "course_materials",
-            use_filename: true,
-            chunk_size: 20000000, // 20MB chunks for larger files
-            timeout: 120000 // Increased timeout (120 seconds)
-          });
+          const result = await uploadToCloudinary(file);
 
           // Add file to database with course_id
           await Material.addFile(
@@ -46,7 +78,7 @@ exports.createContent = async (req, res) => {
             course_id,
             file.originalname,
             result.secure_url,
-            result.public_id  // Store cloudinary public_id for later reference
+            result.public_id // Store cloudinary public_id for later reference
           );
 
           // Add to response
@@ -92,7 +124,7 @@ exports.createContent = async (req, res) => {
       const Announcement = require("../models/announcementModel");
       await Announcement.create({
         content_id: contentId,
-        is_pinned: req.body.is_pinned ? 1 : 0
+        is_pinned: req.body.is_pinned ? 1 : 0,
       });
     }
 
@@ -104,10 +136,10 @@ exports.createContent = async (req, res) => {
   } catch (error) {
     console.error("Error creating course content:", error);
     console.error("Error details:", JSON.stringify(error, null, 2));
-    res.status(500).json({ 
-      message: "Error creating course content", 
+    res.status(500).json({
+      message: "Error creating course content",
       error: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
     });
   }
 };
@@ -129,51 +161,53 @@ exports.getCourseContent = async (req, res) => {
     const contentWithFiles = await Promise.all(
       content.map(async (item) => {
         const files = await Material.getFilesByContentId(item.content_id);
-        console.log(`Content ${item.content_id} (${item.title}) has ${files.length} files`);
-        
+        console.log(
+          `Content ${item.content_id} (${item.title}) has ${files.length} files`
+        );
+
         // Get additional data based on content type
         if (item.content_type === "assignment") {
           const assignmentData = await Assignment.getByContentId(
             item.content_id
           );
           // Include title and description from course_content in the assignmentData
-          return { 
-            ...item, 
-            files, 
+          return {
+            ...item,
+            files,
             assignmentData: {
               ...assignmentData,
               title: item.title,
-              description: item.description
-            }
+              description: item.description,
+            },
           };
         }
 
         if (item.content_type === "class_link") {
           const linkData = await ClassLink.getByContentId(item.content_id);
-          return { 
-            ...item, 
-            files, 
+          return {
+            ...item,
+            files,
             linkData: {
               ...linkData,
               title: item.title,
-              description: item.description
-            }
+              description: item.description,
+            },
           };
         }
-        
+
         if (item.content_type === "announcement") {
           const Announcement = require("../models/announcementModel");
           const announcementData = await Announcement.getByContentId(
             item.content_id
           );
-          return { 
-            ...item, 
-            files, 
+          return {
+            ...item,
+            files,
             announcementData: {
               ...announcementData,
               title: item.title,
-              description: item.description
-            }
+              description: item.description,
+            },
           };
         }
 
@@ -201,17 +235,49 @@ exports.updateContent = async (req, res) => {
 
     // Handle file uploads if files are included
     let fileUrls = [];
+    const uploadToCloudinary = async (file) => {
+      try {
+        // Determine file type and set resource_type accordingly
+        const fileExtension = file.originalname.split(".").pop().toLowerCase();
+        const resourceType = [
+          "pdf",
+          "doc",
+          "docx",
+          "ppt",
+          "pptx",
+          "xls",
+          "xlsx",
+        ].includes(fileExtension)
+          ? "raw"
+          : "auto";
+
+        console.log(
+          `Uploading ${file.originalname} as resource_type: ${resourceType}`
+        );
+
+        // Upload to Cloudinary with correct resource type
+        const result = await cloudinary.uploader.upload(file.path, {
+          resource_type: resourceType,
+          folder: "course_materials",
+          use_filename: true,
+          chunk_size: 20000000, // 20MB chunks for larger files
+          timeout: 120000, // Increased timeout (120 seconds)
+        });
+
+        console.log(
+          `Upload success for ${file.originalname}: ${result.secure_url}`
+        );
+        return result;
+      } catch (error) {
+        console.error(`Upload failed for ${file.originalname}:`, error);
+        throw error;
+      }
+    };
+
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
         try {
-          // Upload to Cloudinary with enhanced options
-          const result = await cloudinary.uploader.upload(file.path, {
-            resource_type: "auto",
-            folder: "course_materials",
-            use_filename: true,
-            chunk_size: 20000000, // 20MB chunks for larger files
-            timeout: 120000 // Increased timeout (120 seconds)
-          });
+          const result = await uploadToCloudinary(file);
 
           // Add file to database
           await Material.addFile(

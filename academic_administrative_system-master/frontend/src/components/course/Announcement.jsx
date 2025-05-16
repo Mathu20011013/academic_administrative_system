@@ -24,35 +24,55 @@ const Announcement = ({ announcement }) => {
     // Handle file download directly
     const handleDownload = async (fileUrl, fileName) => {
         try {
+            if (!fileUrl) {
+                throw new Error('File URL is missing');
+            }
+            
             // For Cloudinary URLs, we need special handling
-            if (fileUrl && fileUrl.includes('cloudinary.com')) {
-                // For PDFs, get the raw file format from cloudinary
+            if (fileUrl.includes('cloudinary.com')) {
+                console.log(`Attempting to download: ${fileName} from ${fileUrl}`);
+                
+                // For PDFs, use specialized handling
                 if (fileName && fileName.toLowerCase().endsWith('.pdf')) {
                     // Transform the URL to get the raw file instead of the default viewer
                     const baseUrl = fileUrl.split('/upload/')[0];
                     const filePathPart = fileUrl.split('/upload/')[1];
+                    
+                    // Try the fl_attachment approach first (works in most browsers)
                     const downloadUrl = `${baseUrl}/upload/fl_attachment/${filePathPart}`;
+                    console.log(`Using PDF download URL: ${downloadUrl}`);
                     
                     // Open in new tab with download flag
                     window.open(downloadUrl, '_blank');
                 } else {
-                    // For non-PDFs, use fetch API approach for better control
-                    const response = await fetch(fileUrl);
-                    const blob = await response.blob();
-                    
-                    // Create object URL and trigger download
-                    const url = window.URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = fileName || 'download';
-                    document.body.appendChild(link);
-                    link.click();
-                    
-                    // Cleanup
-                    setTimeout(() => {
-                        document.body.removeChild(link);
-                        window.URL.revokeObjectURL(url);
-                    }, 100);
+                    // For non-PDFs, try the fetch approach with fallback
+                    try {
+                        const response = await fetch(fileUrl);
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP error: ${response.status}`);
+                        }
+                        
+                        const blob = await response.blob();
+                        
+                        // Create object URL and trigger download
+                        const url = window.URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = fileName || 'download';
+                        document.body.appendChild(link);
+                        link.click();
+                        
+                        // Cleanup
+                        setTimeout(() => {
+                            document.body.removeChild(link);
+                            window.URL.revokeObjectURL(url);
+                        }, 100);
+                    } catch (fetchError) {
+                        console.warn(`Fetch download failed: ${fetchError.message}, falling back to direct link`);
+                        // Fallback to direct link opening
+                        window.open(fileUrl, '_blank');
+                    }
                 }
             } else {
                 // For non-Cloudinary URLs, use the original method

@@ -4,6 +4,12 @@
   padding: 20px;
 }
 
+.forum-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
 /* Form for adding a new discussion */
 .new-discussion-box {
   border: 1px solid #ddd;
@@ -11,12 +17,15 @@
   padding: 20px;
   margin-bottom: 20px;
   background-color: #f9f9f9;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .new-discussion-box h3 {
   font-size: 1.5rem;
   margin-bottom: 15px;
   text-align: center;
+  margin-top: 0;
+  color: #333;
 }
 
 .new-discussion-box form div {
@@ -53,10 +62,23 @@
   margin-top: 20px;
 }
 
+.forum-posts {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
 .forum-post-card {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
   background-color: #fff;
+}
+
+.forum-post {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .card-body {
@@ -104,4 +126,99 @@
   justify-content: center;
   align-items: center;
   height: 100px; /* Adjust the height as needed */
+}
+
+/* Comments and Error Messages */
+.comments-section {
+  border-top: 1px solid #eee;
+  padding-top: 15px;
+}
+
+.comments-section h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #555;
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.comment {
+  background: #f9f9f9;
+  border-radius: 6px;
+  padding: 15px;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.user-type {
+  background: #e7f3ff;
+  border-radius: 4px;
+  padding: 2px 6px;
+  margin-left: 5px;
+  font-size: 12px;
+}
+
+.comment-content {
+  line-height: 1.5;
+}
+
+.comment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.comment-form textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  resize: vertical;
+}
+
+.comment-button {
+  display: inline-block; /* Ensure button is visible */
+  padding: 8px 16px;
+  background: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.comment-button:hover {
+  background: #3a7bc8;
+}
+
+.comment-button:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+}
+
+.no-comments, .no-discussions {
+  color: #888;
+  font-style: italic;
+  text-align: center;
+  padding: 20px;
+}
+
+.error-message {
+  color: #e53935;
+  background: #ffebee;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  text-align: center;
 }

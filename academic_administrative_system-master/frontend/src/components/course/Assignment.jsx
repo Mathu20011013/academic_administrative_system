@@ -3,40 +3,33 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import '../../styles/Assignment.css';
-import api from '../../api/api';
 
 const Assignment = ({ assignment, isInstructor, studentId }) => {
   const [submission, setSubmission] = useState(null);
   const navigate = useNavigate();
-  
-  useEffect(() => {
-    // If student, check if they've already submitted
-    if (!isInstructor && studentId) {
-      const checkSubmission = async () => {
-        try {
-          const response = await api.get(`/submission/student/${studentId}/assignment/${assignment.assignment_id}`);
-          if (response.data.submission) {
-            setSubmission(response.data.submission);
-          }
-        } catch (error) {
-          console.error('Error checking submission:', error);
-        }
-      };
-      checkSubmission();
-    }
-  }, [assignment.assignment_id, isInstructor, studentId]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleViewSubmissions = () => {
-    navigate(`/assignment/${assignment.assignment_id}/submissions`);
+  // Function to format date nicely
+  const formatDate = (dateString) => {
+    if (!dateString) return 'No due date';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
   };
 
-  const handleSubmit = () => {
-    navigate(`/assignment/${assignment.assignment_id}/submit`);
+  // Check if assignment is past due
+  const isPastDue = () => {
+    if (!assignment.due_date) return false;
+    const dueDate = new Date(assignment.due_date);
+    const now = new Date();
+    return now > dueDate;
   };
-
-  // Calculate if assignment is past due
-  const isPastDue = new Date(assignment.due_date) < new Date();
 
   // Get appropriate icon based on file type
   const getFileIcon = (fileName) => {
@@ -53,136 +46,204 @@ const Assignment = ({ assignment, isInstructor, studentId }) => {
     
     return 'fa-file';
   };
-  
-  // Handle file download directly
+
+  // Handle file download
   const handleDownload = async (fileUrl, fileName) => {
     try {
-        if (!fileUrl) {
-            throw new Error('File URL is missing');
-        }
+      if (!fileUrl) {
+        throw new Error('File URL is missing');
+      }
+      
+      // For Cloudinary URLs, we need special handling
+      if (fileUrl.includes('cloudinary.com')) {
+        console.log(`Attempting to download: ${fileName} from ${fileUrl}`);
         
-        // For Cloudinary URLs, we need special handling
-        if (fileUrl.includes('cloudinary.com')) {
-            console.log(`Attempting to download: ${fileName} from ${fileUrl}`);
-            
-            // For PDFs, use specialized handling
-            if (fileName && fileName.toLowerCase().endsWith('.pdf')) {
-                // Transform the URL to get the raw file instead of the default viewer
-                const baseUrl = fileUrl.split('/upload/')[0];
-                const filePathPart = fileUrl.split('/upload/')[1];
-                
-                // Try the fl_attachment approach first (works in most browsers)
-                const downloadUrl = `${baseUrl}/upload/fl_attachment/${filePathPart}`;
-                console.log(`Using PDF download URL: ${downloadUrl}`);
-                
-                // Open in new tab with download flag
-                window.open(downloadUrl, '_blank');
-            } else {
-                // For non-PDFs, try the fetch approach with fallback
-                try {
-                    const response = await fetch(fileUrl);
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP error: ${response.status}`);
-                    }
-                    
-                    const blob = await response.blob();
-                    
-                    // Create object URL and trigger download
-                    const url = window.URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = fileName || 'download';
-                    document.body.appendChild(link);
-                    link.click();
-                    
-                    // Cleanup
-                    setTimeout(() => {
-                        document.body.removeChild(link);
-                        window.URL.revokeObjectURL(url);
-                    }, 100);
-                } catch (fetchError) {
-                    console.warn(`Fetch download failed: ${fetchError.message}, falling back to direct link`);
-                    // Fallback to direct link opening
-                    window.open(fileUrl, '_blank');
-                }
-            }
+        // For PDFs, use specialized handling
+        if (fileName && fileName.toLowerCase().endsWith('.pdf')) {
+          // Transform the URL to get the raw file instead of the default viewer
+          const baseUrl = fileUrl.split('/upload/')[0];
+          const filePathPart = fileUrl.split('/upload/')[1];
+          
+          // Try the fl_attachment approach first (works in most browsers)
+          const downloadUrl = `${baseUrl}/upload/fl_attachment/${filePathPart}`;
+          console.log(`Using PDF download URL: ${downloadUrl}`);
+          
+          // Open in new tab with download flag
+          window.open(downloadUrl, '_blank');
         } else {
-            // For non-Cloudinary URLs, use the original method
+          // For non-PDFs, try the fetch approach with fallback
+          try {
+            const response = await fetch(fileUrl);
+            
+            if (!response.ok) {
+              throw new Error(`HTTP error: ${response.status}`);
+            }
+            
+            const blob = await response.blob();
+            
+            // Create object URL and trigger download
+            const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
-            link.href = fileUrl;
+            link.href = url;
             link.download = fileName || 'download';
-            link.target = '_blank';
             document.body.appendChild(link);
             link.click();
-            document.body.removeChild(link);
+            
+            // Cleanup
+            setTimeout(() => {
+              document.body.removeChild(link);
+              window.URL.revokeObjectURL(url);
+            }, 100);
+          } catch (fetchError) {
+            console.warn(`Fetch download failed: ${fetchError.message}, falling back to direct link`);
+            // Fallback to direct link opening
+            window.open(fileUrl, '_blank');
+          }
         }
+      } else {
+        // For non-Cloudinary URLs, use the original method
+        const link = document.createElement('a');
+        link.href = fileUrl;
+        link.download = fileName || 'download';
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
     } catch (error) {
-        console.error('Download error:', error);
-        alert('Failed to download file. Please try again later.');
+      console.error('Download error:', error);
+      alert('Failed to download file. Please try again later.');
     }
   };
-  
+
+  // Check if student has already submitted
+  useEffect(() => {
+    if (!isInstructor && studentId && assignment && assignment.assignment_id) {
+      const fetchSubmission = async () => {
+        try {
+          setLoading(true);
+          const response = await axios.get(`/api/submissions/student/${studentId}/assignment/${assignment.assignment_id}`);
+          if (response.data) {
+            setSubmission(response.data);
+          }
+        } catch (err) {
+          console.log("No submission found or error:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      fetchSubmission();
+    }
+  }, [assignment, studentId, isInstructor]);
+
+  if (!assignment) {
+    return <div className="assignment">Assignment details not available</div>;
+  }
+
   return (
-    <div className={`assignment ${isPastDue ? 'past-due' : ''}`}>
+    <div className={`assignment ${isPastDue() ? 'past-due' : ''}`}>
       <h3>{assignment.title}</h3>
-      <p className="assignment-description">{assignment.description}</p>
-      <div className="assignment-details">
-        <p>
-          <strong>Due Date:</strong> {new Date(assignment.due_date).toLocaleString()}
-        </p>
-        <p>
-          <strong>Max Score:</strong> {assignment.max_score} points
-        </p>
+      
+      <div className="assignment-description">
+        {assignment.description}
       </div>
       
-      {isInstructor ? (
-        <button onClick={handleViewSubmissions} className="view-submissions-btn">
-          View Submissions
-        </button>
-      ) : (
-        <div className="student-actions">
-          {submission ? (
-            <div className="submission-status">
-              <p>Submitted on: {new Date(submission.submission_date).toLocaleString()}</p>
-              {submission.grade !== null && (
-                <p className="grade">
-                  Grade: {submission.grade}/{assignment.max_score}
-                </p>
+      <div className="assignment-details">
+        <p><strong>Due Date:</strong> {formatDate(assignment.due_date)}</p>
+        <p><strong>Max Score:</strong> {assignment.max_score || 100}</p>
+        {isPastDue() && <p className="due-notice">This assignment is past due</p>}
+      </div>
+
+      {/* Assignment Files Section */}
+      {assignment.files && assignment.files.length > 0 && (
+        <div className="assignment-files">
+          <h4>Assignment Files</h4>
+          <div className="file-list">
+            {assignment.files.map((file, index) => (
+              <div key={file.material_id || index} className="file-item">
+                <i className={`fas ${getFileIcon(file.material_title)}`}></i>
+                <span className="file-name">{file.material_title || 'Unnamed file'}</span>
+                <button 
+                  className="download-btn"
+                  onClick={() => handleDownload(file.material_url, file.material_title)}
+                >
+                  <i className="fas fa-download"></i> Download
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Student submission options */}
+      {!isInstructor && (
+        <div className="submission-section">
+          {loading ? (
+            <p>Loading submission details...</p>
+          ) : submission ? (
+            <div className="existing-submission">
+              <h4>Your Submission</h4>
+              <p>Submitted on: {new Date(submission.created_at).toLocaleString()}</p>
+              
+              {/* Show submitted files if any */}
+              {submission.files && submission.files.length > 0 && (
+                <div className="submission-files">
+                  <h5>Submitted Files</h5>
+                  <div className="file-list">
+                    {submission.files.map((file, index) => (
+                      <div key={index} className="file-item">
+                        <i className={`fas ${getFileIcon(file.filename)}`}></i>
+                        <span className="file-name">{file.filename}</span>
+                        <button 
+                          className="download-btn"
+                          onClick={() => handleDownload(file.url, file.filename)}
+                        >
+                          <i className="fas fa-download"></i> Download
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Option to update submission if not past due */}
+              {!isPastDue() && (
+                <button 
+                  className="submit-btn"
+                  onClick={() => navigate(`/submit-assignment/${assignment.assignment_id}`)}
+                >
+                  Update Submission
+                </button>
               )}
             </div>
           ) : (
-            <button 
-              onClick={handleSubmit} 
-              className="submit-btn"
-              disabled={isPastDue}
-            >
-              {isPastDue ? 'Past Due' : 'Submit Assignment'}
-            </button>
+            // No submission yet
+            <div className="no-submission">
+              {!isPastDue() && (
+                <button 
+                  className="submit-btn"
+                  onClick={() => navigate(`/submit-assignment/${assignment.assignment_id}`)}
+                >
+                  Submit Assignment
+                </button>
+              )}
+            </div>
           )}
         </div>
       )}
 
-      {/* Display any attached files */}
-      {assignment.files && assignment.files.length > 0 && (
-        <div className="assignment-files">
-          <h4>Attached Files:</h4>
-          {assignment.files.map((file, index) => (
-            <div key={file.file_id || index} className="file-item">
-              <i className={`fas ${getFileIcon(file.file_name)}`}></i>
-              <span className="file-name">{file.file_name || 'Unnamed file'}</span>
-              <button 
-                className="download-btn"
-                onClick={() => handleDownload(file.file_url, file.file_name)}
-              >
-                <i className="fas fa-download"></i> Download
-              </button>
-            </div>
-          ))}
+      {/* Instructor grading options */}
+      {isInstructor && (
+        <div className="instructor-options">
+          <button 
+            className="view-submissions-btn"
+            onClick={() => navigate(`/instructor/assignments/${assignment.assignment_id}/submissions`)}
+          >
+            View Student Submissions
+          </button>
         </div>
       )}
-      
-      {/* Assignment submission form would go here */}
     </div>
   );
 };

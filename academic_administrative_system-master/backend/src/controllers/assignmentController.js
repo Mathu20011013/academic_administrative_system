@@ -8,34 +8,34 @@ const db = require('../config/db');
 // Get assignment details
 exports.getAssignment = async (req, res) => {
   try {
-    const assignmentId = req.params.assignmentId;
-    const query = `
-      SELECT a.*, c.title, c.description, c.course_id
-      FROM assignments a
-      JOIN course_content c ON a.content_id = c.content_id
-      WHERE a.assignment_id = ?`;
-    db.query(query, [assignmentId], async (err, results) => {
-      if (err) {
-        console.error('Error fetching assignment:', err);
-        return res.status(500).json({ message: 'Error fetching assignment', error: err.message });
-      }
-      if (results.length === 0) {
-        return res.status(404).json({ message: 'Assignment not found' });
-      }
-      const assignment = results[0];
-      const filesQuery = `SELECT * FROM course_materials WHERE content_id = ?`;
-      db.query(filesQuery, [assignment.content_id], (err, fileResults) => {
-        if (err) {
-          console.error('Error fetching assignment files:', err);
-          return res.status(500).json({ message: 'Error fetching assignment files', error: err.message });
-        }
-        assignment.files = fileResults;
-        res.status(200).json({ assignment });
-      });
-    });
+    const { assignmentId } = req.params;
+    
+    // Get assignment details
+    const assignment = await Assignment.getById(assignmentId);
+    
+    if (!assignment) {
+      return res.status(404).json({ message: "Assignment not found" });
+    }
+    
+    // Get content details to include title and description
+    const contentDetails = await CourseContent.getById(assignment.content_id);
+    
+    // Get files associated with this assignment's content
+    const Material = require('../models/materialModel');
+    const files = await Material.getFilesByContentId(assignment.content_id);
+    
+    // Combine all information
+    const assignmentWithDetails = {
+      ...assignment,
+      title: contentDetails?.title || "Untitled Assignment",
+      description: contentDetails?.description || "",
+      files: files || []
+    };
+    
+    res.json(assignmentWithDetails);
   } catch (error) {
-    console.error('Error in getAssignment:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error("Error getting assignment details:", error);
+    res.status(500).json({ message: "Error retrieving assignment details", error: error.message });
   }
 };
 

@@ -71,7 +71,27 @@ const Assignment = {
         }
       );
     });
-  }
+  },
+
+  // Get assignment details by ID
+  getById: (assignmentId) => {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT assignments.*, course_content.title, course_content.description 
+        FROM assignments 
+        LEFT JOIN course_content ON assignments.content_id = course_content.content_id 
+        WHERE assignment_id = ?
+      `;
+      
+      db.query(query, [assignmentId], (err, results) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(results.length > 0 ? results[0] : null);
+        }
+      });
+    });
+  },
 };
 
 module.exports = Assignment;

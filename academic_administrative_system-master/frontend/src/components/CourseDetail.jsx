@@ -101,9 +101,15 @@ const CourseDetail = () => {
         case 'assignment':
           contentElement = (
             <Assignment 
-              assignment={item.assignmentData || item} 
+              assignment={{
+                ...item.assignmentData,
+                content_id: item.content_id,
+                title: item.title,
+                description: item.description,
+                files: item.files  // Pass files to the Assignment component
+              }} 
               isInstructor={userRole === 'instructor'}
-              studentId={localStorage.getItem('userId')}
+              studentId={userRole === 'student' ? localStorage.getItem('userId') : null}
             />
           );
           break;
@@ -111,7 +117,7 @@ const CourseDetail = () => {
           contentElement = <Material material={item} />;
           break;
         case 'class_link':
-          contentElement = <ClassLink classLink={item.linkData || item} />;
+          contentElement = <ClassLink classLink={item} />;
           break;
         default:
           return null;

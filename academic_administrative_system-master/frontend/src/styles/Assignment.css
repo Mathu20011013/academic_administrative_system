@@ -67,3 +67,136 @@
     color: #28a745;
   }
   
+  /* File display and download section */
+.assignment-files {
+  margin-top: 20px;
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 5px;
+  padding: 15px;
+}
+
+.assignment-files h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #444;
+  font-size: 16px;
+}
+
+.file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 4px;
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.file-item:hover {
+  background-color: #f5f5f5;
+}
+
+.file-item i {
+  margin-right: 10px;
+  color: #5680e9;
+  font-size: 18px;
+}
+
+.file-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.download-btn {
+  background-color: #5680e9;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.download-btn:hover {
+  background-color: #3f5fc9;
+}
+
+/* Submission section styling */
+.submission-section {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px dashed #ddd;
+}
+
+.existing-submission {
+  background-color: #f0f7ff;
+  padding: 15px;
+  border-radius: 5px;
+  border-left: 3px solid #5680e9;
+}
+
+.existing-submission h4 {
+  margin-top: 0;
+  color: #333;
+}
+
+.submit-btn {
+  background-color: #5680e9;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.submit-btn:hover {
+  background-color: #3f5fc9;
+}
+
+.instructor-options {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px dashed #ddd;
+}
+
+.view-submissions-btn {
+  background-color: #5680e9;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.view-submissions-btn:hover {
+  background-color: #3f5fc9;
+}
+
+/* Submission files section */
+.submission-files {
+  margin-top: 15px;
+  background-color: white;
+  border-radius: 5px;
+  padding: 10px 15px;
+}
+
+.submission-files h5 {
+  margin: 0 0 10px 0;
+  color: #555;
+  font-size: 15px;
+}

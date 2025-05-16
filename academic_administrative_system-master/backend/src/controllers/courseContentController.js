@@ -160,6 +160,7 @@ exports.getCourseContent = async (req, res) => {
     // Get files for each content item
     const contentWithFiles = await Promise.all(
       content.map(async (item) => {
+        // Get files for this content item
         const files = await Material.getFilesByContentId(item.content_id);
         console.log(
           `Content ${item.content_id} (${item.title}) has ${files.length} files`
@@ -167,13 +168,12 @@ exports.getCourseContent = async (req, res) => {
 
         // Get additional data based on content type
         if (item.content_type === "assignment") {
-          const assignmentData = await Assignment.getByContentId(
-            item.content_id
-          );
-          // Include title and description from course_content in the assignmentData
+          const assignmentData = await Assignment.getByContentId(item.content_id);
+
+          // Return assignment with files
           return {
             ...item,
-            files,
+            files: files,
             assignmentData: {
               ...assignmentData,
               title: item.title,
@@ -183,44 +183,30 @@ exports.getCourseContent = async (req, res) => {
         }
 
         if (item.content_type === "class_link") {
-          const linkData = await ClassLink.getByContentId(item.content_id);
+          const classLinkData = await ClassLink.getByContentId(item.content_id);
+
           return {
             ...item,
-            files,
-            linkData: {
-              ...linkData,
-              title: item.title,
-              description: item.description,
-            },
+            files: files,
+            classLinkData,
           };
         }
 
-        if (item.content_type === "announcement") {
-          const Announcement = require("../models/announcementModel");
-          const announcementData = await Announcement.getByContentId(
-            item.content_id
-          );
-          return {
-            ...item,
-            files,
-            announcementData: {
-              ...announcementData,
-              title: item.title,
-              description: item.description,
-            },
-          };
-        }
-
-        return { ...item, files };
+        // For other content types (material, announcement)
+        return {
+          ...item,
+          files: files,
+        };
       })
     );
 
-    res.status(200).json({ content: contentWithFiles });
+    res.json({ content: contentWithFiles });
   } catch (error) {
-    console.error("Error fetching course content:", error);
-    res
-      .status(500)
-      .json({ message: "Error fetching course content", error: error.message });
+    console.error("Error getting course content:", error);
+    res.status(500).json({
+      message: "Error getting course content",
+      error: error.message,
+    });
   }
 };
 

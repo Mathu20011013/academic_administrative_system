@@ -271,7 +271,7 @@ const Assignment = ({ assignment, isInstructor, studentId }) => {
         <div className="instructor-options">
           <button 
             className="view-submissions-btn"
-            onClick={() => navigate(`/instructor/assignments/${assignment.assignment_id}/submissions`)}
+            onClick={() => navigate(`/instructor/assignment/${assignment.assignment_id}/submissions`)}
           >
             View Student Submissions
           </button>

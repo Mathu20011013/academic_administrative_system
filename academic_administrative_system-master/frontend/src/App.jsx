@@ -22,6 +22,7 @@ import CourseDetail from './components/CourseDetail';
 import SubmissionForm from './components/SubmissionForm';
 import SubmissionGrader from './components/instructor/SubmissionGrader';
 import ContentCreator from './components/instructor/ContentCreator';
+import SubmissionViewer from './components/instructor/SubmissionViewer'; // Import the new component
 
 import NotFound from './components/NotFound';
 import Payment from './components/payment';
@@ -59,6 +60,12 @@ const App = () => {
           <Route path="/assignment/:assignmentId/submit" element={<SubmissionForm />} />
           <Route path="/assignment/:assignmentId/submissions" element={<SubmissionGrader />} />
           
+          {/* Add route for instructor to view student submissions */}
+          <Route 
+            path="/instructor/assignment/:assignmentId/submissions" 
+            element={<SubmissionViewer />} 
+          />
+
           <Route path="/payment" element={<Payment />} />
           
           {/* Catch-all route for 404 Not Found */}

@@ -44,7 +44,7 @@ exports.submitAssignment = async (req, res) => {
   }
 };
 
-// Add grading functionality
+// Grade a submission
 exports.gradeSubmission = async (req, res) => {
   try {
     const submissionId = req.params.submissionId;
@@ -55,14 +55,24 @@ exports.gradeSubmission = async (req, res) => {
       return res.status(400).json({ message: 'Grade is required' });
     }
     
-    // Update submission with grade
-    const result = await Submission.updateGrade(submissionId, grade, feedback);
+    // Update the submission with the grade and feedback
+    const query = `
+      UPDATE submissions
+      SET grade = ?, feedback = ?, graded_at = NOW()
+      WHERE submission_id = ?`;
     
-    if (!result) {
-      return res.status(404).json({ message: 'Submission not found' });
-    }
-    
-    res.status(200).json({ message: 'Submission graded successfully' });
+    db.query(query, [grade, feedback || '', submissionId], (err, result) => {
+      if (err) {
+        console.error('Error grading submission:', err);
+        return res.status(500).json({ message: 'Error grading submission', error: err.message });
+      }
+      
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: 'Submission not found' });
+      }
+      
+      res.status(200).json({ message: 'Submission graded successfully' });
+    });
   } catch (error) {
     console.error('Error grading submission:', error);
     res.status(500).json({ message: 'Error grading submission', error: error.message });
@@ -70,12 +80,10 @@ exports.gradeSubmission = async (req, res) => {
 };
 
 // Get all submissions for an assignment
-// Get all submissions for an assignment
-exports.getSubmissions = async (req, res) => {
+exports.getSubmissionsByAssignment = async (req, res) => {
   try {
     const assignmentId = req.params.assignmentId;
     
-    // Get all submissions for this assignment
     const query = `
       SELECT s.*, u.username as student_name
       FROM submissions s
@@ -93,7 +101,7 @@ exports.getSubmissions = async (req, res) => {
       res.status(200).json({ submissions: results });
     });
   } catch (error) {
-    console.error('Error in getSubmissions:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error('Error fetching submissions:', error);
+    res.status(500).json({ message: 'Error fetching submissions', error: error.message });
   }
 };

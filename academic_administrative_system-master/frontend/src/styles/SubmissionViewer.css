@@ -1,0 +1,234 @@
+.submission-viewer {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.assignment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.assignment-header h2 {
+  margin: 0;
+  color: #333;
+}
+
+.back-btn {
+  background-color: #f1f1f1;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.back-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.assignment-details {
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.assignment-details p {
+  margin: 5px 0;
+}
+
+.submissions-count {
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+}
+
+.submissions-count h3 {
+  margin: 0;
+  color: #444;
+}
+
+.no-submissions {
+  background-color: #f9f9f9;
+  padding: 30px;
+  text-align: center;
+  border-radius: 5px;
+}
+
+.submission-card {
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.submission-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.submission-header h4 {
+  margin: 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.submission-date {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.submission-file {
+  margin-bottom: 20px;
+}
+
+.submission-file h5 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  background-color: #f9f9f9;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.file-item i {
+  margin-right: 10px;
+  color: #5680e9;
+}
+
+.file-item span {
+  flex: 1;
+}
+
+.download-btn {
+  background-color: #5680e9;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.download-btn:hover {
+  background-color: #3f5fc9;
+}
+
+.grading-section {
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 5px;
+}
+
+.grade-input {
+  margin-bottom: 15px;
+}
+
+.grade-input label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.grade-input input {
+  width: 100px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.feedback-input {
+  margin-bottom: 15px;
+}
+
+.feedback-input label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.feedback-input textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  resize: vertical;
+}
+
+.submit-grade {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.grade-btn {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.grade-btn:hover {
+  background-color: #218838;
+}
+
+.grade-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.graded-info {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.error-container {
+  text-align: center;
+  padding: 30px;
+  background-color: #f8d7da;
+  border-radius: 5px;
+  color: #721c24;
+  margin: 20px auto;
+  max-width: 600px;
+}
+
+.error-container button {
+  margin-top: 15px;
+  padding: 8px 16px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}

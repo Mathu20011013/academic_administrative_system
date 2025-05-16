@@ -8,33 +8,43 @@ import "../styles/SubmissionForm.css";
 import Layout from "../components/Layout"; // Import Layout component
 
 const SubmissionForm = () => {
-  const { assignmentId } = useParams();
+  const { assignmentId } = useParams(); // Get assignment ID from URL
   const navigate = useNavigate();
+  
   const [assignment, setAssignment] = useState(null);
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
-  const [studentId, setStudentId] = useState("");
+  const [error, setError] = useState(null);
+  const [studentId, setStudentId] = useState(null);
 
+  console.log("Assignment ID from URL:", assignmentId); // Debug log
+  
   useEffect(() => {
-    // Get student ID from local storage or context
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (user && user.student_id) {
-      setStudentId(user.student_id);
-    }
-
+    // Get student ID from local storage
+    const user = JSON.parse(localStorage.getItem("user")) || {};
+    setStudentId(user.id || user.student_id);
+    
+    // Fetch assignment details
     const fetchAssignment = async () => {
       try {
-        const response = await api.get(`/assignment/${assignmentId}`);
-        setAssignment(response.data.assignment);
+        console.log("Fetching assignment with ID:", assignmentId);
+        const response = await api.get(`/api/assignment/${assignmentId}`);
+        console.log("API response:", response.data);
+        
+        // Set the assignment directly from response data
+        setAssignment(response.data);
         setLoading(false);
       } catch (err) {
+        console.error("Error fetching assignment:", err);
         setError("Failed to load assignment details");
         setLoading(false);
       }
     };
-    fetchAssignment();
+    
+    if (assignmentId) {
+      fetchAssignment();
+    }
   }, [assignmentId]);
 
   const handleFileChange = (e) => {
@@ -144,7 +154,20 @@ const SubmissionForm = () => {
               </button>
 
               <button
-                onClick={() => navigate(`/course/${assignment.course_id}`)}
+                onClick={() => {
+                  // Log what we're trying to navigate to
+                  console.log("Assignment object for navigation:", assignment);
+                  
+                  // Make sure we have a course ID
+                  if (assignment && assignment.course_id) {
+                    console.log("Navigating back to course:", assignment.course_id);
+                    navigate(`/course/${assignment.course_id}`);
+                  } else {
+                    // Fallback to going back in history if no course ID
+                    console.log("No course ID found, navigating back in history");
+                    navigate(-1);
+                  }
+                }}
                 className="btn btn-secondary"
               >
                 Back to Course

@@ -12,6 +12,9 @@ const Assignment = ({ assignment, isInstructor, studentId }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Log the received assignment prop
+  console.log("Assignment component received:", assignment);
+
   // Function to format date nicely
   const formatDate = (dateString) => {
     if (!dateString) return 'No due date';
@@ -211,7 +214,23 @@ const Assignment = ({ assignment, isInstructor, studentId }) => {
               {!isPastDue() && (
                 <button 
                   className="submit-btn"
-                  onClick={() => navigate(`/submit-assignment/${assignment.assignment_id}`)}
+                  onClick={() => {
+                    // Try multiple ways to get the assignment ID
+                    const assignmentId = assignment.assignment_id || assignment.content_id || assignment.id;
+                    
+                    console.log("Assignment object:", assignment);
+                    console.log("Assignment ID found:", assignmentId);
+                    
+                    if (!assignmentId) {
+                      console.error("No assignment ID found:", assignment);
+                      alert("Error: Cannot find assignment ID");
+                      return;
+                    }
+                    
+                    const url = `/assignment/${assignmentId}/submit`;
+                    console.log("Navigating to:", url);
+                    navigate(url);
+                  }}
                 >
                   Update Submission
                 </button>
@@ -223,7 +242,21 @@ const Assignment = ({ assignment, isInstructor, studentId }) => {
               {!isPastDue() && (
                 <button 
                   className="submit-btn"
-                  onClick={() => navigate(`/submit-assignment/${assignment.assignment_id}`)}
+                  onClick={() => {
+                    // Try multiple ways to get the assignment ID
+                    const assignmentId = assignment.assignment_id || assignment.content_id || assignment.id;
+                    
+                    if (!assignmentId) {
+                      console.error("No assignment ID found:", assignment);
+                      alert("Error: Cannot find assignment ID");
+                      return;
+                    }
+                    
+                    const url = `/assignment/${assignmentId}/submit`;
+                    console.log("Navigating to submit assignment:", url);
+                    console.log("Assignment data:", assignment);
+                    navigate(url);
+                  }}
                 >
                   Submit Assignment
                 </button>

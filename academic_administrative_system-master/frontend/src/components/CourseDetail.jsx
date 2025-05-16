@@ -30,19 +30,38 @@ const CourseDetail = () => {
 
     const fetchCourseData = async () => {
       try {
+        setLoading(true);
+        setError(null); // Clear previous errors
+        
+        // Log the courseId we're trying to fetch
+        console.log('Fetching course data for course ID:', courseId);
+        
         // Fetch course info
         const courseResponse = await api.get(`/courses/${courseId}`);
         console.log('Course response:', courseResponse.data);
+        
+        if (!courseResponse.data || !courseResponse.data.course) {
+          throw new Error('Course data is missing from the response');
+        }
+        
         setCourseInfo(courseResponse.data.course);
         
         // Fetch course content
         const contentResponse = await api.get(`/content/course/${courseId}`);
         console.log('Content response:', contentResponse.data);
-        setContent(contentResponse.data.content || []);
+        
+        if (contentResponse.data && Array.isArray(contentResponse.data.content)) {
+          setContent(contentResponse.data.content);
+        } else {
+          // Handle empty content properly
+          console.log('No content found or invalid content format');
+          setContent([]);
+        }
+        
         setLoading(false);
       } catch (err) {
         console.error('Error fetching course data:', err);
-        setError('Failed to load course content');
+        setError(`Failed to load course content: ${err.message}`);
         setLoading(false);
       }
     };

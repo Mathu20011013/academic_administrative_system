@@ -4,16 +4,26 @@ const db = require("../config/db");
 // Get all courses
 const getAllCourses = (req, res) => {
   res.setHeader("Cache-Control", "no-store");
-  const query = `
-    SELECT 
-      course_id AS "Course ID", 
-      course_name AS "Course Name", 
-      syllabus AS "Syllabus", 
-      price AS "Price",
-      instructor_id AS "Instructor ID",
-      image_url AS "Image URL"
-    FROM course;
+  const showInactive = req.query.showInactive === 'true';
+  
+  let query = `
+    SELECT
+      c.course_id AS "Course ID",
+      c.course_name AS "Course Name",
+      c.syllabus AS "Syllabus",
+      c.price AS "Price",
+      c.instructor_id AS "Instructor ID",
+      c.image_url AS "Image URL",
+      c.is_active,
+      u.username AS "Instructor Name"
+    FROM course c
+    LEFT JOIN instructor i ON c.instructor_id = i.instructor_id
+    LEFT JOIN user u ON i.user_id = u.user_id
   `;
+  
+  if (!showInactive) {
+    query += ` WHERE c.is_active = TRUE`;
+  }
 
   db.query(query, (error, results) => {
     if (error) {
@@ -27,7 +37,6 @@ const getAllCourses = (req, res) => {
 // Add new course
 const addCourse = (req, res) => {
   const { course_name, syllabus, price, instructor_id, image_url } = req.body;
-
   console.log("Received data to add new course:", req.body);
 
   // Validate required fields
@@ -51,12 +60,10 @@ const addCourse = (req, res) => {
 
     // If instructor_id is valid, proceed to insert the course
     const insertQuery = `
-      INSERT INTO course (course_name, syllabus, price, instructor_id, image_url)
-      VALUES (?, ?, ?, ?, ?);
+      INSERT INTO course (course_name, syllabus, price, instructor_id, image_url, is_active)
+      VALUES (?, ?, ?, ?, ?, TRUE);
     `;
-
     const values = [course_name, syllabus, price, instructor_id, image_url];
-
     db.query(insertQuery, values, (insertError, insertResults) => {
       if (insertError) {
         console.error("Error adding course:", insertError);
@@ -74,8 +81,7 @@ const addCourse = (req, res) => {
 // Edit course details
 const editCourse = (req, res) => {
   const { course_id } = req.params;
-  const { course_name, syllabus, price, instructor_id, image_url} = req.body;
-
+  const { course_name, syllabus, price, instructor_id, image_url } = req.body;
   console.log("Course ID:", course_id); // Debugging
   console.log("Request Body:", req.body); // Debugging
 
@@ -87,17 +93,15 @@ const editCourse = (req, res) => {
 
   const updateQuery = `
     UPDATE course
-    SET 
-      course_name = ?, 
-      syllabus = ?, 
-      price = ?, 
+    SET
+      course_name = ?,
+      syllabus = ?,
+      price = ?,
       instructor_id = ?,
-      image_url =?
+      image_url = ?
     WHERE course_id = ?;
   `;
-
   const values = [course_name, syllabus, price, instructor_id, image_url, course_id];
-
   db.query(updateQuery, values, (updateError, updateResults) => {
     if (updateError) {
       console.error("Error updating course:", updateError);
@@ -129,7 +133,6 @@ const resetCoursePrice = (req, res) => {
     SET price = ?
     WHERE course_id = ?;
   `;
-
   db.query(updateQuery, [price, course_id], (updateError, updateResults) => {
     if (updateError) {
       console.error("Error resetting price:", updateError);
@@ -145,24 +148,26 @@ const resetCoursePrice = (req, res) => {
   });
 };
 
-// Delete course
-const deleteCourse = (req, res) => {
+// Toggle course status (active/inactive)
+const toggleCourseStatus = (req, res) => {
   const { course_id } = req.params;
-
-  const query = `DELETE FROM course WHERE course_id = ?;`;
-
-  db.query(query, [course_id], (error, results) => {
-    if (error) {
-      console.error("Error deleting course:", error);
-      return res.status(500).json({ error: "Internal Server Error" });
+  const { status } = req.body;
+  
+  const query = 'UPDATE course SET is_active = ? WHERE course_id = ?';
+  
+  db.query(query, [status, course_id], (err, results) => {
+    if (err) {
+      console.error('Error updating course status:', err);
+      return res.status(500).json({ error: 'Failed to update course status' });
     }
-
-    // If no rows were deleted
+    
     if (results.affectedRows === 0) {
-      return res.status(404).json({ error: "Course not found" });
+      return res.status(404).json({ error: 'Course not found' });
     }
-
-    res.status(200).json({ message: "Course deleted successfully" });
+    
+    res.json({ 
+      message: `Course ${status ? 'activated' : 'deactivated'} successfully` 
+    });
   });
 };
 
@@ -171,5 +176,5 @@ module.exports = {
   addCourse,
   editCourse,
   resetCoursePrice,
-  deleteCourse,
+  toggleCourseStatus
 };

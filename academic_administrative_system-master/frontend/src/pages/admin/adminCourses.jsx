@@ -3,12 +3,15 @@ import Layout from "../../components/admin/ad-Layout";
 import Table from "../../components/table";
 import EditCourseModal from "../admin/adminEditCoursePopup";
 import AddCourseModal from "../admin/adminAddCoursePopup";
+import '../../styles/scrollbar.css';
 
 const AdminCourses = () => {
   const [courses, setCourses] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchCourses();
@@ -16,19 +19,25 @@ const AdminCourses = () => {
 
   const fetchCourses = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/admin/courses");
+      setIsLoading(true);
+      const response = await fetch("http://localhost:5000/api/admin/courses?showInactive=true");
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       const data = await response.json();
-      setCourses(data);
+      const coursesArray = Array.isArray(data) ? data : (data.courses && Array.isArray(data.courses)) ? data.courses : [];
+      setCourses(coursesArray);
     } catch (error) {
       console.error("Error fetching courses:", error);
+      setError(error.message);
+      setCourses([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleEditClick = (course) => {
-    setSelectedCourse(course); // Ensure course contains course_id
+    setSelectedCourse(course);
     setShowEditModal(true);
   };
 
@@ -36,37 +45,57 @@ const AdminCourses = () => {
     setShowAddModal(true);
   };
 
-  const handleDeleteClick = async (course_id) => {
+  const handleToggleStatus = async (course_id, currentStatus) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/courses/${course_id}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) {
-        throw new Error(`Error deleting course with ID: ${course_id}`);
+      if (!course_id) {
+        console.error("Course ID is undefined:", course_id);
+        alert("Cannot update course: Course ID is undefined");
+        return;
       }
-      setCourses(courses.filter(course => course['Course ID'] !== course_id));
-      alert("Course deleted successfully!");
+      
+      const newStatus = !currentStatus;
+      const response = await fetch(`http://localhost:5000/api/admin/courses/${course_id}/status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Server response:", errorText);
+        throw new Error(`Error updating status for course with ID: ${course_id}`);
+      }
+
+      setCourses(courses.map(course => 
+        course["Course ID"] === course_id ? { ...course, is_active: newStatus } : course
+      ));
+      
+      alert(`Course ${newStatus ? 'activated' : 'deactivated'} successfully!`);
+      fetchCourses();
     } catch (error) {
-      console.error("Error deleting course:", error);
-      alert("Failed to delete course: " + error.message);
+      console.error("Error updating course status:", error);
+      alert("Failed to update course status: " + error.message);
     }
   };
 
   const handleSaveChanges = async (updatedCourse) => {
-    console.log("Updated Course Data:", updatedCourse); // Debugging
-
     const payload = {
       course_name: updatedCourse.course_name,
       syllabus: updatedCourse.syllabus,
       price: updatedCourse.price,
       instructor_id: updatedCourse.instructor_id,
-      image_url:updatedCourse.image_url,
+      image_url: updatedCourse.image_url,
     };
 
     try {
+      setIsLoading(true);
       const response = await fetch(`http://localhost:5000/api/admin/courses/${updatedCourse.course_id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify(payload),
       });
 
@@ -81,22 +110,25 @@ const AdminCourses = () => {
     } catch (error) {
       console.error(`Error updating course:`, error);
       alert("Failed to update course: " + error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleAddCourse = async (newCourse) => {
     const payload = {
-      course_name: newCourse.course_name,  // Changed from newCourse.Title
-      syllabus: newCourse.syllabus,        // Changed from newCourse.Description
-      price: newCourse.price,              // Changed from newCourse.Price
-      instructor_id: newCourse.instructor_id, // Changed from newCourse['Instructor ID']
+      course_name: newCourse.course_name,
+      syllabus: newCourse.syllabus,
+      price: newCourse.price,
+      instructor_id: newCourse.instructor_id,
+      image_url: newCourse.image_url,
     };
-  
-    // ...rest of the function remains unchanged
-    try { 
+
+    try {
+      setIsLoading(true);
       const response = await fetch("http://localhost:5000/api/admin/courses", {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify(payload),
@@ -113,38 +145,46 @@ const AdminCourses = () => {
     } catch (error) {
       console.error(`Error adding course:`, error);
       alert("Failed to add course: " + error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  const columns = [
+    { key: "Course ID", header: "Course ID" },
+    { key: "Course Name", header: "Course Name" },
+    { key: "Instructor Name", header: "Instructor Name" },
+    { key: "Price", header: "Price" },
+    { key: "Status", header: "Status" },
+    { key: "Actions", header: "Actions" }
+  ];
+
   const enhancedCourses = courses.map((course) => ({
     ...course,
+    Status: course.is_active ? "Active" : "Inactive",
     Actions: (
-      <div className="modal-buttons">
-        <button className="btn-edit" onClick={() => handleEditClick(course)} aria-label="Edit">
+      <div style={{ display: "flex", gap: "8px" }}>
+        <button
+          className="btn-edit"
+          onClick={() => handleEditClick(course)}
+        >
           Edit
         </button>
-        <button className="btn-delete" onClick={() => handleDeleteClick(course['Course ID'])} aria-label="Delete">
-          Delete
+        <button
+          className={course.is_active ? "btn-delete" : "btn-edit"}
+          onClick={() => handleToggleStatus(course["Course ID"], course.is_active)}
+        >
+          {course.is_active ? "Deactivate" : "Activate"}
         </button>
       </div>
-    ),
+    )
   }));
-
-  const courseColumns = [
-    { header: "Course ID", key: "Course ID" },
-    { header: "Course Name", key: "Course Name" },
-    { header: "Syllabus", key: "Syllabus" },
-    { header: "Price", key: "Price" },
-    { header: "Instructor ID", key: "Instructor ID" },
-    { header: "Image", key: "Image URL" },
-    { header: "Actions", key: "Actions" },
-  ];
 
   return (
     <Layout>
-      <div className="admin-home-container" style={{ backgroundColor: "transparent", boxShadow: "none" }}>
+      <div className="admin-courses-container" style={{ backgroundColor: "transparent", boxShadow: "none" }}>
         <div className="table-container" style={{ position: "relative", zIndex: 1, backgroundColor: "transparent", boxShadow: "none" }}>
-          <button 
+          <button
             onClick={handleAddNewClick}
             className="add-button"
             style={{
@@ -159,7 +199,7 @@ const AdminCourses = () => {
               top: "0px",
               right: "110px",
               zIndex: 2,
-              height: "50px", // Set the height
+              height: "50px", 
               width: "200px",
               fontSize: "17px",
               fontWeight: "bold",
@@ -168,23 +208,32 @@ const AdminCourses = () => {
             Add New Course
           </button>
 
-          <Table data={enhancedCourses} columns={courseColumns} />
-        </div>
+          {isLoading ? (
+            <div className="loading-spinner">Loading...</div>
+          ) : error ? (
+            <div className="error-message">
+              Error: {error}
+              <button onClick={fetchCourses}>Try Again</button>
+            </div>
+          ) : (
+            <Table data={enhancedCourses} columns={columns} />
+          )}
 
-        {showEditModal && (
-          <EditCourseModal 
-            course={selectedCourse} 
-            onSave={handleSaveChanges} 
-            onClose={() => setShowEditModal(false)} 
-          />
-        )}
-        
-        {showAddModal && (
-          <AddCourseModal 
-            onSave={handleAddCourse} 
-            onClose={() => setShowAddModal(false)} 
-          />
-        )}
+          {showEditModal && (
+            <EditCourseModal
+              course={selectedCourse}
+              onSave={handleSaveChanges}
+              onClose={() => setShowEditModal(false)}
+            />
+          )}
+
+          {showAddModal && (
+            <AddCourseModal
+              onSave={handleAddCourse}
+              onClose={() => setShowAddModal(false)}
+            />
+          )}
+        </div>
       </div>
     </Layout>
   );

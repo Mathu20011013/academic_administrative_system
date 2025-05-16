@@ -55,3 +55,19 @@
     font-size: 14px; /* Smaller font size for smaller screens */
   }
 }
+/* Status styles */
+.status-active {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.status-inactive {
+  color: #a71d2a;
+  font-weight: bold;
+}
+
+/* Inactive row styling */
+.inactive-row {
+  opacity: 0.75;
+  background-color: #f8f9fa !important;
+}

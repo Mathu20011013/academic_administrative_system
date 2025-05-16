@@ -1,7 +1,7 @@
 // src/routes/courseRoutes.js
 const express = require('express');
 const router = express.Router();
-const { createCourse, getAllCourses, getCourseById, updateCourse, deleteCourse, getInstructorCourses } = require('../controllers/courseController');
+const { createCourse, getAllCourses, getCourseById, updateCourse, deleteCourse, getInstructorCourses, toggleCourseStatus } = require('../controllers/courseController');
 const { check } = require('express-validator'); // Input validation
 const authenticate = require('../middleware/authmiddleware').authenticate; // Import the authenticate middleware
 
@@ -28,6 +28,7 @@ router.get('/:courseId', getCourseById);
 router.put('/:courseId', updateCourse);
 
 // Route to delete a course (admin only)
-router.delete('/:courseId', deleteCourse);
+//router.delete('/:courseId', deleteCourse);
+router.put('/:courseId/status', toggleCourseStatus);
 
 module.exports = router;

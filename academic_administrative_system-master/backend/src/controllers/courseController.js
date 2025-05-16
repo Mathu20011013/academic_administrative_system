@@ -1,15 +1,22 @@
 // src/controllers/courseController.js
 const Course = require("../models/courseModel");
-const db = require("../config/db"); // Make sure this line is present
+const db = require("../config/db");
 
 // getAllCourses
 exports.getAllCourses = async (req, res) => {
   try {
-    const query = `
-      SELECT c.course_id, c.course_name, c.price, c.image_url, u.username AS instructor_name, c.syllabus AS description
+    const showInactive = req.query.showInactive === 'true';
+    
+    let query = `
+      SELECT c.course_id, c.course_name, c.price, c.image_url, u.username AS instructor_name, c.syllabus AS description, c.is_active
       FROM course c
       LEFT JOIN user u ON c.instructor_id = u.user_id`;
-
+    
+    // For non-admin users, only show active courses
+    if (!showInactive) {
+      query += ` WHERE c.is_active = TRUE`;
+    }
+    
     db.query(query, (err, results) => {
       if (err) {
         console.error("Error fetching courses:", err);
@@ -23,19 +30,19 @@ exports.getAllCourses = async (req, res) => {
     console.error("Error fetching courses:", error);
     res.status(500).json({ message: "Failed to fetch courses", error });
   }
-}; // Missing closing brace added
+};
 
 // Get course by ID
 exports.getCourseById = async (req, res) => {
   const course_id = req.params.courseId;
   try {
     const query = `
-      SELECT c.course_id, c.course_name, c.price, c.image_url, 
-             u.username AS instructor_name, c.syllabus AS description
+      SELECT c.course_id, c.course_name, c.price, c.image_url,
+      u.username AS instructor_name, c.syllabus AS description
       FROM course c
       LEFT JOIN user u ON c.instructor_id = u.user_id
       WHERE c.course_id = ?`;
-
+    
     db.query(query, [course_id], (err, results) => {
       if (err) {
         console.error("Error fetching course:", err);
@@ -43,11 +50,11 @@ exports.getCourseById = async (req, res) => {
           .status(500)
           .json({ message: "Failed to fetch course", error: err });
       }
-
+      
       if (results.length === 0) {
         return res.status(404).json({ message: "Course not found" });
       }
-
+      
       res.status(200).json({ course: results[0] });
     });
   } catch (error) {
@@ -81,15 +88,26 @@ exports.updateCourse = async (req, res) => {
   }
 };
 
-// Delete course
-exports.deleteCourse = async (req, res) => {
+// Toggle course status (active/inactive)
+exports.toggleCourseStatus = async (req, res) => {
   const course_id = req.params.courseId;
+  const { status } = req.body; // Expecting a boolean value
+  
   try {
-    const result = await Course.delete(course_id);
-    res.status(200).json({ message: "Course deleted successfully", result });
+    const result = await Course.toggleStatus(course_id, status);
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+    
+    const statusText = status ? 'activated' : 'deactivated';
+    res.status(200).json({ 
+      message: `Course ${statusText} successfully`, 
+      result 
+    });
   } catch (error) {
-    console.error("Error deleting course:", error);
-    res.status(500).json({ message: "Error deleting course", error });
+    console.error("Error updating course status:", error);
+    res.status(500).json({ message: "Error updating course status", error });
   }
 };
 
@@ -111,15 +129,15 @@ exports.getInstructorCourses = async (req, res) => {
     db.query(instructorQuery, [userId], (err, instructorResults) => {
       if (err) {
         console.error("Error finding instructor:", err);
-        return res.status(500).json({ 
-          message: "Failed to find instructor record", 
-          error: err 
+        return res.status(500).json({
+          message: "Failed to find instructor record",
+          error: err
         });
       }
       
       if (instructorResults.length === 0) {
-        return res.status(404).json({ 
-          message: "No instructor record found for this user" 
+        return res.status(404).json({
+          message: "No instructor record found for this user"
         });
       }
       
@@ -133,19 +151,19 @@ exports.getInstructorCourses = async (req, res) => {
         FROM course c
         LEFT JOIN user u ON c.instructor_id = u.user_id
         WHERE c.instructor_id = ?`;
-      
+        
       db.query(coursesQuery, [instructorId], (err, results) => {
         if (err) {
           console.error("Error fetching instructor courses:", err);
-          return res.status(500).json({ 
-            message: "Failed to fetch instructor courses", 
-            error: err 
+          return res.status(500).json({
+            message: "Failed to fetch instructor courses",
+            error: err
           });
         }
         
         if (results.length === 0) {
-          return res.status(404).json({ 
-            message: "No courses assigned to this instructor." 
+          return res.status(404).json({
+            message: "No courses assigned to this instructor."
           });
         }
         
@@ -157,5 +175,26 @@ exports.getInstructorCourses = async (req, res) => {
     return res
       .status(500)
       .json({ message: "Error fetching instructor's courses.", error });
+  }
+};
+
+// Delete course (keeping for backward compatibility)
+exports.deleteCourse = async (req, res) => {
+  const course_id = req.params.courseId;
+  try {
+    // Instead of deleting, we'll deactivate the course
+    const result = await Course.toggleStatus(course_id, false);
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+    
+    res.status(200).json({ 
+      message: "Course deactivated successfully", 
+      result 
+    });
+  } catch (error) {
+    console.error("Error deactivating course:", error);
+    res.status(500).json({ message: "Error deactivating course", error });
   }
 };

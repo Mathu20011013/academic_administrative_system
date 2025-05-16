@@ -259,3 +259,32 @@ select:focus {
     max-width: 500px;
   }
 }
+
+
+.btn-activate {
+  background-color: #007bff; /* Blue color - same as edit */
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-activate:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+
+.btn-deactivate {
+  background-color: #a71d2a; /* Red color - same as delete */
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-deactivate:hover {
+  background-color: #d00314e4; /* Darker red on hover */
+}

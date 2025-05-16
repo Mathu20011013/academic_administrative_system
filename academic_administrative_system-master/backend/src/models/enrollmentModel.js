@@ -1,5 +1,5 @@
 // src/models/enrollmentModel.js
-const db = require('../config/db');
+const db = require("../config/db");
 
 module.exports = {
   // Check if a student is already enrolled in a course
@@ -10,60 +10,45 @@ module.exports = {
         if (err) {
           reject(err);
         } else {
-          resolve(results.length > 0); // Return true if already enrolled
+          resolve(results.length > 0);
         }
       });
     });
   },
 
-  // Enroll a student into a course
-  create: (user_id, course_id) => {
+  // Create a new enrollment
+  create: (student_id, course_id) => {
     return new Promise((resolve, reject) => {
-      // First find the student_id that corresponds to this user_id
-      const findStudentQuery = 'SELECT student_id FROM student WHERE user_id = ?';
-      db.query(findStudentQuery, [user_id], (err, results) => {
+      const query = 'INSERT INTO enrollment (student_id, course_id) VALUES (?, ?)';
+      db.query(query, [student_id, course_id], (err, results) => {
         if (err) {
           reject(err);
-          return;
+        } else {
+          resolve(results);
         }
-        
-        if (results.length === 0) {
-          reject(new Error('No student record found for this user'));
-          return;
-        }
-        
-        const studentId = results[0].student_id;
-        
-        // Now insert with the correct student_id
-        const query = 'INSERT INTO enrollment (student_id, course_id) VALUES (?, ?)';
-        db.query(query, [studentId, course_id], (err, results) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(results);
-          }
-        });
       });
     });
   },
 
-  // Get all courses a student is enrolled in with instructor name
+  // Get all courses a student is enrolled in
   getEnrolledCourses: (student_id) => {
     return new Promise((resolve, reject) => {
       const query = `
-        SELECT c.*, u.username AS instructor_name
-        FROM course c
-        JOIN enrollment e ON c.course_id = e.course_id
+        SELECT c.course_id, c.course_name, c.price, c.image_url, 
+               u.username AS instructor_name, c.syllabus AS description,
+               c.is_active
+        FROM enrollment e
+        JOIN course c ON e.course_id = c.course_id
         LEFT JOIN user u ON c.instructor_id = u.user_id
-        WHERE e.student_id = ?`; // Changed JOIN to LEFT JOIN for instructor
+        WHERE e.student_id = ? AND c.is_active = TRUE`;
       
       db.query(query, [student_id], (err, results) => {
         if (err) {
+          console.error("Error fetching enrolled courses:", err);
           reject(err);
-        } else if (!results || results.length === 0) {
-          resolve([]); // Return empty array if no results found
         } else {
-          resolve(results); // Return the courses
+          console.log("Enrolled courses fetched:", results);
+          resolve(results);
         }
       });
     });

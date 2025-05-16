@@ -2,6 +2,15 @@ import React from "react";
 import "../styles/table.css"; // Import the CSS file for styling
 
 const Table = ({ data, columns, style }) => {
+  // Add error handling for undefined data or columns
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    return <div className="table-container">No data available</div>;
+  }
+
+  if (!columns || !Array.isArray(columns) || columns.length === 0) {
+    return <div className="table-container">No columns defined</div>;
+  }
+
   const tableStyle = {
     padding: "20px", // Add padding around the table
     ...style, // Merge with any additional styles passed as props
@@ -19,9 +28,14 @@ const Table = ({ data, columns, style }) => {
         </thead>
         <tbody>
           {data.map((row, rowIndex) => (
-            <tr key={rowIndex}>
+            <tr key={rowIndex} className={row.Status === "Inactive" ? "inactive-row" : ""}>
               {columns.map((column, colIndex) => (
-                <td key={colIndex}>{row[column.key]}</td>
+                <td 
+                  key={colIndex}
+                  className={column.key === "Status" ? `status-${row.Status?.toLowerCase()}` : ""}
+                >
+                  {row[column.key]}
+                </td>
               ))}
             </tr>
           ))}

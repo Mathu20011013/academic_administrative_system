@@ -3,28 +3,33 @@ const db = require("../config/db"); // Assuming you're using MySQL or another DB
 
 module.exports = {
   // Get all courses
-  getAll: () => {
-    return new Promise((resolve, reject) => {
-      const query = "SELECT * FROM course";
-      db.query(query, (err, results) => {
-        if (err) {
-          console.error("Error fetching all courses:", err);
-          reject(err);
-        } else {
-          console.log("Courses fetched:", results); // Log the result
-          resolve(results);
-        }
-      });
+getAll: (showInactive = false) => {
+  return new Promise((resolve, reject) => {
+    let query = "SELECT * FROM course";
+    if (!showInactive) {
+      query += " WHERE is_active = TRUE";
+    }
+    
+    db.query(query, (err, results) => {
+      if (err) {
+        console.error("Error fetching all courses:", err);
+        reject(err);
+      } else {
+        console.log("Courses fetched:", results);
+        resolve(results);
+      }
     });
-  },
+  });
+},
+
   // Function to get courses assigned to a specific instructor
- getInstructorCourses: (instructor_id) => {
+getInstructorCourses: (instructor_id) => {
   return new Promise((resolve, reject) => {
     const query = `
-      SELECT c.course_id, c.course_name, c.price, c.image_url, u.username AS instructor_name, c.syllabus AS description
+      SELECT c.course_id, c.course_name, c.price, c.image_url, u.username AS instructor_name, c.syllabus AS description, c.is_active
       FROM course c
       LEFT JOIN user u ON c.instructor_id = u.user_id
-      WHERE c.instructor_id = ?`;
+      WHERE c.instructor_id = ? AND c.is_active = TRUE`;
     
     db.query(query, [instructor_id], (err, results) => {
       if (err) {
@@ -99,19 +104,25 @@ module.exports = {
     });
   },
   // Delete a course
-delete: (course_id) => {
-  const query = "DELETE FROM course WHERE course_id = ?";
+toggleStatus: (course_id, status) => {
+  // Add validation
+  if (!course_id) {
+    return Promise.reject(new Error("Course ID is required"));
+  }
+  
+  const query = "UPDATE course SET is_active = ? WHERE course_id = ?";
   return new Promise((resolve, reject) => {
-    db.query(query, [course_id], (err, result) => {
+    db.query(query, [status, course_id], (err, result) => {
       if (err) {
-        console.error("Error deleting course:", err);
+        console.error("Error updating course status:", err);
         reject(err);
       } else {
-        console.log("Course and related enrollments deleted successfully");
+        console.log(`Course status updated to ${status ? 'active' : 'inactive'} successfully`);
         resolve(result);
       }
     });
   });
 },
+
 
 };

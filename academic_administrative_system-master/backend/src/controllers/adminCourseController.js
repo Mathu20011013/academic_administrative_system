@@ -171,10 +171,32 @@ const toggleCourseStatus = (req, res) => {
   });
 };
 
+// Upload course image
+const uploadCourseImage = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image file uploaded' });
+    }
+
+    // Upload to Cloudinary using your existing utility
+    const imageUrl = await uploadToCloudinary(req.file.path, 'course_images');
+    
+    // Return the image URL
+    res.status(200).json({
+      imageUrl: imageUrl,
+      message: 'Image uploaded successfully'
+    });
+  } catch (error) {
+    console.error('Error uploading course image:', error);
+    res.status(500).json({ error: 'Failed to upload image' });
+  }
+};
+
 module.exports = {
   getAllCourses,
   addCourse,
   editCourse,
   resetCoursePrice,
-  toggleCourseStatus
+  toggleCourseStatus,
+  uploadCourseImage
 };

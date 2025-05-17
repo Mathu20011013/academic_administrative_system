@@ -36,8 +36,21 @@ const AdminCourses = () => {
     }
   };
 
+  // Update the handleEditClick to ensure syllabus field is included
   const handleEditClick = (course) => {
-    setSelectedCourse(course);
+    // Make sure we have consistent field names for the edit modal
+    const courseWithConsistentFields = {
+      course_id: course.course_id || course["Course ID"],
+      course_name: course.course_name || course["Course Name"],
+      syllabus: course.syllabus || course["Syllabus"] || "",
+      price: course.price || course["Price"],
+      instructor_id: course.instructor_id || course["Instructor ID"],
+      image_url: course.image_url || course["Image URL"] || "",
+      instructor_name: course.instructor_name || course["Instructor Name"] || ""
+    };
+    
+    console.log("Editing course:", courseWithConsistentFields); // Debug log
+    setSelectedCourse(courseWithConsistentFields);
     setShowEditModal(true);
   };
 
@@ -80,7 +93,10 @@ const AdminCourses = () => {
     }
   };
 
+  // Update the handleSaveChanges function
   const handleSaveChanges = async (updatedCourse) => {
+    console.log("Received updated course:", updatedCourse); // Debug log
+    
     const payload = {
       course_name: updatedCourse.course_name,
       syllabus: updatedCourse.syllabus,
@@ -88,6 +104,8 @@ const AdminCourses = () => {
       instructor_id: updatedCourse.instructor_id,
       image_url: updatedCourse.image_url,
     };
+    
+    console.log("Sending payload to backend:", payload); // Debug log
 
     try {
       setIsLoading(true);
@@ -100,8 +118,9 @@ const AdminCourses = () => {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Error updating course data");
+        const errorText = await response.text();
+        console.error("Server error response:", errorText);
+        throw new Error("Error updating course data");
       }
 
       fetchCourses();
@@ -115,7 +134,10 @@ const AdminCourses = () => {
     }
   };
 
+  // Update the handleAddCourse function
   const handleAddCourse = async (newCourse) => {
+    console.log("Received new course:", newCourse); // Debug log
+    
     const payload = {
       course_name: newCourse.course_name,
       syllabus: newCourse.syllabus,
@@ -123,6 +145,8 @@ const AdminCourses = () => {
       instructor_id: newCourse.instructor_id,
       image_url: newCourse.image_url,
     };
+    
+    console.log("Sending payload to backend:", payload); // Debug log
 
     try {
       setIsLoading(true);
@@ -135,8 +159,9 @@ const AdminCourses = () => {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Error adding course");
+        const errorText = await response.text();
+        console.error("Server error response:", errorText);
+        throw new Error("Error adding course");
       }
 
       fetchCourses();
@@ -150,35 +175,59 @@ const AdminCourses = () => {
     }
   };
 
+  // Update the columns array to ensure correct mapping
   const columns = [
     { key: "Course ID", header: "Course ID" },
     { key: "Course Name", header: "Course Name" },
+    { key: "Syllabus", header: "Syllabus" },
     { key: "Instructor Name", header: "Instructor Name" },
     { key: "Price", header: "Price" },
     { key: "Status", header: "Status" },
     { key: "Actions", header: "Actions" }
   ];
 
-  const enhancedCourses = courses.map((course) => ({
-    ...course,
-    Status: course.is_active ? "Active" : "Inactive",
-    Actions: (
-      <div style={{ display: "flex", gap: "8px" }}>
-        <button
-          className="btn-edit"
-          onClick={() => handleEditClick(course)}
+  // Update the enhancedCourses mapping to ensure proper display of syllabus
+  const enhancedCourses = courses.map((course) => {
+    console.log("Processing course:", course); // Debug log
+    return {
+      ...course,
+      // Display a truncated syllabus with tooltip
+      "Syllabus": (
+        <div 
+          title={course.syllabus || course["Syllabus"] || "No syllabus available"}
+          style={{ 
+            maxWidth: "200px", 
+            overflow: "hidden", 
+            textOverflow: "ellipsis", 
+            whiteSpace: "nowrap" 
+          }}
         >
-          Edit
-        </button>
-        <button
-          className={course.is_active ? "btn-delete" : "btn-edit"}
-          onClick={() => handleToggleStatus(course["Course ID"], course.is_active)}
-        >
-          {course.is_active ? "Deactivate" : "Activate"}
-        </button>
-      </div>
-    )
-  }));
+          {(course.syllabus || course["Syllabus"]) 
+            ? ((course.syllabus || course["Syllabus"]).length > 50 
+                ? `${(course.syllabus || course["Syllabus"]).substring(0, 50)}...` 
+                : (course.syllabus || course["Syllabus"]))
+            : "N/A"}
+        </div>
+      ),
+      "Status": course.is_active ? "Active" : "Inactive",
+      "Actions": (
+        <div style={{ display: "flex", gap: "8px" }}>
+          <button
+            className="btn-edit"
+            onClick={() => handleEditClick(course)}
+          >
+            Edit
+          </button>
+          <button
+            className={course.is_active ? "btn-delete" : "btn-edit"}
+            onClick={() => handleToggleStatus(course["Course ID"], course.is_active)}
+          >
+            {course.is_active ? "Deactivate" : "Activate"}
+          </button>
+        </div>
+      )
+    };
+  });
 
   return (
     <Layout>

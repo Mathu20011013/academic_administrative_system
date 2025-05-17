@@ -52,6 +52,14 @@ const Navbar = () => {
                 Forum
               </NavLink>
             </li>
+            <li className="nav-item">
+              <NavLink
+                to="/adminReports"
+                className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
+              >
+                <i className="fas fa-chart-bar"></i> Reports
+              </NavLink>
+            </li>
           </ul>
         </div>
       </div>

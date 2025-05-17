@@ -17,12 +17,14 @@ import AdminInstructors from './pages/admin/adminInstructor';
 import InstructorForum from './pages/instructor/instructorForum';
 import InstructorCourses from './pages/instructor/instructorCourses';
 import InstructorChatbot from './pages/instructor/instructorChatbot';
+import AdminReports from './pages/admin/adminReports'; // Import the new AdminReports page
 
 import CourseDetail from './components/CourseDetail';
 import SubmissionForm from './components/SubmissionForm';
 import SubmissionGrader from './components/instructor/SubmissionGrader';
 import ContentCreator from './components/instructor/ContentCreator';
 import SubmissionViewer from './components/instructor/SubmissionViewer'; // Import the new component
+import ErrorBoundary from './components/ErrorBoundary';
 
 import NotFound from './components/NotFound';
 import Payment from './components/payment';
@@ -48,6 +50,14 @@ const App = () => {
           <Route path="/adminstudents" element={<AdminStudents />} />
           <Route path="/admininstructors" element={<AdminInstructors />} />
           <Route path="/adminforum" element={<AdminForum />} />
+          <Route 
+            path="/adminReports" 
+            element={
+              <ErrorBoundary>
+                <AdminReports />
+              </ErrorBoundary>
+            } 
+          /> {/* New route for AdminReports */}
 
           {/* Instructor routes */}
           <Route path="/instructorForum" element={<InstructorForum />} />

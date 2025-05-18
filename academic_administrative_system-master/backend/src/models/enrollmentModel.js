@@ -35,11 +35,13 @@ module.exports = {
     return new Promise((resolve, reject) => {
       const query = `
         SELECT c.course_id, c.course_name, c.price, c.image_url, 
-               u.username AS instructor_name, c.syllabus AS description,
+               COALESCE(u.username, u.first_name, 'Not assigned') AS instructor_name, 
+               c.syllabus AS description,
                c.is_active
         FROM enrollment e
         JOIN course c ON e.course_id = c.course_id
-        LEFT JOIN user u ON c.instructor_id = u.user_id
+        LEFT JOIN instructor i ON c.instructor_id = i.instructor_id
+        LEFT JOIN user u ON i.user_id = u.user_id
         WHERE e.student_id = ? AND c.is_active = TRUE`;
       
       db.query(query, [student_id], (err, results) => {

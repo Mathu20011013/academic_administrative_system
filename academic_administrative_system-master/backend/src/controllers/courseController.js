@@ -8,9 +8,12 @@ exports.getAllCourses = async (req, res) => {
     const showInactive = req.query.showInactive === 'true';
     
     let query = `
-      SELECT c.course_id, c.course_name, c.price, c.image_url, u.username AS instructor_name, c.syllabus AS description, c.is_active
+      SELECT c.course_id, c.course_name, c.price, c.image_url, 
+        COALESCE(u.username, 'Unknown Instructor') AS instructor_name, 
+        c.syllabus AS description, c.is_active
       FROM course c
-      LEFT JOIN user u ON c.instructor_id = u.user_id`;
+      LEFT JOIN instructor i ON c.instructor_id = i.instructor_id
+      LEFT JOIN user u ON i.user_id = u.user_id`;
     
     // For non-admin users, only show active courses
     if (!showInactive) {
@@ -38,9 +41,11 @@ exports.getCourseById = async (req, res) => {
   try {
     const query = `
       SELECT c.course_id, c.course_name, c.price, c.image_url,
-      u.username AS instructor_name, c.syllabus AS description
+        COALESCE(u.username, 'Unknown Instructor') AS instructor_name, 
+        c.syllabus AS description
       FROM course c
-      LEFT JOIN user u ON c.instructor_id = u.user_id
+      LEFT JOIN instructor i ON c.instructor_id = i.instructor_id
+      LEFT JOIN user u ON i.user_id = u.user_id
       WHERE c.course_id = ?`;
     
     db.query(query, [course_id], (err, results) => {

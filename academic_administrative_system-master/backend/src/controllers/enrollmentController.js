@@ -108,66 +108,136 @@ exports.enrollStudent = async (req, res) => {
 // Get all enrolled courses for a student with instructor name
 exports.getEnrolledCourses = async (req, res) => {
   try {
+    // IMPORTANT FIX: Get student_id from request parameters
     let id = req.params.student_id;
     console.log("Received ID for enrolled courses:", id);
     
-    // Always try to map from user_id to student_id first
-    try {
-      const studentId = await getUserStudentId(id);
-      console.log(`Successfully mapped user_id ${id} to student_id ${studentId}`);
-      id = studentId;
-    } catch (error) {
-      // If mapping fails, check if the provided ID is already a valid student_id
-      const isValid = await isStudentId(id);
-      if (!isValid) {
-        console.error(`ID ${id} is neither a valid user_id nor a student_id`);
-        return res.status(404).json({ 
-          message: "No valid student found for the provided ID",
-          error: error.message
-        });
-      }
-      console.log(`Using provided ID ${id} directly as student_id`);
+    // Add detailed error logging to trace the issue
+    if (!id) {
+      console.error("No student_id provided in request parameters");
+      return res.status(400).json({ 
+        message: "Missing student ID parameter"
+      });
     }
     
-    console.log("Fetching enrolled courses for student_id:", id);
+    // Try to directly get enrollments first without mapping (for debugging)
+    console.log("Testing direct enrollment query with ID:", id);
     
-    // Query your database for enrolled courses
-    const enrolledCourses = await Enrollment.getEnrolledCourses(id);
-    console.log("Enrolled courses found:", enrolledCourses.length);
+    // First check if enrollment records exist
+    db.query('SELECT COUNT(*) as count FROM enrollment WHERE student_id = ?', [id], (checkErr, checkResult) => {
+      if (checkErr) {
+        console.error("Error checking enrollments:", checkErr);
+        return res.status(500).json({ 
+          message: "Database error checking enrollments",
+          error: checkErr.message
+        });
+      }
+      
+      const enrollmentCount = checkResult[0].count;
+      console.log(`Found ${enrollmentCount} enrollment records for student ${id}`);
+
+      // If no direct match as student_id, try to map from user_id
+      if (enrollmentCount === 0) {
+        console.log("No enrollments found with direct ID, trying to map from user_id to student_id");
+        
+        // Use getUserStudentId helper to map user_id to student_id
+        db.query('SELECT student_id FROM student WHERE user_id = ?', [id], (mappingErr, mappingResults) => {
+          if (mappingErr) {
+            console.error("Error mapping user_id to student_id:", mappingErr);
+            return res.status(500).json({
+              message: "Error mapping user ID to student ID",
+              error: mappingErr.message
+            });
+          }
+          
+          if (mappingResults.length === 0) {
+            console.log(`No student found for user_id ${id}`);
+            return res.status(200).json({ courses: [] }); // Return empty array instead of error
+          }
+          
+          // Use the mapped student_id
+          const studentId = mappingResults[0].student_id;
+          console.log(`Mapped user_id ${id} to student_id ${studentId}, trying query again`);
+          
+          // Now query with the correct student_id
+          fetchCourses(studentId);
+        });
+      } else {
+        // We found enrollments with the direct ID, proceed with query
+        fetchCourses(id);
+      }
+    });
     
-    // Return with courses wrapper to match frontend expectations
-    res.status(200).json({ courses: enrolledCourses });
+    // Function to fetch courses with correct student_id
+    function fetchCourses(studentId) {
+      const query = `
+        SELECT c.course_id, c.course_name, c.price, c.image_url,
+              COALESCE(u.username, 'Not assigned') AS instructor_name, 
+              c.syllabus AS description,
+              c.is_active
+        FROM enrollment e
+        JOIN course c ON e.course_id = c.course_id
+        LEFT JOIN instructor i ON c.instructor_id = i.instructor_id
+        LEFT JOIN user u ON i.user_id = u.user_id
+        WHERE e.student_id = ? AND c.is_active = TRUE`;
+      
+      db.query(query, [studentId], (err, results) => {
+        if (err) {
+          console.error("Error in SQL query:", err);
+          return res.status(500).json({ 
+            message: "Database error fetching courses",
+            error: err.message
+          });
+        }
+        
+        console.log(`Retrieved ${results.length} courses for student ${studentId}`);
+        
+        // Return with courses wrapper to match frontend expectations
+        res.status(200).json({ courses: results });
+      });
+    }
   } catch (error) {
-    console.error("Error fetching enrolled courses:", error);
-    res.status(500).json({
-      message: "Failed to fetch enrolled courses",
-      error: error.message
+    console.error("Unexpected error in getEnrolledCourses:", error);
+    res.status(500).json({ 
+      message: "Unexpected server error",
+      error: error.message 
     });
   }
 };
 
-// Check if a student is enrolled in a specific course
+// Add this export to match the route
 exports.checkEnrollment = async (req, res) => {
   try {
-    let id = req.params.studentId;
-    const course_id = req.params.courseId;
-    
-    // Try to map from user_id to student_id
-    try {
-      const studentId = await getUserStudentId(id);
-      id = studentId;
-    } catch (error) {
-      // If mapping fails, check if the provided ID is already a valid student_id
-      const isValid = await isStudentId(id);
-      if (!isValid) {
-        return res.status(404).json({ message: "No valid student found for the provided ID" });
+    const { studentId, courseId } = req.params;
+    console.log(`Checking if student ${studentId} is enrolled in course ${courseId}`);
+
+    const query = `
+      SELECT COUNT(*) as enrolled
+      FROM enrollment
+      WHERE student_id = ? AND course_id = ?
+    `;
+
+    db.query(query, [studentId, courseId], (err, results) => {
+      if (err) {
+        console.error("Error checking enrollment:", err);
+        return res.status(500).json({
+          message: "Database error checking enrollment",
+          error: err.message
+        });
       }
-    }
-    
-    const isEnrolled = await Enrollment.checkEnrollment(id, course_id);
-    res.status(200).json({ isEnrolled });
+
+      const isEnrolled = results[0].enrolled > 0;
+      console.log(`Student ${studentId} enrollment status for course ${courseId}: ${isEnrolled ? 'Enrolled' : 'Not enrolled'}`);
+
+      res.status(200).json({
+        isEnrolled: isEnrolled
+      });
+    });
   } catch (error) {
-    console.error("Error checking enrollment:", error);
-    res.status(500).json({ message: "Error checking enrollment status", error });
+    console.error("Error in checkEnrollment function:", error);
+    res.status(500).json({
+      message: "Failed to check enrollment status",
+      error: error.message
+    });
   }
 };

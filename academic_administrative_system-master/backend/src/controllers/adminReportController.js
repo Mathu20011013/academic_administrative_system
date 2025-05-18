@@ -127,72 +127,92 @@ exports.getInstructorPerformance = (req, res) => {
 exports.getEnrollmentTrends = (req, res) => {
   const months = parseInt(req.query.months) || 6;
   
-  const query = `
-    SELECT 
-      c.course_id,
-      c.course_name,
-      DATE_FORMAT(e.enrollment_date, '%Y-%m') as month,
-      COUNT(e.enrollment_id) as enrollments
-    FROM course c
-    LEFT JOIN enrollment e ON c.course_id = e.course_id
-    WHERE e.enrollment_date >= DATE_SUB(CURRENT_DATE(), INTERVAL ${months} MONTH)
-    GROUP BY c.course_id, month
-    ORDER BY month, c.course_id
-  `;
+  // First get all courses
+  const coursesQuery = `SELECT course_id, course_name FROM course`;
   
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error("Error fetching enrollment trends:", err);
-      return res.status(500).json({ message: "Error fetching enrollment trends", error: err.message });
+  db.query(coursesQuery, (coursesErr, coursesResults) => {
+    if (coursesErr) {
+      console.error("Error fetching courses for trends:", coursesErr);
+      return res.status(500).json({ message: "Error fetching courses", error: coursesErr.message });
     }
     
-    // Get distinct courses and months
-    const courseMap = new Map();
-    const monthsSet = new Set();
+    // Then get enrollment data by month
+    const enrollmentQuery = `
+      SELECT 
+        c.course_id,
+        DATE_FORMAT(e.enrollment_date, '%Y-%m') as month,
+        COUNT(e.enrollment_id) as enrollments
+      FROM course c
+      LEFT JOIN enrollment e ON c.course_id = e.course_id AND 
+        e.enrollment_date >= DATE_SUB(CURRENT_DATE(), INTERVAL ${months} MONTH)
+      GROUP BY c.course_id, month
+      ORDER BY month, c.course_id
+    `;
     
-    results.forEach(row => {
-      const courseId = row.course_id;
-      const month = row.month;
-      
-      monthsSet.add(month);
-      
-      if (!courseMap.has(courseId)) {
-        courseMap.set(courseId, {
-          id: courseId,
-          name: row.course_name,
-          enrollmentsByMonth: {}
-        });
+    db.query(enrollmentQuery, (err, enrollmentResults) => {
+      if (err) {
+        console.error("Error fetching enrollment trends:", err);
+        return res.status(500).json({ message: "Error fetching enrollment trends", error: err.message });
       }
       
-      courseMap.get(courseId).enrollmentsByMonth[month] = parseInt(row.enrollments);
-    });
-    
-    // Sort months
-    const sortedMonths = Array.from(monthsSet).sort();
-    
-    // Format data for chart
-    const courses = Array.from(courseMap.values()).map(course => {
-      const enrollments = sortedMonths.map(month => 
-        course.enrollmentsByMonth[month] || 0
-      );
+      // Generate an array of the last ${months} months
+      const monthsArray = [];
+      for (let i = 0; i < months; i++) {
+        const date = new Date();
+        date.setMonth(date.getMonth() - i);
+        const monthStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        monthsArray.unshift(monthStr); // Add to beginning to maintain chronological order
+      }
       
-      return {
-        id: course.id,
-        name: course.name,
-        enrollments
-      };
-    });
-    
-    // Format month labels to be more readable
-    const monthLabels = sortedMonths.map(monthStr => {
-      const [year, month] = monthStr.split('-');
-      const date = new Date(parseInt(year), parseInt(month) - 1);
-      return date.toLocaleString('default', { month: 'short', year: 'numeric' });
-    });
-    
-    res.status(200).json({
-      months: monthLabels,
-      courses
+      // Create a map of all courses
+      const courseMap = new Map();
+      coursesResults.forEach(course => {
+        courseMap.set(course.course_id, {
+          id: course.course_id,
+          name: course.course_name,
+          enrollmentsByMonth: {}
+        });
+        
+        // Initialize all months with zero enrollments
+        monthsArray.forEach(month => {
+          courseMap.get(course.course_id).enrollmentsByMonth[month] = 0;
+        });
+      });
+      
+      // Fill in actual enrollment data where available
+      enrollmentResults.forEach(row => {
+        const courseId = row.course_id;
+        const month = row.month;
+        
+        if (courseMap.has(courseId) && monthsArray.includes(month)) {
+          courseMap.get(courseId).enrollmentsByMonth[month] = parseInt(row.enrollments);
+        }
+      });
+      
+      // Format data for chart
+      const courses = Array.from(courseMap.values()).map(course => {
+        const enrollments = monthsArray.map(month => 
+          course.enrollmentsByMonth[month] || 0
+        );
+        
+        return {
+          id: course.id,
+          name: course.name,
+          enrollments
+        };
+      });
+      
+      // Format month labels to be more readable
+      const monthLabels = monthsArray.map(monthStr => {
+        const [year, month] = monthStr.split('-');
+        const date = new Date(parseInt(year), parseInt(month) - 1);
+        return date.toLocaleString('default', { month: 'short', year: 'numeric' });
+      });
+      
+      res.status(200).json({
+        months: monthLabels,
+        courses
+      });
     });
   });
 };

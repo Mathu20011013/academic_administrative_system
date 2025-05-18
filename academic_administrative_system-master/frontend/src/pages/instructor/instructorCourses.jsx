@@ -55,7 +55,7 @@ const InstructorCourses = () => {
   return (
     <Layout>
       <div className="container mt-4 home-container">
-        <h1>Assigned Courses</h1>
+    
         {error && (
           <div className="alert alert-danger">
             {error}

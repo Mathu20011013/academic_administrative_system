@@ -62,11 +62,7 @@ const HeroSection = ({ role, userId }) => {
         </div>
         <div className="hero-icons">
           {/* Conditionally render cart icon based on role */}
-          {userRole === "student" && (
-            <div className="cart-icon">
-              <FaShoppingCart />
-            </div>
-          )}
+          
 
           {/* Notification Icon */}
           <div className="notification-icon">

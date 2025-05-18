@@ -171,7 +171,7 @@ const AdminReports = () => {
       
       // Add report title and date
       pdf.setFontSize(18);
-      pdf.text("Academic Administrative System", margin, margin);
+      pdf.text("Error To Clever", margin, margin);
       pdf.setFontSize(14);
       
       // Use the correct report title based on active report
@@ -643,7 +643,7 @@ const AdminReports = () => {
           <h3>Monthly Revenue Report</h3>
           <p>
             This report shows the revenue generated from course enrollments where payment status is 'completed'. 
-            The total revenue for the period is <strong>${(totalRevenue || 0).toFixed(2)}</strong>.
+            The total revenue for the period is <strong>LKR{(totalRevenue || 0).toFixed(2)}</strong>.
           </p>
         </div>
         
@@ -986,24 +986,49 @@ const AdminReports = () => {
           </p>
         </div>
         
-        <div className="chart-container users-chart" style={{ maxWidth: '400px', margin: '0 auto' }}>
-          <Pie 
-            data={pieData}
+        <div className="chart-container users-chart" style={{ maxWidth: '500px', margin: '0 auto' }}>
+          <Bar
+            data={{
+              labels: ['Students per Course', 'Students per Instructor', 'Courses per Instructor'],
+              datasets: [
+                {
+                  data: [
+                    (studentCount / courseCount).toFixed(2),
+                    (studentCount / instructorCount).toFixed(2),
+                    (courseCount / instructorCount).toFixed(2)
+                  ],
+                  backgroundColor: [
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 206, 86, 0.7)'
+                  ],
+                  borderWidth: 1
+                }
+              ]
+            }}
             options={{
               responsive: true,
-              maintainAspectRatio: true,
               plugins: {
                 legend: {
-                  position: 'right',
+                  display: false
                 },
                 title: {
                   display: true,
-                  text: 'User Distribution'
+                  text: 'System Utilization Metrics'
+                }
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  title: {
+                    display: true,
+                    text: 'Value'
+                  }
                 }
               }
             }}
             height={300}
-            width={400}
+            width={500}
           />
         </div>
         
@@ -1090,7 +1115,7 @@ const AdminReports = () => {
       
       // Add report title and date
       pdf.setFontSize(18);
-      pdf.text("Academic Administrative System", margin, margin);
+      pdf.text("", margin, margin);
       pdf.setFontSize(14);
       pdf.text("User Base Report", margin, margin + 30);
       pdf.setFontSize(10);

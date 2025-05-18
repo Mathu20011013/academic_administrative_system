@@ -53,7 +53,7 @@ const Payment = () => {
       <div className="course-summary">
         <h3>{course.title}</h3>
         <p>Instructor: {course.instructor}</p>
-        <p className="price">Price: ${course.price}</p>
+        <p className="price">Price: LKR{course.price}</p>
       </div>
       
       <div className="payment-form">

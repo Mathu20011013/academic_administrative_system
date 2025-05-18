@@ -82,7 +82,7 @@ const CourseCard = ({
         {buttonText === "Enroll" && (
           <>
             <p className="card-text">{description}</p> {/* Description for Home */}
-            <p className="card-text">Price: ${price}</p> {/* Price for Home */}
+            <p className="card-text">Price: LKR{price}</p> {/* Price for Home */}
           </>
         )}
 

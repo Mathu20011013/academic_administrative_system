@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "../styles/ProfileModal.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { handleLogout as logoutUser, getCurrentRole, getUserId, getToken } from '../utils/auth.js';
 
 const ProfileModal = ({ userId, role, closeModal }) => {
   const [profileData, setProfileData] = useState({});
@@ -22,7 +23,8 @@ const ProfileModal = ({ userId, role, closeModal }) => {
 
   // Function to check and debug the authentication token
   const checkAuthToken = () => {
-    const token = localStorage.getItem("authToken");
+    const currentRole = getCurrentRole();
+    const token = getToken(currentRole);
     console.log(
       "Current auth token:",
       token ? `${token.substring(0, 15)}...` : "No token found"
@@ -54,13 +56,13 @@ const ProfileModal = ({ userId, role, closeModal }) => {
   // Fetch profile data when the component mounts
   useEffect(() => {
     const fetchProfile = async () => {
-      // Always check localStorage as fallback
-      const id = userId || localStorage.getItem("userId");
-      const userRole = role || localStorage.getItem("userRole");
+      // Use the utility functions to get the current role and user ID
+      const currentRole = getCurrentRole();
+      const id = userId || getUserId(currentRole);
 
-      console.log("Fetching profile with:", { id, userRole });
+      console.log("Fetching profile with:", { id, currentRole });
 
-      if (!id || !userRole) {
+      if (!id || !currentRole) {
         setError("No user ID or role provided");
         setLoading(false);
         return;
@@ -69,7 +71,7 @@ const ProfileModal = ({ userId, role, closeModal }) => {
       try {
         // No authentication needed for viewing profile
         const response = await axios.get(
-          `http://localhost:5000/api/profile/${id}?role=${userRole}`
+          `http://localhost:5000/api/profile/${id}?role=${currentRole}`
         );
         console.log("Profile data received:", response.data);
         setProfileData(response.data);
@@ -97,7 +99,7 @@ const ProfileModal = ({ userId, role, closeModal }) => {
         setError("Authentication error. Please log in again.");
         // Give user a chance to read the message before redirect
         setTimeout(() => {
-          handleLogout();
+          logoutUser();
         }, 2000);
       } else {
         setError(
@@ -133,7 +135,7 @@ const ProfileModal = ({ userId, role, closeModal }) => {
       setError(
         "Authentication token is missing or invalid. Please log in again."
       );
-      setTimeout(() => handleLogout(), 2000);
+      setTimeout(() => logoutUser(), 2000);
       return;
     }
 
@@ -188,7 +190,7 @@ const ProfileModal = ({ userId, role, closeModal }) => {
       setError(
         "Authentication token is missing or invalid. Please log in again."
       );
-      setTimeout(() => handleLogout(), 2000);
+      setTimeout(() => logoutUser(), 2000);
       return;
     }
 
@@ -244,12 +246,9 @@ const ProfileModal = ({ userId, role, closeModal }) => {
 
   // Handle logout (navigate to the login page)
   const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("userId");
-    localStorage.removeItem("userRole");
-    localStorage.removeItem("userEmail");
-    localStorage.removeItem("userName");
-    navigate("/login");
+    // Use the imported function with its new name
+    logoutUser(); 
+    navigate('/login');
   };
 
   // Toggle between profile edit and password reset forms

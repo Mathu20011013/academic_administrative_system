@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { handleLogin } from '../utils/auth.js';
 import '../styles/AuthPage.css';
 
 const Login = () => {
@@ -24,20 +25,14 @@ const Login = () => {
         setMessage(response.data.message);
         setIsSuccess(true);
         
-        // Store the token
-        localStorage.setItem('authToken', response.data.token);
-        
-        // Store user data if available in the response
+        // Use the new handleLogin function to store token and user data
         if (response.data.user) {
-          localStorage.setItem('userId', response.data.user.user_id);
-          localStorage.setItem('userRole', response.data.user.role);
+          handleLogin(response.data.user, response.data.token);
+          
+          // Still store the other fields as before
           localStorage.setItem('userEmail', response.data.user.email);
           localStorage.setItem('userName', response.data.user.username);
-          console.log('Stored user data:', {
-            userId: response.data.user.user_id,
-            role: response.data.user.role,
-            email: response.data.user.email
-          });
+          console.log('Stored user data with role-specific storage');
         } else {
           // Extract from token as fallback
           try {
@@ -48,9 +43,16 @@ const Login = () => {
             
             console.log('Token payload:', payload);
             
-            // Store user data from token
-            localStorage.setItem('userId', payload.id);
-            localStorage.setItem('userRole', payload.role);
+            // Create a user object with token payload data
+            const userData = {
+              user_id: payload.id,
+              role: payload.role
+            };
+            
+            // Store using our new function
+            handleLogin(userData, token);
+            
+            // Store remaining fields as before
             localStorage.setItem('userEmail', payload.email);
             localStorage.setItem('userName', payload.username);
           } catch (error) {

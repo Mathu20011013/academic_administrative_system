@@ -1,8 +1,16 @@
 import React from "react";
-import { NavLink } from "react-router-dom"; // Using NavLink for active tab styling
-import "../styles/Navbar.css"; // Importing CSS
+import { NavLink, useNavigate } from "react-router-dom"; // Add useNavigate
+import "../styles/Navbar.css";
+import { handleLogout } from "../utils/auth.js"; // Import the logout function
 
 const Navbar = () => {
+  const navigate = useNavigate();
+
+  const logoutUser = () => {
+    handleLogout();
+    navigate('/login');
+  };
+
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light">
       <div className="container-fluid">
@@ -56,6 +64,9 @@ const Navbar = () => {
                 Chatbot
               </NavLink>
             </li>
+            
+            {/* Logout Button */}
+            
           </ul>
         </div>
       </div>

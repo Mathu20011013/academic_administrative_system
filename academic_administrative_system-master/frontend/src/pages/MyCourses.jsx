@@ -3,6 +3,7 @@ import axios from "axios";
 import Layout from "../components/Layout";
 import CourseCard from "../components/CourseCard";
 import { useNavigate } from "react-router-dom";
+import { getCurrentRole, getUserId, getToken } from '../utils/auth.js';
 
 const MyCourses = () => {
   const [courses, setCourses] = useState([]);
@@ -13,10 +14,16 @@ const MyCourses = () => {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        // Get token
-        const token = localStorage.getItem("authToken") || 
-                      localStorage.getItem("token") || 
-                      localStorage.getItem("jwt");
+        // Get current role
+        const currentRole = getCurrentRole();
+        console.log("[Debug] Current role:", currentRole);
+        
+        // Get role-specific token and user ID
+        const token = getToken(currentRole) || localStorage.getItem("authToken");
+        const userId = getUserId(currentRole) || localStorage.getItem('userId');
+        
+        console.log("[Debug] User ID:", userId);
+        console.log("[Debug] Token available:", token ? "Yes" : "No");
         
         if (!token) {
           console.error("No token found - redirecting to login");
@@ -26,10 +33,6 @@ const MyCourses = () => {
           return;
         }
 
-        // Get user ID from localStorage
-        const userId = localStorage.getItem('userId');
-        console.log("[Debug] User ID:", userId);
-        
         if (!userId) {
           setError("User ID not found");
           setLoading(false);

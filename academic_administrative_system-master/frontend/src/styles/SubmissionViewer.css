@@ -232,3 +232,21 @@
   border-radius: 4px;
   cursor: pointer;
 }
+
+.btn-group .btn {
+  margin-right: 5px;
+}
+
+.submissions-list td {
+  vertical-align: middle;
+}
+
+.file-link {
+  color: #007bff;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.file-link:hover {
+  color: #0056b3;
+}

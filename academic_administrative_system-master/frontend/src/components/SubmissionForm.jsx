@@ -21,9 +21,29 @@ const SubmissionForm = () => {
   console.log("Assignment ID from URL:", assignmentId); // Debug log
   
   useEffect(() => {
-    // Get student ID from local storage
-    const user = JSON.parse(localStorage.getItem("user")) || {};
-    setStudentId(user.id || user.student_id);
+    // Try multiple possible storage formats
+    let userId = localStorage.getItem("userId"); // Direct ID
+    
+    if (!userId) {
+      // Try getting from user object if stored as JSON
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          userId = user.id || user.userId || user.student_id;
+        } catch (e) {
+          console.error("Error parsing user from localStorage:", e);
+        }
+      }
+      
+      // If still no userId, try other common storage keys
+      if (!userId) {
+        userId = localStorage.getItem("studentId") || localStorage.getItem("user_id");
+      }
+    }
+    
+    console.log("Found user ID:", userId);
+    setStudentId(userId);
     
     // Fetch assignment details
     const fetchAssignment = async () => {
@@ -53,10 +73,23 @@ const SubmissionForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     if (!file) {
       setError("Please select a file to upload");
       return;
     }
+    
+    // Check if we have a student ID
+    if (!studentId) {
+      setError("User ID not found. Please log in again.");
+      return;
+    }
+
+    console.log("Submitting assignment with data:", {
+      assignmentId,
+      studentId,
+      fileName: file.name,
+    });
 
     setSubmitting(true);
     setError("");
@@ -67,16 +100,32 @@ const SubmissionForm = () => {
       formData.append("student_id", studentId);
       formData.append("file", file);
 
-      await api.post("/submission/create", formData, {
+      // Use the correct API endpoint
+      const response = await api.post("/submission/create", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
 
+      console.log("Submission successful:", response.data);
+      
       // Redirect back to course page
-      navigate(`/course/${assignment.course_id}`);
+      if (assignment && assignment.course_id) {
+        navigate(`/course/${assignment.course_id}`);
+      } else {
+        navigate(-1);
+      }
     } catch (err) {
-      setError(err.message || "Failed to submit assignment");
+      console.error("Submission error:", err);
+      
+      // Show more detailed error
+      let errorMessage = "Failed to submit assignment";
+      if (err.response && err.response.data) {
+        errorMessage = err.response.data.message || errorMessage;
+        console.error("Server error details:", err.response.data);
+      }
+      
+      setError(errorMessage);
     } finally {
       setSubmitting(false);
     }

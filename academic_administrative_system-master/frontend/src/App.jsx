@@ -1,5 +1,5 @@
 // frontend/src/App.jsx
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -23,11 +23,12 @@ import CourseDetail from './components/CourseDetail';
 import SubmissionForm from './components/SubmissionForm';
 import SubmissionGrader from './components/instructor/SubmissionGrader';
 import ContentCreator from './components/instructor/ContentCreator';
-import SubmissionViewer from './components/instructor/SubmissionViewer'; // Import the new component
 import ErrorBoundary from './components/ErrorBoundary';
 
 import NotFound from './components/NotFound';
 import Payment from './components/payment';
+
+const SubmissionViewer = lazy(() => import('./components/instructor/SubmissionViewer'));
 
 const App = () => {
   return (
@@ -74,6 +75,14 @@ const App = () => {
           <Route 
             path="/instructor/assignment/:assignmentId/submissions" 
             element={<SubmissionViewer />} 
+          />
+          <Route 
+            path="/assignment/:assignmentId/submissions" 
+            element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <SubmissionViewer />
+              </Suspense>
+            } 
           />
 
           <Route path="/payment" element={<Payment />} />

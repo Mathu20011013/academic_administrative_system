@@ -114,5 +114,34 @@ export const getInstructorCourses = async (instructorId) => {
 // Add more API functions here for other routes as needed
 
 // Add more API functions here for other routes like /home, /mycourses, etc.
+export const viewSubmissionFile = (submissionId) => {
+  const url = `${api.defaults.baseURL}/submission/file/${submissionId}`;
+  window.open(url, '_blank');
+};
+
+export const downloadSubmissionFile = (submissionId) => {
+  const url = `${api.defaults.baseURL}/submission/download/${submissionId}`;
+  window.open(url, '_blank');
+};
+
+export const getSubmissionsByAssignment = async (assignmentId) => {
+  try {
+    const response = await api.get(`/submission/assignment/${assignmentId}/submissions`);
+    return response.data;
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || 'Error fetching submissions';
+    throw new Error(errorMessage);
+  }
+};
+
+export const getAssignmentById = async (assignmentId) => {
+  try {
+    const response = await api.get(`/assignment/${assignmentId}`);
+    return response.data;
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || 'Error fetching assignment';
+    throw new Error(errorMessage);
+  }
+};
 
 export default api;

@@ -1,47 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import api from '../../api/api';
+import api, { 
+  getAssignmentById, 
+  getSubmissionsByAssignment,
+  viewSubmissionFile,
+  downloadSubmissionFile
+} from '../../../api'; // Adjust path as needed
 import '../../styles/SubmissionViewer.css';
-import InstructorLayout from './in-Layout';
+import Layout from '../Layout';
+import { Button } from 'react-bootstrap';
 
 const SubmissionViewer = () => {
   const { assignmentId } = useParams();
   const navigate = useNavigate();
-  const [submissions, setSubmissions] = useState([]);
+  
   const [assignment, setAssignment] = useState(null);
+  const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [feedback, setFeedback] = useState({});
-  const [grades, setGrades] = useState({});
-  const [saving, setSaving] = useState({});
 
-  // Fetch assignment details and submissions
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
-        // Get assignment details
-        const assignmentResponse = await api.get(`/api/assignment/${assignmentId}`);
-        setAssignment(assignmentResponse.data);
+        console.log('Fetching assignment data for ID:', assignmentId);
+        // Fetch assignment details using the imported function
+        const assignmentData = await getAssignmentById(assignmentId);
+        console.log('Assignment data received:', assignmentData);
+        setAssignment(assignmentData);
         
-        // Get submissions for this assignment
-        const submissionsResponse = await api.get(`/api/assignment/${assignmentId}/submissions`);
-        setSubmissions(submissionsResponse.data.submissions || []);
-        
-        // Initialize grades and feedback
-        const initialGrades = {};
-        const initialFeedback = {};
-        submissionsResponse.data.submissions?.forEach(sub => {
-          initialGrades[sub.submission_id] = sub.grade || '';
-          initialFeedback[sub.submission_id] = sub.feedback || '';
-        });
-        setGrades(initialGrades);
-        setFeedback(initialFeedback);
+        // Fetch submissions for this assignment using the imported function
+        const submissionsData = await getSubmissionsByAssignment(assignmentId);
+        console.log('Submissions data received:', submissionsData);
+        setSubmissions(submissionsData.submissions || []);
         
         setLoading(false);
       } catch (err) {
-        console.error("Error fetching data:", err);
-        setError("Failed to load assignment and submissions");
+        console.error('Error fetching data:', err);
+        setError('Failed to load assignment data: ' + err.message);
         setLoading(false);
       }
     };
@@ -49,99 +44,82 @@ const SubmissionViewer = () => {
     fetchData();
   }, [assignmentId]);
 
-  // Handle grade change
-  const handleGradeChange = (submissionId, value) => {
-    setGrades(prev => ({
-      ...prev,
-      [submissionId]: value
-    }));
-  };
-  
-  // Handle feedback change
-  const handleFeedbackChange = (submissionId, value) => {
-    setFeedback(prev => ({
-      ...prev,
-      [submissionId]: value
-    }));
-  };
-  
-  // Submit grade and feedback
-  const handleSubmitGrade = async (submissionId) => {
+  const handleGradeSubmission = async (submissionId, grade, feedback) => {
     try {
-      setSaving({ ...saving, [submissionId]: true });
-      
-      await api.put(`/api/submission/${submissionId}/grade`, {
-        grade: grades[submissionId],
-        feedback: feedback[submissionId]
+      await api.put(`/submission/${submissionId}/grade`, {
+        grade,
+        feedback
       });
       
-      // Update the submissions list with new grade
-      setSubmissions(submissions.map(sub => {
-        if (sub.submission_id === submissionId) {
-          return {
-            ...sub,
-            grade: grades[submissionId],
-            feedback: feedback[submissionId],
-            graded_at: new Date().toISOString()
-          };
-        }
-        return sub;
-      }));
+      // Refresh submissions data
+      const response = await api.get(`/submission/assignment/${assignmentId}/submissions`);
+      setSubmissions(response.data.submissions || []);
       
-      alert('Grade submitted successfully!');
+      alert('Submission graded successfully');
     } catch (err) {
-      console.error("Error submitting grade:", err);
-      alert('Failed to submit grade. Please try again.');
-    } finally {
-      setSaving({ ...saving, [submissionId]: false });
+      console.error('Error grading submission:', err);
+      alert('Failed to grade submission');
     }
   };
-  
-  // Format date
-  const formatDate = (dateString) => {
-    if (!dateString) return 'No date';
-    return new Date(dateString).toLocaleString();
+
+  // Use the imported functions for file operations with better error handling
+  const handleViewFile = (submissionId) => {
+    try {
+      console.log("Viewing file for submission:", submissionId);
+      viewSubmissionFile(submissionId);
+    } catch (err) {
+      console.error("Error viewing file:", err);
+      alert("Failed to view file. Please try again.");
+    }
   };
-  
-  // Handle file download
-  const handleDownload = (fileUrl, fileName) => {
-    window.open(fileUrl, '_blank');
+
+  const handleDownloadFile = (submissionId) => {
+    try {
+      console.log("Downloading file for submission:", submissionId);
+      downloadSubmissionFile(submissionId);
+    } catch (err) {
+      console.error("Error downloading file:", err);
+      alert("Failed to download file. Please try again.");
+    }
   };
 
   if (loading) {
     return (
-      <InstructorLayout>
-        <div className="loading">Loading submissions...</div>
-      </InstructorLayout>
+      <Layout>
+        <div className="loading">Loading assignment data...</div>
+      </Layout>
     );
   }
 
   if (error) {
     return (
-      <InstructorLayout>
+      <Layout>
         <div className="error-container">
-          <h3>Error</h3>
           <p>{error}</p>
           <button onClick={() => navigate(-1)}>Go Back</button>
         </div>
-      </InstructorLayout>
+      </Layout>
     );
   }
 
   return (
-    <InstructorLayout>
+    <Layout>
       <div className="submission-viewer">
         <div className="assignment-header">
-          <h2>{assignment?.title || 'Assignment'}</h2>
+          <h2>Assignment Submissions</h2>
           <button className="back-btn" onClick={() => navigate(-1)}>
-            <i className="fas fa-arrow-left"></i> Back to Course
+            <i className="fas fa-arrow-left"></i> Back
           </button>
         </div>
         
-        <div className="assignment-details">
-          <p><strong>Due Date:</strong> {formatDate(assignment?.due_date)}</p>
-          <p><strong>Max Score:</strong> {assignment?.max_score || 100}</p>
-        </div>
+        {assignment && (
+          <div className="assignment-details">
+            <h3>{assignment.title}</h3>
+            <p>{assignment.description}</p>
+            <p><strong>Due Date:</strong> {new Date(assignment.due_date).toLocaleString()}</p>
+            <p><strong>Max Score:</strong> {assignment.max_score}</p>
+          </div>
+        )}
         
         <div className="submissions-count">
           <h3>Submissions ({submissions.length})</h3>
@@ -149,81 +127,122 @@ const SubmissionViewer = () => {
         
         {submissions.length === 0 ? (
           <div className="no-submissions">
-            <p>No submissions have been made for this assignment yet.</p>
+            <p>No submissions yet for this assignment.</p>
           </div>
         ) : (
-          <div className="submissions-list">
-            {submissions.map((submission) => (
-              <div key={submission.submission_id} className="submission-card">
-                <div className="submission-header">
-                  <h4>{submission.student_name || 'Student'}</h4>
-                  <span className="submission-date">
-                    Submitted: {formatDate(submission.submitted_at)}
-                  </span>
-                </div>
-                
-                {submission.submission_file && (
-                  <div className="submission-file">
-                    <h5>Submitted File</h5>
-                    <div className="file-item">
-                      <i className="fas fa-file-alt"></i>
-                      <span>{submission.filename || 'Submission File'}</span>
-                      <button 
-                        className="download-btn"
-                        onClick={() => handleDownload(submission.submission_file, 'submission-file')}
+          <div className="table-responsive">
+            <table className="table table-striped">
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Date Submitted</th>
+                  <th>File</th>
+                  <th>Grade</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {submissions.map(submission => (
+                  <tr key={submission.submission_id}>
+                    <td>{submission.student_name || `Student ${submission.student_id}`}</td>
+                    <td>{new Date(submission.submission_date).toLocaleString()}</td>
+                    <td>
+                      <span 
+                        className="file-link"
+                        onClick={() => handleViewFile(submission.submission_id)}
                       >
-                        <i className="fas fa-download"></i> Download
-                      </button>
-                    </div>
-                  </div>
-                )}
-                
-                <div className="grading-section">
-                  <div className="grade-input">
-                    <label>Grade (out of {assignment?.max_score || 100}):</label>
-                    <input
-                      type="number"
-                      min="0"
-                      max={assignment?.max_score || 100}
-                      value={grades[submission.submission_id]}
-                      onChange={(e) => handleGradeChange(submission.submission_id, e.target.value)}
-                      disabled={saving[submission.submission_id]}
-                    />
-                  </div>
-                  
-                  <div className="feedback-input">
-                    <label>Feedback:</label>
-                    <textarea
-                      value={feedback[submission.submission_id]}
-                      onChange={(e) => handleFeedbackChange(submission.submission_id, e.target.value)}
-                      disabled={saving[submission.submission_id]}
-                      placeholder="Provide feedback to the student..."
-                      rows={4}
-                    />
-                  </div>
-                  
-                  <div className="submit-grade">
-                    <button
-                      onClick={() => handleSubmitGrade(submission.submission_id)}
-                      disabled={saving[submission.submission_id]}
-                      className="grade-btn"
-                    >
-                      {saving[submission.submission_id] ? 'Saving...' : 'Submit Grade'}
-                    </button>
-                    
-                    {submission.graded_at && (
-                      <div className="graded-info">
-                        <span>Last graded: {formatDate(submission.graded_at)}</span>
+                        {submission.filename || 'View File'}
+                      </span>
+                    </td>
+                    <td>
+                      {submission.grade !== null ? 
+                        `${submission.grade}/${assignment?.max_score || 100}` : 
+                        'Not graded'}
+                    </td>
+                    <td>
+                      <div className="btn-group">
+                        <button 
+                          className="btn btn-sm btn-primary"
+                          onClick={() => handleViewFile(submission.submission_id)}
+                        >
+                          View
+                        </button>
+                        <button 
+                          className="btn btn-sm btn-secondary"
+                          onClick={() => handleDownloadFile(submission.submission_id)}
+                        >
+                          Download
+                        </button>
+                        <button 
+                          className="btn btn-sm btn-info"
+                          data-bs-toggle="modal"
+                          data-bs-target={`#gradeModal-${submission.submission_id}`}
+                        >
+                          Grade
+                        </button>
                       </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
+                      
+                      {/* Grade Modal */}
+                      <div className="modal fade" id={`gradeModal-${submission.submission_id}`} tabIndex="-1">
+                        <div className="modal-dialog">
+                          <div className="modal-content">
+                            <div className="modal-header">
+                              <h5 className="modal-title">Grade Submission</h5>
+                              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div className="modal-body">
+                              <form 
+                                onSubmit={(e) => {
+                                  e.preventDefault();
+                                  const grade = e.target.elements.grade.value;
+                                  const feedback = e.target.elements.feedback.value;
+                                  handleGradeSubmission(submission.submission_id, grade, feedback);
+                                  
+                                  // Close the modal (requires Bootstrap JS)
+                                  document.querySelector(`#gradeModal-${submission.submission_id} .btn-close`).click();
+                                }}
+                              >
+                                <div className="mb-3">
+                                  <label htmlFor={`grade-${submission.submission_id}`} className="form-label">Grade (max: {assignment?.max_score || 100})</label>
+                                  <input 
+                                    type="number" 
+                                    className="form-control" 
+                                    id={`grade-${submission.submission_id}`}
+                                    name="grade"
+                                    defaultValue={submission.grade || ''}
+                                    min="0"
+                                    max={assignment?.max_score || 100}
+                                    required
+                                  />
+                                </div>
+                                <div className="mb-3">
+                                  <label htmlFor={`feedback-${submission.submission_id}`} className="form-label">Feedback</label>
+                                  <textarea 
+                                    className="form-control" 
+                                    id={`feedback-${submission.submission_id}`}
+                                    name="feedback"
+                                    defaultValue={submission.feedback || ''}
+                                    rows="3"
+                                  ></textarea>
+                                </div>
+                                <div className="d-flex justify-content-end">
+                                  <button type="button" className="btn btn-secondary me-2" data-bs-dismiss="modal">Cancel</button>
+                                  <button type="submit" className="btn btn-primary">Save</button>
+                                </div>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
-    </InstructorLayout>
+    </Layout>
   );
 };
 

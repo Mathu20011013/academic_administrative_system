@@ -16,6 +16,14 @@ const Payment = () => {
     return null;
   }
   
+  // Add this function to handle close button click
+  const handleClose = () => {
+    // You can add a confirmation dialog if needed
+    if (window.confirm('Are you sure you want to cancel this payment?')) {
+      navigate('/home');  // or navigate back to where the user came from
+    }
+  };
+  
   const handlePayment = async () => {
     setLoading(true);
     setError('');
@@ -48,7 +56,17 @@ const Payment = () => {
   
   return (
     <div className="payment-container">
-      <h2>Complete Your Enrollment</h2>
+      {/* Add this header div with title and close button */}
+      <div className="payment-header">
+        <h2>Complete Your Enrollment</h2>
+        <button 
+          className="close-button" 
+          onClick={handleClose}
+          aria-label="Cancel Payment"
+        >
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
       
       <div className="course-summary">
         <h3>{course.title}</h3>
@@ -93,7 +111,7 @@ const Payment = () => {
           onClick={handlePayment}
           disabled={loading}
         >
-          {loading ? 'Processing...' : `Pay $${course.price}`}
+          {loading ? 'Processing...' : `Pay LKR${course.price}`}
         </button>
       </div>
     </div>

@@ -5,9 +5,9 @@ module.exports = {
   getUserNotifications: (userId, limit = 10) => {
     return new Promise((resolve, reject) => {
       const query = `
-        SELECT * FROM notifications 
-        WHERE user_id = ? 
-        ORDER BY created_at DESC 
+        SELECT * FROM notifications
+        WHERE user_id = ?
+        ORDER BY created_at DESC
         LIMIT ?`;
       
       db.query(query, [userId, limit], (err, results) => {
@@ -41,8 +41,8 @@ module.exports = {
   create: (userId, message, type, relatedId = null) => {
     return new Promise((resolve, reject) => {
       const query = `
-        INSERT INTO notifications 
-        (user_id, message, type, related_id, is_read, created_at) 
+        INSERT INTO notifications
+        (user_id, message, type, related_id, is_read, created_at)
         VALUES (?, ?, ?, ?, 0, NOW())`;
       
       db.query(query, [userId, message, type, relatedId], (err, result) => {

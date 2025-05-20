@@ -16,49 +16,58 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: 15px 50px;
+  padding: 10px 30px; /* Reduced horizontal padding */
   box-sizing: border-box;
-  height: 80px;
+  height: 70px; /* Reduced height */
   background-color: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(249, 181, 0, 0.15); /* Orange-tinted shadow */
 }
 
-/* Logo & Name */
+/* Logo & Name - Increased size */
 .hero-logo {
   display: flex;
   align-items: center;
 }
 
 .hero-logo img {
-  height: 55px;
+  height: 80px; /* Increased from 55px */
   width: auto;
   margin-right: 12px;
 }
 
 .hero-logo h2 {
-  font-size: 20px;
-  font-weight: bold;
+  font-size: 35px; /* Increased from 22px to 28px */
+  font-weight: 700; /* Made bolder */
   color: #333;
   margin: 0;
+  letter-spacing: 1px; /* Improved spacing between letters */
 }
 
-/* Search Bar - Updated with more subtle design */
+/* Add a slight hover effect to the logo text */
+.hero-logo:hover h2 {
+  color: #f9b500; /* Change to orange on hover */
+  transition: color 0.3s ease;
+}
+
+/* Updated Search Bar with theme color and better spacing */
 .hero-search {
   flex-grow: 0;
-  width: 300px;
+  width: 380px; /* Increased from 280px to 380px */
   display: flex;
   align-items: center;
-  background: #f9f9f9;
-  border-radius: 25px;
-  padding: 5px 15px;
-  border: 1px solid #e0e0e0;
-  margin: 0 20px;
+  background: #fafafa; /* Lighter background color */
+  border-radius: 25px; /* More rounded corners */
+  padding: 6px 8px 6px 16px; /* Increased left padding for text */
+  border: 2px solid #f9b500; /* Orange theme border */
+  margin: 0 15px; /* Reduced margin */
   transition: all 0.3s ease;
+  position: relative;
 }
 
 .hero-search:focus-within {
   border-color: #f9b500;
-  box-shadow: 0 1px 5px rgba(249, 181, 0, 0.2);
+  box-shadow: 0 1px 5px rgba(249, 181, 0, 0.3);
+  background: #ffffff; /* White background when focused */
 }
 
 .hero-search input {
@@ -66,29 +75,66 @@
   background: transparent;
   border: none;
   outline: none;
-  padding: 8px;
+  padding: 8px 8px 8px 0; /* Remove left padding, add right padding */
   font-size: 14px;
-  color: #555;
+  color: #444; /* Darker text for better contrast */
+  border-radius: 25px 0 0 25px; /* Match the outer radius on the left side */
+}
+
+.hero-search input::placeholder {
+  color: #aaa; /* Lighter placeholder color */
 }
 
 .hero-search button {
-  background: transparent;
-  color: #4A4A4A;
+  background: #f9b500; /* Orange background for button */
+  color: white; /* White icon color */
   border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  padding: 8px;
-  transition: color 0.2s;
+  padding: 0;
+  margin-left: 6px; /* Add specific margin between input and button */
+  margin-right: 2px; /* Add small right margin to prevent button touching border */
+  transition: all 0.2s ease;
+  flex-shrink: 0; /* Prevent button from shrinking */
 }
 
 .hero-search button:hover {
-  color: #f9b500;
+  background-color: #e09600; /* Darker orange on hover */
+  transform: scale(1.05);
 }
 
-.hero-search button svg {
-  font-size: 18px;
+/* Improve search dropdown to match the search bar styling */
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + 5px); /* Position below with small gap */
+  left: 0;
+  width: 100%; /* Same width as search bar */
+  background: white;
+  border: 1px solid #f9b500; /* Match theme color */
+  border-radius: 12px; /* Rounder corners for dropdown */
+  box-shadow: 0 4px 10px rgba(249, 181, 0, 0.15);
+  z-index: 1000;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.search-item {
+  padding: 10px 16px; /* Match input padding */
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.search-item:last-child {
+  border-bottom: none;
+}
+
+.search-item:hover {
+  background-color: rgba(249, 181, 0, 0.1); /* Light orange background on hover */
 }
 
 /* Icons - Consistent styling */
@@ -96,32 +142,6 @@
   display: flex;
   align-items: center;
   gap: 25px;
-}
-
-/* Cart Icon Styling */
-.cart-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #4A4A4A;
-  color: white;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.cart-icon:hover {
-  transform: scale(1.05);
-  background-color: #333333;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.cart-icon svg {
-  font-size: 18px;
-  color: white;
 }
 
 /* Profile Icon Styling */
@@ -132,21 +152,28 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color:#6c757d;
-  color: white;
+  background-color: white;
+  border: 2px solid #f9b500; /* Orange border */
+  color: #444;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(249, 181, 0, 0.2);
 }
 
 .profile-icon:hover {
   transform: scale(1.05);
-  background-color: #5a6268; 
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  background-color: #f9b500;
+  color: white;
+  box-shadow: 0 2px 8px rgba(249, 181, 0, 0.4);
 }
 
 .profile-icon svg {
   font-size: 18px;
+  color: #444; /* Darker icon color */
+  transition: color 0.2s;
+}
+
+.profile-icon:hover svg {
   color: white;
 }
 
@@ -158,22 +185,29 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #6c757d;
-  color: white;
+  background-color: white;
+  border: 2px solid #f9b500; /* Orange border */
+  color: #444;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(249, 181, 0, 0.2);
   position: relative;
 }
 
 .notification-icon:hover {
   transform: scale(1.05);
-  background-color: #5a6268;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  background-color: #f9b500;
+  color: white;
+  box-shadow: 0 2px 8px rgba(249, 181, 0, 0.4);
 }
 
 .notification-icon svg {
   font-size: 18px;
+  color: #444; /* Darker icon color */
+  transition: color 0.2s;
+}
+
+.notification-icon:hover svg {
   color: white;
 }
 
@@ -312,5 +346,65 @@
 
 .search-item:hover {
   background-color: #f5f5f5;
+}
+/* Notification dropdown styling */
+.notification-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 300px;
+  max-height: 400px;
+  overflow-y: auto;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  padding: 10px;
+  margin-top: 10px;
+  border: 1px solid #e0e0e0;
+}
+
+.notification-dropdown h3 {
+  margin: 0;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  font-size: 1rem;
+  color: #333;
+}
+
+.notification-list {
+  padding: 5px 0;
+}
+
+.notification-item {
+  padding: 10px;
+  border-bottom: 1px solid #f5f5f5;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.notification-item:hover {
+  background-color: #f9f9f9;
+}
+
+.notification-item.unread {
+  background-color: #f0f7ff;
+}
+
+.notification-message {
+  margin: 0 0 5px 0;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.notification-time {
+  color: #777;
+  font-size: 0.75rem;
+}
+
+.no-notifications {
+  padding: 15px;
+  text-align: center;
+  color: #777;
 }
 

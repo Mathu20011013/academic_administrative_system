@@ -49,7 +49,8 @@ app.use('/api/admin/reports', adminReportRoutes); // Then register the route
 
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/search', searchRoutes);
-app.use('/api/search', require('./routes/searchRoutes'));
+
+
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, '../frontend/build'))); // Ensure the correct path to React build
 
@@ -57,6 +58,7 @@ app.use(express.static(path.join(__dirname, '../frontend/build'))); // Ensure th
 app.get('*', (req, res) => {
   res.status(200).send('API server is running. Frontend needs to be served separately in development.');
 });
+
 
 // Only handle API routes, don't try to serve frontend files
 app.use((req, res, next) => {
@@ -66,6 +68,5 @@ app.use((req, res, next) => {
     res.status(200).send('API server is running. Frontend needs to be served separately in development.');
   }
 });
-
 
 module.exports = app;

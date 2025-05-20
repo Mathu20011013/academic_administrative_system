@@ -7,6 +7,40 @@
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
   }
   
+  .content-creator-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .content-creator-header h2 {
+    margin: 0;
+  }
+  
+  .close-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    font-weight: bold;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 4px 10px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+  
+  .close-button:hover {
+    background-color: #f2f2f2;
+    color: #dc3545;
+  }
+  
   .content-creator h2 {
     margin-top: 0;
     margin-bottom: 20px;
@@ -36,6 +70,32 @@
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 1rem;
+  }
+  
+  .form-group input[type="date"],
+  .form-group input[type="datetime-local"] {
+    color: #333;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 8px 12px;
+    border-radius: 4px;
+    width: 100%;
+    font-size: 14px;
+  }
+  
+  /* Make sure the calendar picker icon is visible */
+  .form-group input[type="date"]::-webkit-calendar-picker-indicator,
+  .form-group input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.5);
+    cursor: pointer;
+  }
+  
+  /* Improve date input focus states */
+  .form-group input[type="date"]:focus,
+  .form-group input[type="datetime-local"]:focus {
+    border-color: #4a90e2;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
   }
   
   .form-group textarea {
@@ -92,4 +152,3 @@
     border: 1px solid #f5c6cb;
     border-radius: 4px;
   }
-  

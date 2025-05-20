@@ -21,8 +21,6 @@ const ContentCreator = ({ onContentCreated }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
-
-
   const handleFileChange = (e) => {
     setFiles(Array.from(e.target.files));
   };
@@ -89,10 +87,30 @@ const ContentCreator = ({ onContentCreated }) => {
   }
 };
 
+  const handleClose = () => {
+    // You can add confirmation if there are unsaved changes
+    if (title || description || files.length > 0) {
+      if (!window.confirm('You have unsaved changes. Are you sure you want to leave?')) {
+        return;
+      }
+    }
+    // Navigate back to the course page
+    navigate(`/course/${courseId}`);
+  };
 
   return (
     <div className="content-creator">
-      <h2>Create New Content</h2>
+      <div className="content-creator-header">
+        <h2>Create New Content</h2>
+        <button 
+          className="close-button" 
+          onClick={handleClose}
+          aria-label="Close"
+        >
+          {/* Use a simple text X instead of FontAwesome */}
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
       
       {error && <div className="error-message">{error}</div>}
       

@@ -13,8 +13,14 @@ const HeroSection = ({ role, userId }) => {
   const [searchResults, setSearchResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
   
-  // Ref for search dropdown
+  // Notification states
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
+  
+  // Refs for dropdowns
   const searchRef = useRef(null);
+  const notificationRef = useRef(null);
 
   // Handle profile icon click
   const handleProfileClick = () => {
@@ -89,16 +95,85 @@ const HeroSection = ({ role, userId }) => {
     }, 100);
   };
 
-  // Close search results when clicking outside
+  // Fetch notifications
+  const fetchNotifications = async () => {
+    try {
+      const token = localStorage.getItem("token") || localStorage.getItem("authToken");
+      
+      if (!token) {
+        console.log("No token found for notifications");
+        return;
+      }
+      
+      const config = {
+        headers: { Authorization: `Bearer ${token}` }
+      };
+      
+      console.log("Fetching notifications...");
+      const notifResponse = await axios.get("http://localhost:5000/api/notifications", config);
+      console.log("Notifications response:", notifResponse.data);
+      setNotifications(notifResponse.data.notifications || []);
+      
+      const countResponse = await axios.get("http://localhost:5000/api/notifications/unread/count", config);
+      console.log("Unread count response:", countResponse.data);
+      setUnreadCount(countResponse.data.count || 0);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      if (error.response) {
+        console.error("Response status:", error.response.status);
+        console.error("Response data:", error.response.data);
+      }
+    }
+  };
+
+  // Mark notification as read
+  const markAsRead = async (notificationId) => {
+    try {
+      const token = localStorage.getItem("token") || localStorage.getItem("authToken");
+      
+      if (!token) return;
+      
+      await axios.put(
+        `http://localhost:5000/api/notifications/${notificationId}/read`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      // Update local state
+      setNotifications(notifications.map(notif => 
+        notif.notification_id === notificationId 
+          ? { ...notif, is_read: 1 } 
+          : notif
+      ));
+      
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
+
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setShowResults(false);
       }
+      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+        setShowNotifications(false);
+      }
     };
     
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Fetch notifications on component mount
+  useEffect(() => {
+    fetchNotifications();
+    
+    // Refresh notifications every minute
+    const interval = setInterval(fetchNotifications, 60000);
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -138,10 +213,37 @@ const HeroSection = ({ role, userId }) => {
         </div>
         
         <div className="hero-icons">
-          <div className="notification-icon">
-            <FaBell />
+          {/* Notification icon with dropdown */}
+          <div className="notification-icon" ref={notificationRef}>
+            <div onClick={() => setShowNotifications(!showNotifications)}>
+              <FaBell />
+              {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
+            </div>
+            
+            {showNotifications && (
+              <div className="notification-dropdown">
+                <h3>Notifications</h3>
+                <div className="notification-list">
+                  {notifications && notifications.length > 0 ? (
+                    notifications.map((notification) => (
+                      <div 
+                        key={notification.notification_id} 
+                        className={`notification-item ${notification.is_read ? "" : "unread"}`}
+                        onClick={() => markAsRead(notification.notification_id)}
+                      >
+                        <p className="notification-message">{notification.message}</p>
+                        <small className="notification-time">
+                          {new Date(notification.created_at).toLocaleString()}
+                        </small>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="no-notifications">No notifications</p>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
-
           
           <div className="profile-icon" onClick={handleProfileClick}>
             <FaUser />

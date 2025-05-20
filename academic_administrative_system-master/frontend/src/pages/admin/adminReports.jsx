@@ -231,7 +231,7 @@ const AdminReports = () => {
             }
             
             pdf.text(courseName, margin + 5, currentY + 5);
-            pdf.text(`$${(course.revenue || 0).toFixed(2)}`, margin + 280, currentY + 5);
+            pdf.text(`LKR${(course.revenue || 0).toFixed(2)}`, margin + 280, currentY + 5);
             pdf.text(`${course.enrollments || 0}`, margin + 380, currentY + 5);
             
             currentY += 20;
@@ -249,7 +249,7 @@ const AdminReports = () => {
           
           pdf.setFont('helvetica', 'bold');
           pdf.text("Total", margin + 5, currentY + 5);
-          pdf.text(`$${(totalRevenue).toFixed(2)}`, margin + 280, currentY + 5);
+          pdf.text(`LKR${(totalRevenue).toFixed(2)}`, margin + 280, currentY + 5);
           pdf.text(`${totalEnrollments}`, margin + 380, currentY + 5);
           
           // Add chart on a new page
@@ -643,7 +643,7 @@ const AdminReports = () => {
           <h3>Monthly Revenue Report</h3>
           <p>
             This report shows the revenue generated from course enrollments where payment status is 'completed'. 
-            The total revenue for the period is <strong>LKR{(totalRevenue || 0).toFixed(2)}</strong>.
+            The total revenue for the period is <strong>LKR {(totalRevenue || 0).toFixed(2)}</strong>.
           </p>
         </div>
         
@@ -674,13 +674,13 @@ const AdminReports = () => {
               {courses.map((course, index) => (
                 <tr key={index}>
                   <td>{course.name || 'Unknown Course'}</td>
-                  <td>${(course.revenue || 0).toFixed(2)}</td>
+                  <td>LKR {(course.revenue || 0).toFixed(2)}</td>
                   <td>{course.enrollments || 0}</td>
                 </tr>
               ))}
               <tr className="total-row">
                 <td><strong>Total</strong></td>
-                <td><strong>${(totalRevenue || 0).toFixed(2)}</strong></td>
+                <td><strong>LKR {(totalRevenue || 0).toFixed(2)}</strong></td>
                 <td><strong>{totalEnrollments || 0}</strong></td>
               </tr>
             </tbody>

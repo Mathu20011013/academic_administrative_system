@@ -552,34 +552,6 @@ const ProfileModal = ({ userId, role, closeModal }) => {
                       className={isEditable ? "editable" : ""}
                     />
                   </div>
-                  <div className="form-group">
-                    <label>Rating Average:</label>
-                    <div className="rating-display">
-                      {profileData.rating_average ? (
-                        <div className="stars">
-                          {Array(5)
-                            .fill()
-                            .map((_, i) => (
-                              <span
-                                key={i}
-                                className={
-                                  i < Math.round(profileData.rating_average)
-                                    ? "star filled"
-                                    : "star"
-                                }
-                              >
-                                ★
-                              </span>
-                            ))}
-                          <span className="rating-text">
-                            {profileData.rating_average}
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="no-rating">No ratings yet</span>
-                      )}
-                    </div>
-                  </div>
                 </div>
               )}
 

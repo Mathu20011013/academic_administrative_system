@@ -14,5 +14,7 @@ router.put('/:notificationId/read', authenticate, notificationController.markAsR
 
 // Get unread notification count
 router.get('/unread/count', authenticate, notificationController.getUnreadCount);
+// Add to notificationRoutes.js
+router.post('/test', notificationController.createTestNotification);
 
 module.exports = router;

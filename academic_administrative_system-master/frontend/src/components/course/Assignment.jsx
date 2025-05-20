@@ -8,6 +8,7 @@ import '../../styles/Assignment.css';
 
 const Assignment = ({ assignment, isInstructor, studentId }) => {
   const [submission, setSubmission] = useState(null);
+  const [dueDate, setDueDate] = useState(assignment.due_date || '');
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -275,6 +276,20 @@ const Assignment = ({ assignment, isInstructor, studentId }) => {
           >
             View Student Submissions
           </button>
+        </div>
+      )}
+
+      {/* Due Date Input for Instructors */}
+      {isInstructor && (
+        <div className="form-group">
+          <label htmlFor="dueDate">Due Date<span className="required">*</span></label>
+          <input 
+            id="dueDate"
+            type="datetime-local" 
+            value={dueDate} 
+            onChange={(e) => setDueDate(e.target.value)}
+            required
+          />
         </div>
       )}
     </div>

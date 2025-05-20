@@ -1,14 +1,22 @@
 // controllers/discussionController.js
 const Discussion = require('../models/discussion');
 
-// Get all discussions
+// Get all discussions - with better error handling
 const getAllDiscussions = (req, res) => {
-  Discussion.getAllDiscussions((err, results) => {
+  console.log("Getting all discussions");
+  
+  Discussion.getAllDiscussions((err, discussions) => {
     if (err) {
       console.error('Error fetching discussions:', err);
-      return res.status(500).json({ error: 'Internal Server Error' });
+      return res.status(500).json({ 
+        error: 'Database error', 
+        message: err.message,
+        sqlMessage: err.sqlMessage
+      });
     }
-    res.status(200).json(results);
+    
+    console.log(`Returning ${discussions?.length || 0} discussions`);
+    res.json(discussions || []);
   });
 };
 

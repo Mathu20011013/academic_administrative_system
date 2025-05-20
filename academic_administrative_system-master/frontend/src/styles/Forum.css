@@ -5,53 +5,77 @@
 }
 
 .forum-container {
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
 /* Form for adding a new discussion */
 .new-discussion-box {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 20px;
   background-color: #f9f9f9;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 30px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .new-discussion-box h3 {
-  font-size: 1.5rem;
-  margin-bottom: 15px;
-  text-align: center;
+  font-size: 24px;
   margin-top: 0;
+  margin-bottom: 20px;
   color: #333;
+  text-align: center;
+  font-weight: 500;
 }
 
 .new-discussion-box form div {
-  margin-bottom: 10px;
+  margin-bottom: 16px;
+}
+
+.new-discussion-box label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #444;
 }
 
 .new-discussion-box input,
 .new-discussion-box textarea {
   width: 100%;
-  padding: 10px;
-  margin-top: 5px;
-  border-radius: 8px;
+  padding: 12px 16px;
   border: 1px solid #ddd;
+  border-radius: 6px;
+  background-color: #eaeaea;
+  font-size: 16px;
+  transition: border-color 0.2s;
+  resize: vertical;
+}
+
+.new-discussion-box textarea {
+  min-height: 120px;
+}
+
+.new-discussion-box input:focus,
+.new-discussion-box textarea:focus {
+  outline: none;
+  border-color: #0084ff;
 }
 
 .new-discussion-box button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  background-color: #007bff;
+  background-color: #0084ff;
   color: white;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 16px;
   cursor: pointer;
+  transition: background-color 0.2s;
 }
 
 .new-discussion-box button:hover {
-  background-color: #0056b3;
+  background-color: #0066cc;
 }
 
 /* Forum Posts Container */
@@ -65,7 +89,7 @@
 .forum-posts {
   display: flex;
   flex-direction: column;
-  gap: 25px;
+  gap: 24px;
 }
 
 .forum-post-card {
@@ -75,136 +99,134 @@
 }
 
 .forum-post {
-  background: #fff;
+  border: 1px solid #eee;
   border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  background-color: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
-.card-body {
-  padding: 15px;
+.post-header {
+  background-color: #f6f8fa;
+  padding: 16px 20px;
+  border-bottom: 1px solid #eee;
 }
 
-.card-title {
-  font-size: 1.25rem;
-  font-weight: bold;
+.post-header h3 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 18px;
+  font-weight: 600;
 }
 
-.card-text {
-  font-size: 1rem;
-}
-
-.reply-textarea {
-  width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-  border-radius: 5px;
-  border: 1px solid #ddd;
-}
-
-.reply-button {
-  padding: 5px 10px;
-  border: none;
-  border-radius: 5px;
-  background-color: #007bff;
-  color: white;
-  cursor: pointer;
-  margin-top: 10px;
-}
-
-.reply-button:hover {
-  background-color: #0056b3;
-}
-
-.text-center {
-  text-align:  center;
-}
-
-/* Center the heading in the middle of the gap */
-.heading-container { 
+.post-meta {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100px; /* Adjust the height as needed */
+  justify-content: space-between;
+  color: #666;
+  font-size: 14px;
+}
+
+.author {
+  font-weight: 500;
+}
+
+.date {
+  color: #888;
+}
+
+.post-content {
+  padding: 20px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #444;
 }
 
 /* Comments and Error Messages */
 .comments-section {
-  border-top: 1px solid #eee;
-  padding-top: 15px;
+  padding: 0 20px 20px 20px;
 }
 
 .comments-section h4 {
   margin-top: 0;
-  margin-bottom: 15px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
   color: #555;
+  font-size: 16px;
+  font-weight: 500;
 }
 
 .comments-list {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .comment {
-  background: #f9f9f9;
+  padding: 12px 16px;
+  background-color: #f9f9f9;
   border-radius: 6px;
-  padding: 15px;
+  margin-bottom: 10px;
+  border-left: 3px solid #ddd;
 }
 
 .comment-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   font-size: 14px;
 }
 
-.user-type {
-  background: #e7f3ff;
-  border-radius: 4px;
-  padding: 2px 6px;
-  margin-left: 5px;
+.comment-author {
+  font-weight: 600;
+  color: #444;
+}
+
+.comment-date {
+  color: #888;
   font-size: 12px;
 }
 
 .comment-content {
-  line-height: 1.5;
+  font-size: 15px;
+  line-height: 1.4;
+  color: #333;
 }
 
 .comment-form {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+  margin-top: 20px;
 }
 
 .comment-form textarea {
   width: 100%;
-  min-height: 80px;
-  padding: 10px;
+  padding: 12px;
   border: 1px solid #ddd;
-  border-radius: 4px;
+  border-radius: 6px;
+  min-height: 80px;
   resize: vertical;
+  background-color: #eaeaea;
+  font-size: 15px;
 }
 
-.comment-button {
-  display: inline-block; /* Ensure button is visible */
-  padding: 8px 16px;
-  background: #4a90e2;
+.comment-form textarea:focus {
+  outline: none;
+  border-color: #0084ff;
+}
+
+.comment-submit-btn {
+  align-self: flex-end;
+  background-color: #0084ff;
   color: white;
   border: none;
-  border-radius: 4px;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-weight: 500;
   cursor: pointer;
-  margin-top: 10px;
+  transition: background-color 0.2s;
 }
 
-.comment-button:hover {
-  background: #3a7bc8;
-}
-
-.comment-button:disabled {
-  background: #cccccc;
-  cursor: not-allowed;
+.comment-submit-btn:hover {
+  background-color: #0066cc;
 }
 
 .no-comments, .no-discussions {
@@ -215,10 +237,46 @@
 }
 
 .error-message {
+  background-color: #fff0f0;
   color: #e53935;
-  background: #ffebee;
-  padding: 10px;
-  border-radius: 4px;
+  padding: 12px 16px;
+  border-radius: 6px;
   margin-bottom: 20px;
-  text-align: center;
+  border-left: 4px solid #e53935;
+}
+
+/* Add these styles to your existing CSS */
+.user-role {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: white;
+  background-color: #0084ff;
+}
+
+.user-role[data-role="student"] {
+  background-color: #4caf50;
+}
+
+.user-role[data-role="instructor"] {
+  background-color: #ff9800;
+}
+
+.user-role[data-role="admin"] {
+  background-color: #e91e63;
+}
+
+.user-role-missing {
+  color: #999;
+  font-size: 0.75rem;
+  margin-left: 6px;
+}
+
+.comment-author, .author {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
 }

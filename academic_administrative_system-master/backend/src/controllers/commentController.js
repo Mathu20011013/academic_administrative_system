@@ -1,16 +1,34 @@
 // controllers/commentController.js
 const Comment = require('../models/comment');
+const db = require('../config/db'); // Make sure to include the database connection
 
 // Get all comments for a specific discussion
 const getCommentsByForumId = (req, res) => {
-  const { forum_id } = req.params;
+  const forum_id = req.params.forum_id;
   
-  Comment.getCommentsByForumId(forum_id, (err, results) => {
+  // Use direct database query to ensure we get user roles
+  const sql = `
+    SELECT c.*, u.username, u.email, u.role 
+    FROM comment c
+    LEFT JOIN user u ON c.user_id = u.user_id
+    WHERE c.forum_id = ?
+    ORDER BY c.created_at ASC
+  `;
+
+  db.query(sql, [forum_id], (err, results) => {
     if (err) {
       console.error('Error fetching comments:', err);
       return res.status(500).json({ error: 'Internal Server Error' });
     }
-    res.status(200).json(results);
+    
+    // Debug log to see what's coming back
+    console.log(`Comments for forum ${forum_id}:`, results.map(c => ({
+      comment_id: c.comment_id,
+      username: c.username,
+      role: c.role
+    })));
+    
+    res.status(200).json(results || []);
   });
 };
 

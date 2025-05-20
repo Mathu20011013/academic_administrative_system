@@ -45,9 +45,9 @@ const NewDiscussion = ({ onPostDiscussion, currentUser }) => {
 };
 
 const Forum = ({ currentUser, onSubmitComment }) => {
-  const [forumPosts, setForumPosts] = useState([]);
-  const [replies, setReplies] = useState({});
-  const [newReplies, setNewReplies] = useState({}); // Track new replies for each post
+  const [discussions, setDiscussions] = useState([]);
+  const [comments, setComments] = useState({});
+  const [newReplies, setNewReplies] = useState({});
   const [error, setError] = useState("");
 
   // Fetch discussions and comments on component mount
@@ -65,10 +65,10 @@ const Forum = ({ currentUser, onSubmitComment }) => {
     axios
       .get("http://localhost:5000/api/forum/discussions")
       .then((response) => {
-        setForumPosts(response.data);
+        setDiscussions(response.data);
         // For each discussion, fetch its comments
-        response.data.forEach((post) => {
-          fetchComments(post.discussion_id);
+        response.data.forEach((discussion) => {
+          fetchComments(discussion.forum_id);
         });
       })
       .catch((error) => {
@@ -78,22 +78,27 @@ const Forum = ({ currentUser, onSubmitComment }) => {
   };
 
   // Fetch comments for a specific discussion
-  const fetchComments = (forum_id) => {
+  const fetchComments = (forumId) => {
     axios
-      .get(`http://localhost:5000/api/forum/comments/forum/${forum_id}`)
+      .get(`http://localhost:5000/api/forum/comments/forum/${forumId}`)
       .then((response) => {
-        setReplies((prevReplies) => ({
-          ...prevReplies,
-          [forum_id]: response.data,
+        console.log(`[Debug] Comments for forum ${forumId}:`, response.data);
+        
+        // Check if role is present in the data
+        const hasRoles = response.data.some(comment => comment.role);
+        console.log(`Comments for forum ${forumId} have roles: ${hasRoles}`);
+        
+        setComments((prev) => ({
+          ...prev,
+          [forumId]: response.data,
         }));
-        // Initialize the new reply text area for this discussion
         setNewReplies((prev) => ({
           ...prev,
-          [forum_id]: "",
+          [forumId]: "",
         }));
       })
       .catch((error) => {
-        console.error(`Error fetching comments for discussion ${forum_id}:`, error);
+        console.error(`Error fetching comments for discussion ${forumId}:`, error);
       });
   };
 
@@ -207,6 +212,14 @@ const Forum = ({ currentUser, onSubmitComment }) => {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
+  // Updated formatRole function
+  const formatRole = (role) => {
+    if (!role) return null;
+    
+    // Capitalize first letter
+    return role.charAt(0).toUpperCase() + role.slice(1);
+  };
+
   return (
     <div className="forum-container">
       <NewDiscussion onPostDiscussion={handlePostDiscussion} currentUser={currentUser} />
@@ -214,61 +227,64 @@ const Forum = ({ currentUser, onSubmitComment }) => {
       {error && <div className="error-message">{error}</div>}
       
       <div className="forum-posts">
-        {forumPosts.length > 0 ? (
-          forumPosts.map((post) => (
-            <div key={post.discussion_id} className="forum-post">
+        {discussions.length > 0 ? (
+          discussions.map((discussion) => (
+            <div key={discussion.forum_id} className="forum-post">
               <div className="post-header">
-                <h3>{post.title}</h3>
+                <h3>{discussion.title}</h3>
                 <div className="post-meta">
-                  <span className="post-author">
-                    Posted by: <strong>{post.username}</strong>
-                    {post.user_type && <span className="user-type">({post.user_type})</span>}
+                  <span className="author">
+                    {discussion.username}
+                    {discussion.role && (
+                      <span className="user-role" data-role={discussion.role}>
+                        {formatRole(discussion.role)}
+                      </span>
+                    )}
                   </span>
-                  <span className="post-date">{formatDate(post.created_at)}</span>
+                  <span className="date">{formatDate(discussion.created_at)}</span>
                 </div>
               </div>
               
               <div className="post-content">
-                <p>{post.content}</p>
+                <p>{discussion.question}</p>
               </div>
               
               <div className="comments-section">
-                <h4>Comments ({replies[post.discussion_id]?.length || 0})</h4>
+                <h4>Comments ({comments[discussion.forum_id]?.length || 0})</h4>
                 
-                {replies[post.discussion_id] && replies[post.discussion_id].length > 0 ? (
-                  <div className="comments-list">
-                    {replies[post.discussion_id].map((comment) => (
-                      <div key={comment.comment_id} className="comment">
-                        <div className="comment-header">
-                          <strong>{comment.username}</strong>
-                          {comment.user_type && <span className="user-type">({comment.user_type})</span>}
-                          <span className="comment-date">{formatDate(comment.created_at)}</span>
-                        </div>
-                        <div className="comment-content">{comment.comment}</div>
+                <div className="comments-list">
+                  {comments[discussion.forum_id]?.map((comment) => (
+                    <div key={comment.comment_id} className="comment">
+                      <div className="comment-header">
+                        <span className="comment-author">
+                          {comment.username || 'Anonymous'}
+                          {comment.role && (
+                            <span className="user-role" data-role={comment.role}>
+                              {formatRole(comment.role)}
+                            </span>
+                          )}
+                        </span>
+                        <span className="comment-date">{formatDate(comment.created_at)}</span>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="no-comments">No comments yet</p>
-                )}
+                      <div className="comment-content">
+                        <p>{comment.comment}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
                 
                 <div className="comment-form">
                   <textarea
                     placeholder="Write a comment..."
-                    value={newReplies[post.discussion_id] || ""}
-                    onChange={(e) => 
-                      setNewReplies({
-                        ...newReplies,
-                        [post.discussion_id]: e.target.value,
-                      })
-                    }
+                    value={newReplies[discussion.forum_id] || ''}
+                    onChange={(e) => setNewReplies(prev => ({
+                      ...prev,
+                      [discussion.forum_id]: e.target.value
+                    }))}
                   />
-                  <button
-                    onClick={() => {
-                      console.log("Comment button clicked for post:", post.discussion_id);
-                      handleReply(post.discussion_id);
-                    }}
-                    className="comment-button"
+                  <button 
+                    onClick={() => handleReply(discussion.forum_id)}
+                    className="comment-submit-btn"
                     type="button"
                   >
                     Post Comment

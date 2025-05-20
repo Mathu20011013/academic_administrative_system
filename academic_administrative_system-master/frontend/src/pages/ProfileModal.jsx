@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { handleLogout as logoutUser, getCurrentRole, getUserId, getToken } from '../utils/auth.js';
 
 const ProfileModal = ({ userId, role, closeModal }) => {
+  console.log("ProfileModal received closeModal:", !!closeModal); // Debug log
+  
   const [profileData, setProfileData] = useState({});
   const [isEditable, setIsEditable] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -291,14 +293,38 @@ const ProfileModal = ({ userId, role, closeModal }) => {
     }
   };
   
+  // Create a specific close button handler
+  const handleCloseClick = () => {
+    console.log("Close button clicked in ProfileModal");
+    if (typeof closeModal === 'function') {
+      closeModal();
+    } else {
+      console.error("closeModal is not a function:", closeModal);
+    }
+  };
+  
   return (
     <div className="profile-modal-overlay">
       <div className="profile-modal">
         <div className="modal-header">
           <h2>{showPasswordReset ? "Reset Password" : `Your Profile`}</h2>
-          <button onClick={closeModal} className="close-button">
-            ×
-          </button>
+          <button 
+  className="close-btn" 
+  type="button"
+  onClick={handleCloseClick}
+  style={{
+    position: 'absolute',
+    top: '10px',
+    right: '10px',
+    background: 'none',
+    border: 'none',
+    fontSize: '24px',
+    cursor: 'pointer',
+    zIndex: 100
+  }}
+>
+  ×
+</button>
         </div>
 
         {/* Error and success messages */}

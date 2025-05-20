@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const discussionController = require('../controllers/discussionController');
-const commentController = require('../controllers/commentController');
+const commentController = require('../controllers/commentController'); // Make sure this line is at the top of your file
 
 // Discussion Routes
 router.get('/discussions', discussionController.getAllDiscussions);  // Get all discussions

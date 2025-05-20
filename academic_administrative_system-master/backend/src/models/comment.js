@@ -30,7 +30,7 @@ const getCommentsByForumId = (forum_id, callback) => {
 
 // Create a new comment with user information
 const createComment = (forum_id, user_id, comment, callback) => {
-  const query = 'INSERT INTO comment (forum_id, user_id, comment) VALUES (?, ?, ?)';
+  const query = 'INSERT INTO comment (forum_id, user_id, comment, created_at) VALUES (?, ?, ?, NOW())';
   db.query(query, [forum_id, user_id, comment], callback);
 };
 

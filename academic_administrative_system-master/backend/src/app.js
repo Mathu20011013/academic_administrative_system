@@ -18,6 +18,9 @@ const announcementRoutes = require('./routes/announcementRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const enrollmentController = require('./controllers/enrollmentController');
 const adminReportRoutes = require('./routes/adminReportRoutes'); // Add this line with your other routes
+const notificationRoutes = require('./routes/notificationRoutes');
+const searchRoutes = require('./routes/searchRoutes');
+
 const app = express();
 
 // Enable CORS for all routes
@@ -43,6 +46,10 @@ app.use('/api/announcement', announcementRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/materials', require('./routes/materialRoutes')); // Add materials routes
 app.use('/api/admin/reports', adminReportRoutes); // Then register the route
+
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/search', searchRoutes);
+app.use('/api/search', require('./routes/searchRoutes'));
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, '../frontend/build'))); // Ensure the correct path to React build
 
@@ -59,7 +66,6 @@ app.use((req, res, next) => {
     res.status(200).send('API server is running. Frontend needs to be served separately in development.');
   }
 });
-
 
 
 module.exports = app;

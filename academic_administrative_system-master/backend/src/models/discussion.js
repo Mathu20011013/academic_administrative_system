@@ -1,45 +1,55 @@
 // models/discussion.js
 const db = require('../config/db');
 
-// Get all discussions from the `discussion_forum` table
-const getAllDiscussions = (callback) => {
-  const query = `
-    SELECT 
-      d.forum_id AS discussion_id,
-      d.title,
-      d.question AS content,
-      d.created_at,
-      d.user_id,
-      u.username,
-      u.email,
-      CASE 
-        WHEN s.student_id IS NOT NULL THEN 'student'
-        WHEN i.instructor_id IS NOT NULL THEN 'instructor'
-        ELSE 'admin'
-      END as user_type
-    FROM discussion_forum d
-    JOIN user u ON d.user_id = u.user_id
-    LEFT JOIN student s ON u.user_id = s.user_id
-    LEFT JOIN instructor i ON u.user_id = i.user_id
-    ORDER BY d.created_at DESC
+// Get all discussions - fix this function
+exports.getAllDiscussions = (callback) => {
+  console.log("Fetching all discussions");
+  
+  const sql = `
+    SELECT f.*, u.username, u.email, u.role 
+    FROM discussion_forum f
+    LEFT JOIN user u ON f.user_id = u.user_id
+    ORDER BY f.created_at DESC
   `;
   
-  db.query(query, callback);
+  db.query(sql, (error, results) => {
+    if (error) {
+      console.error("Error in getAllDiscussions query:", error);
+    } else {
+      console.log(`Retrieved ${results?.length || 0} discussions`);
+    }
+    callback(error, results || []);
+  });
 };
 
-// Create a new discussion
-const createDiscussion = (discussionData, callback) => {
-  const { course_id, user_id, title, question } = discussionData;
-  
-  const query = `
-    INSERT INTO discussion_forum (course_id, user_id, title, question) 
-    VALUES (?, ?, ?, ?)
+// Get discussion by ID - use correct table name
+exports.getDiscussionById = (id, callback) => {
+  const sql = `
+    SELECT f.*, u.username, u.email, u.role
+    FROM discussion_forum f
+    LEFT JOIN user u ON f.user_id = u.user_id
+    WHERE f.forum_id = ?
   `;
-  
-  db.query(query, [course_id, user_id, title, question], callback);
+  db.query(sql, [id], callback);
 };
 
-module.exports = {
-  getAllDiscussions,
-  createDiscussion
+// Create discussion - use correct table name
+exports.createDiscussion = (course_id, user_id, title, question, callback) => {
+  console.log("Creating discussion with:", { course_id, user_id, title, question });
+  
+  // Build query with CORRECT TABLE NAME: discussion_forum
+  let sql, params;
+  
+  if (course_id) {
+    sql = 'INSERT INTO discussion_forum (course_id, user_id, title, question, created_at) VALUES (?, ?, ?, ?, NOW())';
+    params = [course_id, user_id, title, question];
+  } else {
+    sql = 'INSERT INTO discussion_forum (user_id, title, question, created_at) VALUES (?, ?, ?, NOW())';
+    params = [user_id, title, question];
+  }
+  
+  console.log("SQL query:", sql);
+  console.log("Parameters:", params);
+  
+  db.query(sql, params, callback);
 };

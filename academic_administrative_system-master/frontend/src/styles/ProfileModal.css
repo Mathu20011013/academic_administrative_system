@@ -67,6 +67,18 @@
   color: #ff3b30;
 }
 
+.close-btn {
+  position: absolute;
+  top: 15px;          /* Adjust this value as needed */
+  right: 15px;        /* Adjust this value as needed */
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+  z-index: 100;
+}
+
 /* Form Sections */
 .form-section {
   margin-bottom: 25px;

@@ -140,8 +140,6 @@ const login = (req, res) => {
 };
 
 // Get user profile - useful for token verification
-// In backend/src/controllers/authController.js
-// Add this function if it doesn't exist:
 const getCurrentUser = (req, res) => {
   if (!req.user || !req.user.id) {
     return res.status(401).json({ error: 'Unauthorized' });

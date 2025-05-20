@@ -10,7 +10,40 @@ const Signup = () => {
   const [message, setMessage] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordStrength, setPasswordStrength] = useState(0);
   const navigate = useNavigate();
+
+  const validatePassword = (value) => {
+    // Reset any previous error
+    setPasswordError('');
+    
+    // Check minimum length
+    if (value.length < 8) {
+      setPasswordError('Password must be at least 8 characters long');
+      return false;
+    }
+    
+    // Check for at least one uppercase letter
+    if (!/[A-Z]/.test(value)) {
+      setPasswordError('Password must contain at least one uppercase letter');
+      return false;
+    }
+    
+    // Check for at least one number
+    if (!/[0-9]/.test(value)) {
+      setPasswordError('Password must contain at least one number');
+      return false;
+    }
+    
+    // Check for at least one special character
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value)) {
+      setPasswordError('Password must contain at least one special character');
+      return false;
+    }
+    
+    return true;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,6 +51,14 @@ const Signup = () => {
 
     if (password !== confirmPassword) {
       setMessage("Passwords do not match");
+      setIsSuccess(false);
+      setLoading(false);
+      return;
+    }
+
+    // Validate password strength
+    if (!validatePassword(password)) {
+      setMessage("Password does not meet strength requirements");
       setIsSuccess(false);
       setLoading(false);
       return;
@@ -104,13 +145,42 @@ const Signup = () => {
               onChange={(e) => setEmail(e.target.value)}
               required
             />
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <div className="password-field">
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => {
+                  const newPassword = e.target.value;
+                  setPassword(newPassword);
+                  validatePassword(newPassword);
+                }}
+                required
+                className={passwordError ? "input-error" : ""}
+              />
+              {passwordError && <span className="error-message">{passwordError}</span>}
+              
+              {/* Password strength indicator */}
+              {password && (
+                <div className="password-strength-meter">
+                  <div className="strength-bars">
+                    <span className={passwordStrength >= 1 ? "active" : ""}></span>
+                    <span className={passwordStrength >= 2 ? "active" : ""}></span>
+                    <span className={passwordStrength >= 3 ? "active" : ""}></span>
+                    <span className={passwordStrength >= 4 ? "active" : ""}></span>
+                    <span className={passwordStrength >= 5 ? "active" : ""}></span>
+                  </div>
+                  <span className="strength-text">
+                    {passwordStrength === 0 && "Enter password"}
+                    {passwordStrength === 1 && "Very Weak"}
+                    {passwordStrength === 2 && "Weak"}
+                    {passwordStrength === 3 && "Medium"}
+                    {passwordStrength === 4 && "Strong"}
+                    {passwordStrength === 5 && "Very Strong"}
+                  </span>
+                </div>
+              )}
+            </div>
             <input
               type="password"
               placeholder="Confirm Password"

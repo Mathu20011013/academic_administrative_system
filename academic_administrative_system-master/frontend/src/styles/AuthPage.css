@@ -123,7 +123,19 @@ input:-moz-autofill {
 
 /* Error Message Styling */
 .error-message {
-  color: red;
-  margin-top: 10px;
-  font-size: 14px;
+  color: #ff3860;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+  text-align: left;
+}
+
+.form-field {
+  width: 100%;
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.input-error {
+  border: 1px solid #ff3860 !important;
 }

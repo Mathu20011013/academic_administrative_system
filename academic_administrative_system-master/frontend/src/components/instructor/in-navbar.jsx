@@ -36,6 +36,7 @@ const InstructorNavbar = () => {
                 Forum
               </NavLink>
             </li>
+            {/* Chatbot Tab - Temporarily disabled
             <li className="nav-item">
               <NavLink
                 className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
@@ -44,6 +45,7 @@ const InstructorNavbar = () => {
                 Chatbot
               </NavLink>
             </li>
+            */}
           </ul>
         </div>
       </div>

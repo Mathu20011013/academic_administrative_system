@@ -55,7 +55,7 @@ const Navbar = () => {
                 Forum
               </NavLink>
             </li>
-            {/* Chatbot Tab */}
+            {/* Chatbot Tab - Temporarily disabled
             <li className="nav-item">
               <NavLink
                 className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
@@ -64,6 +64,7 @@ const Navbar = () => {
                 Chatbot
               </NavLink>
             </li>
+            */}
             
             {/* Logout Button */}
             

@@ -79,16 +79,16 @@ const AdminStudents = () => {
   // Enhance student data to include action buttons (Edit, Delete)
   const enhancedStudents = students.map((student) => ({
     ...student,
-    Actions: (
-      <div style={{ display: "flex", gap: "8px" }}>
-        <button className="btn-edit" onClick={() => handleEditClick(student)}>
-          Edit
-        </button>
-        <button className="btn-delete" onClick={() => handleDeleteClick(student['User ID'])}>
-          Delete
-        </button>
-      </div>
-    ),
+    // Actions: (
+    //   <div style={{ display: "flex", gap: "8px" }}>
+    //     <button className="btn-edit" onClick={() => handleEditClick(student)}>
+    //       Edit
+    //     </button>
+    //     <button className="btn-delete" onClick={() => handleDeleteClick(student['User ID'])}>
+    //       Delete
+    //     </button>
+    //   </div>
+    // ),
   }));
 
   // Define the columns for the student table (including Actions column)
@@ -99,7 +99,7 @@ const AdminStudents = () => {
     { header: "Phone", key: "Phone" },
    // { header: "Role", key: "Role" },
     { header: "Signup Date", key: "Signup Date" },
-    { header: "Actions", key: "Actions" }, // Action column for buttons
+    // { header: "Actions", key: "Actions" }, // Action column for buttons
   ];
 
   return (
